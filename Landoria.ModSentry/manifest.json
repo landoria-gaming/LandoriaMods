@@ -1,6 +1,6 @@
 {
   "name": "ModSentry",
-  "version_number": "1.0.12-draft",
+  "version_number": "1.0.12",
   "website_url": "https://valheim.landoria-gaming.com/",
   "description": "Validates required and optional client mods before joining a Valheim server.",
   "dependencies": [
