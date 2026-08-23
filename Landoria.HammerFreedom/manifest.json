@@ -1,6 +1,6 @@
 {
   "name": "HammerFreedom",
-  "version_number": "1.0.5-draft",
+  "version_number": "1.0.5",
   "website_url": "https://valheim.landoria-gaming.com/",
   "description": "Adds creative flight, stamina, durability, and building freedoms to Hammer worlds.",
   "dependencies": [
