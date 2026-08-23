@@ -1,6 +1,6 @@
 {
   "name": "CharacterVault",
-  "version_number": "1.0.20",
+  "version_number": "1.0.19-draft",
   "website_url": "https://valheim.landoria-gaming.com/",
   "description": "CharacterVault saves character profiles on the server to prevent item duplication.",
   "dependencies": [
