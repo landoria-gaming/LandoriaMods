@@ -16,7 +16,6 @@ namespace Landoria.GetMyTrophyBack
         {
             Log = InitializePlugin(PluginGuid);
             Log.LogInfo($"{PluginName} {PluginVersion} is loaded.");
-            Log.LogInfo($"{PluginName} TEST");
         }
 
         private void OnDestroy()
