@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.20
+
+- Show existing character names when selecting an unregistered character or attempting to create an additional one.
+
 ## 1.0.19
 
 - Stop showing an acknowledged character rejection again after returning to the menu.
