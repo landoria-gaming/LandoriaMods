@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -21,10 +22,26 @@ namespace Landoria.CharacterVault
 
         internal bool HasProfile(string accountId)
         {
+            return GetProfileNames(accountId).Count > 0;
+        }
+
+        internal IReadOnlyList<string> GetProfileNames(string accountId)
+        {
             string prefix = SafeSegment(accountId) + "_";
             string root = StorageRoot();
-            return Directory.Exists(root) && Directory
-                .GetFiles(root, prefix + "*.fch", SearchOption.TopDirectoryOnly).Any();
+            if (!Directory.Exists(root))
+            {
+                return Array.Empty<string>();
+            }
+
+            return Directory.GetFiles(root, prefix + "*.fch", SearchOption.TopDirectoryOnly)
+                .Select(Path.GetFileNameWithoutExtension)
+                .Where(fileName => fileName.StartsWith(prefix, StringComparison.Ordinal))
+                .Select(fileName => fileName.Substring(prefix.Length))
+                .Where(name => !string.IsNullOrWhiteSpace(name))
+                .Distinct(StringComparer.Ordinal)
+                .OrderBy(name => name, StringComparer.Ordinal)
+                .ToArray();
         }
 
         internal void Commit(string accountId, string name, byte[] data)

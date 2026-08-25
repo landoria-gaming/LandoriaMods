@@ -358,7 +358,8 @@ namespace Landoria.CharacterVault
             if (admission != CharacterAdmission.NewEnrollment)
             {
                 _sessions.Remove(rpc);
-                Reject(rpc, CharacterAdmissionMessages.ForRejection(admission));
+                Reject(rpc, CharacterAdmissionMessages.ForRejection(admission,
+                    _storage.GetProfileNames(session.AccountId)));
                 return false;
             }
 

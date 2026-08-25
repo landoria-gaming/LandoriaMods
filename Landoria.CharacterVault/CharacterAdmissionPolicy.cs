@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using System.Linq;
+
 namespace Landoria.CharacterVault
 {
     internal interface ICharacterProfileCatalog
@@ -38,11 +41,33 @@ namespace Landoria.CharacterVault
 
     internal static class CharacterAdmissionMessages
     {
-        internal static string ForRejection(CharacterAdmission admission)
+        internal static string ForRejection(CharacterAdmission admission,
+            IReadOnlyList<string> existingProfileNames)
         {
-            return admission == CharacterAdmission.RejectUnregisteredProfile
-                ? "Create a new character before joining this server."
-                : CharacterRejectionMessages.AdditionalCharacterDenied;
+            if (admission == CharacterAdmission.RejectAdditionalCharacter &&
+                existingProfileNames != null && existingProfileNames.Count > 0)
+            {
+                string names = string.Join(", ", existingProfileNames
+                    .Select(name => name.ToUpperInvariant()));
+                return existingProfileNames.Count == 1
+                    ? $"You already have a character: {names}. You cannot create more."
+                    : $"You already have characters: {names}. You cannot create more.";
+            }
+            if (admission != CharacterAdmission.RejectUnregisteredProfile)
+            {
+                return CharacterRejectionMessages.AdditionalCharacterDenied;
+            }
+
+            if (existingProfileNames == null || existingProfileNames.Count == 0)
+            {
+                return "Create a new character before joining this server.";
+            }
+
+            string message = existingProfileNames.Count == 1
+                ? "Create a new character or use the previously used one: "
+                : "Create a new character or use one of the previously used ones: ";
+            return message + string.Join(", ", existingProfileNames
+                .Select(name => name.ToUpperInvariant())) + ".";
         }
     }
 
