@@ -73,7 +73,7 @@
         <Content Include="LICENSE"/>
         <Content Include="manifest.json"/>
         <Content Include="README.md"/>
-
+        <Content Include="README.Thunderstore.md"/>
     </ItemGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets"/>
     <!-- To modify your build process, add your task inside one of the targets below and uncomment it.

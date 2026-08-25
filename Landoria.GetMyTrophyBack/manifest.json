@@ -1,6 +1,6 @@
 {
   "name": "GetMyTrophyBack",
-  "version_number": "1.0.8-draft",
+  "version_number": "1.0.7",
   "website_url": "https://valheim.landoria-gaming.com/",
   "description": "Returns a boss trophy from its Sacrificial Stone five seconds after selecting the associated power.",
   "dependencies": [
