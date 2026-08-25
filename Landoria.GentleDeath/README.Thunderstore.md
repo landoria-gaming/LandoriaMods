@@ -1,6 +1,6 @@
 # GentleDeath
 
-Keeps equipable items after death while moving other inventory items to the tombstone.
+Keeps the gear you rely on after death while moving resources, treasure, and other inventory items to the tombstone.
 
 ## Video demo
 
@@ -16,18 +16,18 @@ Keeps equipable items after death while moving other inventory items to the tomb
 ## Features
 
 - Keeps weapons, tools, armor, shields, ammunition, utility items, and trinkets.
-- Preserves the equipped state of retained items.
-- Moves non-equipable treasures and materials to the tombstone.
-- Keeps an item safely when the tombstone has no available space.
-- Replaces the world's configured vanilla inventory death penalty.
-
-Equipable items follow Valheim's `ItemData.IsEquipable()` classification.
+- Preserves equipped items after respawning.
+- Moves treasures and raw materials to the tombstone.
+- Keeps protected gear safely even when the tombstone has no room.
+- Applies this gentler death rule throughout the world.
 
 ## Installation
 
 | Client required | Server required (dedicated) | Player-hosted server |
 |---|---|---|
 | Yes | No | Not Supported |
+
+Read the [full documentation](https://github.com/landoria-gaming/LandoriaMods/blob/main/Landoria.GentleDeath/README.md) on GitHub.
 
 ## Contact
 

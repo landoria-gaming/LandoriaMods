@@ -1,6 +1,6 @@
 {
   "name": "GentleDeath",
-  "version_number": "1.0.11-draft",
+  "version_number": "1.0.10",
   "website_url": "https://valheim.landoria-gaming.com/",
   "description": "Keep your weapons, armor, and tools after death; only treasures and gathered materials go to your tombstone.",
   "dependencies": [
