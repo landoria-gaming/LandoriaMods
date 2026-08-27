@@ -38,12 +38,14 @@ namespace Landoria.StructureProtection
         internal void WriteClientState(ZPackage package)
         {
             package.Write(CreatureTargetingEnabled);
+            package.Write(WardPlayerDamageEnabled);
             package.Write(MaximumWardsPerCharacter);
         }
 
         internal void ReadClientState(ZPackage package)
         {
             CreatureTargetingEnabled = package.ReadBool();
+            WardPlayerDamageEnabled = package.ReadBool();
             MaximumWardsPerCharacter = package.ReadInt();
         }
 
