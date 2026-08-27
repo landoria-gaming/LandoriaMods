@@ -1,6 +1,6 @@
 {
   "name": "Socialize",
-  "version_number": "1.0.12-draft",
+  "version_number": "1.0.12",
   "website_url": "https://valheim.landoria-gaming.com/",
   "description": "Adds groups and an enhanced chat to Valheim.",
   "dependencies": [
