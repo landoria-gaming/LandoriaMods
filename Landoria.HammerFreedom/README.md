@@ -1,7 +1,7 @@
 # HammerFreedom
 
 Lets players build freely in authorized Hammer worlds with flight, unlimited stamina,
-fall protection, lasting equipment, and material recovery—without granting administrator access.
+fall protection, and lasting equipment—without granting administrator access.
 
 ## Video demo
 
@@ -19,14 +19,11 @@ fall protection, lasting equipment, and material recovery—without granting adm
 - Makes every creative ability available only when the connected server authorizes it.
 - Provides separate `--hammerfreedom-fly`, `--hammerfreedom-fall-damage-immunity`, and
   `--hammerfreedom-unlimited-stamina` server switches, plus
-  `--hammerfreedom-no-durability-loss` and
-  `--hammerfreedom-no-build-cost-recover-materials`; each is disabled by default.
+  `--hammerfreedom-no-durability-loss`; each is disabled by default.
 - Works only in worlds using the required Hammer modifiers.
 - Prevents all fall damage, regardless of fall height, when authorized.
 - Prevents all stamina use when authorized, regardless of the action.
 - Prevents durability loss for tools, weapons, shields, armor, and other durable equipment.
-- Returns vanilla recoverable materials when a piece is dismantled with a hammer while
-  authorized `NoBuildCost` material recovery is active.
 - Removes these creative abilities when moving to a server that does not authorize them.
 - Shows the `fly` command only when it is available.
 - Supports `fly`, `fly on`, `fly off`, and the fixed native `Z` toggle shortcut.

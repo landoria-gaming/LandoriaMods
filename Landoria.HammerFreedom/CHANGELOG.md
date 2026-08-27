@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.6
+
+- Remove the optional No Build Cost material recovery behavior and its server switch.
+
 ## 1.0.4
 
 - Add Xbox support alongside Steam.

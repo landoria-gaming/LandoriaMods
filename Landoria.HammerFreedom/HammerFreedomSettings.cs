@@ -8,14 +8,11 @@ namespace Landoria.HammerFreedom
         private const string FallDamageArgument = "--hammerfreedom-fall-damage-immunity";
         private const string StaminaArgument = "--hammerfreedom-unlimited-stamina";
         private const string DurabilityArgument = "--hammerfreedom-no-durability-loss";
-        private const string RecoveryArgument =
-            "--hammerfreedom-no-build-cost-recover-materials";
 
         internal bool Flight { get; private set; }
         internal bool FallDamageImmunity { get; private set; }
         internal bool UnlimitedStamina { get; private set; }
         internal bool NoDurabilityLoss { get; private set; }
-        internal bool RecoverBuildMaterials { get; private set; }
 
         internal static HammerFreedomSettings FromArguments(string[] arguments, ModLog logger)
         {
@@ -24,8 +21,7 @@ namespace Landoria.HammerFreedom
                 Flight = Read(arguments, FlightArgument, logger),
                 FallDamageImmunity = Read(arguments, FallDamageArgument, logger),
                 UnlimitedStamina = Read(arguments, StaminaArgument, logger),
-                NoDurabilityLoss = Read(arguments, DurabilityArgument, logger),
-                RecoverBuildMaterials = Read(arguments, RecoveryArgument, logger)
+                NoDurabilityLoss = Read(arguments, DurabilityArgument, logger)
             };
         }
 

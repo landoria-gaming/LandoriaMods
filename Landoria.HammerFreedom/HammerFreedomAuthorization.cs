@@ -134,8 +134,7 @@ namespace Landoria.HammerFreedom
                 hammerWorld, settings != null && settings.Flight,
                 settings != null && settings.FallDamageImmunity,
                 settings != null && settings.UnlimitedStamina,
-                settings != null && settings.NoDurabilityLoss,
-                settings != null && settings.RecoverBuildMaterials);
+                settings != null && settings.NoDurabilityLoss);
         }
 
         private static void ResetConnection()
