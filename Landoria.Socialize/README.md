@@ -1,6 +1,7 @@
 # Socialize
 
-Adds temporary player groups for missions and expeditions, private messaging, map sharing, and expanded chat channels.
+Adds player groups for adventures and expeditions, private messaging, map sharing, and a dedicated group chat channel.
+Groups are not persistent: players leave them when they disconnect and do not rejoin automatically when they return.
 
 ## Valheim compatibility
 
@@ -11,12 +12,32 @@ Adds temporary player groups for missions and expeditions, private messaging, ma
 
 ## Features
 
-- Lets up to five connected players form a temporary group for a mission or expedition.
-- Gives group leaders invite, remove, and promotion controls.
-- Adds nearby, shout, server-wide, group, and private chat, with optional private map pings.
-- Keeps the selected chat channel active.
-- Shares connected group members' map positions automatically.
-- Restricts public positions and map pings outside groups.
+### Groups
+
+- Lets up to five connected players form a group for their current session.
+- Gives group leaders invite, remove, and leadership transfer controls.
+- Shows group invitations through Valheim's Yes/No popup.
+- Automatically promotes the longest-standing remaining member when the group leader leaves.
+- Disbands a group when fewer than two members remain connected.
+- Removes disconnected players from their group and does not restore groups after reconnection or a server restart.
+
+### Chat
+
+- Removes the public server-wide chat channel: normal chat reaches nearby players, while shouts travel farther within server-defined ranges.
+- Adds private group chat for connected group members.
+- Adds world-wide private messages and optional animated pings for a chosen player.
+- Keeps the selected normal, shout, group, or private chat channel active for following messages.
+- Keeps private messages inside the chat window instead of displaying them above the character.
+
+### Map privacy
+
+- Keeps player positions private outside groups.
+- Shares connected group members' positions automatically every two seconds.
+- Shares map pings only with group members and disables them outside groups.
+
+### Notifications
+
+- Announces when players join the server and when members leave, are removed, become leader, or cause a group to disband.
 
 ## Chat Commands
 
@@ -38,12 +59,6 @@ Adds temporary player groups for missions and expeditions, private messaging, ma
 | `/group remove <PlayerName>` | Removes a member; leader only. |
 | `/group promote <PlayerName>` | Transfers leadership. |
 | `/group info` | Lists group members and status. |
-
-- Group membership lasts only for the current connection: players leave when they disconnect and are not placed back in the group when they reconnect.
-- When the leader disconnects, the longest-standing remaining member becomes the new leader.
-- A group ends when fewer than two members remain connected.
-- Invitations use Valheim's Yes/No popup.
-- Friendly-fire rules, permissions, and teleportation are not included.
 
 ## Configuration
 
