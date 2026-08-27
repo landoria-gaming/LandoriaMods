@@ -26,7 +26,6 @@ namespace Landoria.CharacterVault
         internal const string SaveRequestRpc = "CharacterVault_SaveRequest_v1";
         internal const string SaveAckRpc = "CharacterVault_SaveAck_v1";
         internal const string CommitAckRpc = "CharacterVault_CommitAck_v1";
-        internal const string FinalSaveStartedRpc = "CharacterVault_FinalSaveStarted_v1";
         private const int MaximumProfileBytes = 64 * 1024 * 1024;
         private readonly Dictionary<ZRpc, VaultSession> _sessions = new Dictionary<ZRpc, VaultSession>();
         private readonly Dictionary<ZRpc, IncomingTransfer> _uploads = new Dictionary<ZRpc, IncomingTransfer>();
@@ -36,7 +35,7 @@ namespace Landoria.CharacterVault
         private readonly VaultStorage _storage = new VaultStorage();
         private readonly CharacterAdmissionEvaluator _admission;
         private readonly ProfileCommitQueue _commits;
-        private readonly ClientFinalSaveTracker _clientFinalSaves = new ClientFinalSaveTracker();
+        private readonly ServerFinalSaveMonitor _finalSaveMonitor = new ServerFinalSaveMonitor();
         private IncomingTransfer _download;
         private bool _clientUploadBusy;
         private bool _suppressNextClientUpload;
@@ -139,6 +138,7 @@ namespace Landoria.CharacterVault
 
             if (_sessions.TryGetValue(peer.m_rpc, out VaultSession session))
             {
+                _finalSaveMonitor.RecordRemoved(peer.m_rpc, session.Name);
                 _activityRecorded.Remove(session);
             }
             _sessions.Remove(peer.m_rpc);
@@ -167,6 +167,23 @@ namespace Landoria.CharacterVault
                 }
                 CharacterActivityRegistry.Record(session, DateTime.UtcNow);
             }
+        }
+
+        internal void MonitorFinalSaves()
+        {
+            if (ZNet.instance?.IsServer() != true)
+            {
+                return;
+            }
+            foreach (KeyValuePair<ZRpc, VaultSession> pair in _sessions)
+            {
+                if (pair.Value.State.CanSave)
+                {
+                    _finalSaveMonitor.Observe(pair.Key, pair.Value.Name,
+                        pair.Key.GetSocket()?.IsConnected() == true);
+                }
+            }
+            _finalSaveMonitor.Update();
         }
 
         internal void RecordOnlineActivityAtWorldSave()
@@ -292,10 +309,6 @@ namespace Landoria.CharacterVault
                 return;
             }
 
-            if (request.StartsWith("disconnect-", StringComparison.Ordinal))
-            {
-                serverRpc.Invoke(FinalSaveStartedRpc, request);
-            }
             byte[] data = ProfileFile.Read(profile);
             _clientUploadBusy = true;
             CharacterVaultPlugin.SaveStatus?.ShowSaving(request);
@@ -363,7 +376,7 @@ namespace Landoria.CharacterVault
             _uploads.Clear();
             _enrollments.Clear();
             _activityRecorded.Clear();
-            _clientFinalSaves.Clear();
+            _finalSaveMonitor.Clear();
             _download = null;
         }
 
@@ -375,7 +388,6 @@ namespace Landoria.CharacterVault
             rpc.Register<ZPackage>(UploadBeginRpc, ReceiveUploadBegin);
             rpc.Register<ZPackage>(UploadChunkRpc, ReceiveUploadChunk);
             rpc.Register<ZPackage>(UploadCompleteRpc, ReceiveUploadComplete);
-            rpc.Register<string>(FinalSaveStartedRpc, ReceiveFinalSaveStarted);
         }
 
         private void RegisterClient(ZRpc rpc)
@@ -594,14 +606,6 @@ namespace Landoria.CharacterVault
             }
         }
 
-        private void ReceiveFinalSaveStarted(ZRpc rpc, string requestId)
-        {
-            if (_sessions.TryGetValue(rpc, out VaultSession session) && session.State.CanSave)
-            {
-                _clientFinalSaves.RecordStarted(rpc, requestId, session.Name);
-            }
-        }
-
         private void ReceiveUploadComplete(ZRpc rpc, ZPackage package)
         {
             string transferId = package.ReadString();
@@ -614,7 +618,7 @@ namespace Landoria.CharacterVault
             _uploads.Remove(rpc);
             byte[] data = transfer.Complete(transferId);
             ProfileUploadValidator.Validate(session, data);
-            _clientFinalSaves.RecordReceived(rpc, transfer.RequestId);
+            _finalSaveMonitor.RecordSaveReceived(rpc, transfer.RequestId);
             if (!SaveAcknowledgementPolicy.CanAcknowledge(session.State))
             {
                 CharacterVaultPlugin.Log.LogWarning(

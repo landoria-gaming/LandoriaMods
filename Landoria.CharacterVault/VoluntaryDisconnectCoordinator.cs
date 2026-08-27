@@ -108,6 +108,20 @@ namespace Landoria.CharacterVault
             return !delayed;
         }
 
+        internal void HandleNativeCloseRequest()
+        {
+            bool delayed = Start(VoluntaryExitKind.ApplicationQuit, Game.instance, true, false);
+            if (delayed)
+            {
+                CharacterVaultPlugin.Log.LogMessage(
+                    "Intercepted the Windows close action; waiting for the final save acceptance.");
+                return;
+            }
+
+            CharacterVaultPlugin.WindowsClose?.AuthorizeClose();
+            Application.Quit();
+        }
+
         public void Dispose()
         {
             Application.wantsToQuit -= AllowApplicationQuit;
@@ -178,6 +192,7 @@ namespace Landoria.CharacterVault
             if (exitKind == VoluntaryExitKind.ApplicationQuit)
             {
                 _allowApplicationQuit = true;
+                CharacterVaultPlugin.WindowsClose?.AuthorizeClose();
                 CharacterVaultPlugin.Log.LogInfo($"Allowing application quit {reason}.");
                 Application.Quit();
                 return;

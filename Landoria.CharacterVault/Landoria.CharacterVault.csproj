@@ -58,7 +58,7 @@
     <Compile Include="CharacterRejectionMessageState.cs" />
     <Compile Include="CharacterSaveStatusDisplay.cs" />
     <Compile Include="ClientSaveLifecycle.cs" />
-    <Compile Include="ClientFinalSaveTracker.cs" />
+    <Compile Include="ServerFinalSaveMonitor.cs" />
     <Compile Include="NewCharacterPolicy.cs" />
     <Compile Include="ProfileFile.cs" />
     <Compile Include="SaveApiCompatibility.cs" />
@@ -73,6 +73,7 @@
     <Compile Include="GracefulShutdownCoordinator.cs" />
     <Compile Include="KickSavePolicy.cs" />
     <Compile Include="VoluntaryDisconnectCoordinator.cs" />
+    <Compile Include="WindowsCloseInterceptor.cs" />
     <Compile Include="VoluntaryExitSavePolicy.cs" />
     <Compile Include="WorldSavePolicy.cs" />
     <Compile Include="StartingItemGrantPolicy.cs" />
