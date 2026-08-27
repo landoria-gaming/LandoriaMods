@@ -2,7 +2,7 @@
 
 ## 1.0.21
 
-- Keep ward inactivity based on each character's latest online activity.
+- Remember when each character was last online.
 
 ## 1.0.20
 
