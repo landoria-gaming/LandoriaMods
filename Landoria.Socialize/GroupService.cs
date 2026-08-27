@@ -9,7 +9,7 @@ namespace Landoria.Socialize
         internal const string RequestRpc = "Landoria_Social_GroupRequest";
         internal const string ResponseRpc = "Landoria_Social_GroupResponse";
         internal const string PingRequestRpc = "Landoria_Social_GroupPingRequest";
-        private const float PositionUpdateInterval = 5f;
+        private const float PositionUpdateInterval = 2f;
         private static ZRoutedRpc registeredRpc;
         private static float nextPositionUpdate;
 

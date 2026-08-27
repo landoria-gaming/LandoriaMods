@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.0.2
 
 - Keep warded structures protected from unauthorized player attacks while permitted players are online.
 - Limit each character to five wards by default, with a dedicated-server command-line override.

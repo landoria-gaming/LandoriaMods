@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.21
+
+- Keep ward inactivity based on each character's latest online activity.
+
 ## 1.0.20
 
 - Show existing character names when selecting an unregistered character or attempting to create an additional one.

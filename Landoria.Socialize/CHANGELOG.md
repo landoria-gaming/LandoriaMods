@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.12
+
+- Bug fix
+
 ## 1.0.11
 
 - Fix boolean command-switch table rendering on Thunderstore.

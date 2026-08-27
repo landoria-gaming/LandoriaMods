@@ -58,6 +58,7 @@
     <Compile Include="CharacterRejectionMessageState.cs" />
     <Compile Include="CharacterSaveStatusDisplay.cs" />
     <Compile Include="ClientSaveLifecycle.cs" />
+    <Compile Include="ClientFinalSaveTracker.cs" />
     <Compile Include="NewCharacterPolicy.cs" />
     <Compile Include="ProfileFile.cs" />
     <Compile Include="SaveApiCompatibility.cs" />
