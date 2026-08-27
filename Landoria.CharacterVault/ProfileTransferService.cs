@@ -167,6 +167,29 @@ namespace Landoria.CharacterVault
             }
         }
 
+        internal void RecordOnlineActivityAtWorldSave()
+        {
+            if (ZNet.instance?.IsServer() != true)
+            {
+                return;
+            }
+            DateTime seenOnlineUtc = DateTime.UtcNow;
+            int recorded = 0;
+            foreach (ZNetPeer peer in ZNet.instance.GetPeers())
+            {
+                if (peer?.m_rpc == null || !peer.IsReady() ||
+                    !_sessions.TryGetValue(peer.m_rpc, out VaultSession session) ||
+                    !session.State.CanSave)
+                {
+                    continue;
+                }
+                CharacterActivityRegistry.Record(session, seenOnlineUtc);
+                recorded++;
+            }
+            CharacterVaultPlugin.Log.LogInfo(
+                $"Updated last seen online for {recorded} characters before world save.");
+        }
+
         internal void RequestWorldCheckpoint()
         {
             if (ZNet.instance?.IsServer() != true)

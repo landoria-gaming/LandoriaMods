@@ -11,7 +11,8 @@ with another save or a restored backup.
 - The server keeps up to 15 automatic backups per character.
 - CharacterVault requires a new character when joining a server for the first time.
 - CharacterVault supports crossplay servers.
-- The world save records the first and latest connection of each platform account and character.
+- The server records when each platform account and character was first connected and last seen online.
+- Last-seen timestamps are updated when a character is admitted and before each world save, entirely on the server.
 
 ## When characters are saved
 

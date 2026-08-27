@@ -144,17 +144,17 @@ namespace Landoria.StructureProtection
 
         private static void EvaluateLastConnection(ZDO ward, long creator)
         {
-            if (!CharacterActivityApi.TryGetCharacterLastConnectedUtc(
-                creator, out DateTime lastConnectedUtc))
+            if (!CharacterActivityApi.TryGetCharacterLastSeenOnlineUtc(
+                creator, out DateTime lastSeenOnlineUtc))
             {
                 metrics.MissingActivity++;
-                Disable(ward, creator, "last connection is missing");
+                Disable(ward, creator, "last seen online is missing");
                 return;
             }
-            if (lastConnectedUtc <= cutoffUtc)
+            if (lastSeenOnlineUtc <= cutoffUtc)
             {
                 metrics.Expired++;
-                Disable(ward, creator, $"last connected at {lastConnectedUtc:O}");
+                Disable(ward, creator, $"last seen online at {lastSeenOnlineUtc:O}");
                 return;
             }
             metrics.KeptActive++;

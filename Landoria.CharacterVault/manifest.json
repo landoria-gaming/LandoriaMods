@@ -2,7 +2,7 @@
   "name": "CharacterVault",
   "version_number": "1.0.20",
   "website_url": "https://valheim.landoria-gaming.com/",
-  "description": "Stores trusted character profiles and world-scoped connection activity on the server.",
+  "description": "Stores trusted character profiles and world-scoped online activity on the server.",
   "dependencies": [
     "denikson-BepInExPack_Valheim-5.4.2333",
     "Landoria-ModSentry-1.0.11"

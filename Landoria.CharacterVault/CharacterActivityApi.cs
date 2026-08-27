@@ -6,18 +6,18 @@ namespace Landoria.CharacterVault
     {
         public static bool IsReady => CharacterActivityRegistry.IsReady;
 
-        public static bool TryGetPlatformLastConnectedUtc(
-            string platformPlayerId, out DateTime lastConnectedUtc)
+        public static bool TryGetPlatformLastSeenOnlineUtc(
+            string platformPlayerId, out DateTime lastSeenOnlineUtc)
         {
-            return CharacterActivityRegistry.TryGetPlatformLastConnectedUtc(
-                platformPlayerId, out lastConnectedUtc);
+            return CharacterActivityRegistry.TryGetPlatformLastSeenOnlineUtc(
+                platformPlayerId, out lastSeenOnlineUtc);
         }
 
-        public static bool TryGetCharacterLastConnectedUtc(
-            long characterId, out DateTime lastConnectedUtc)
+        public static bool TryGetCharacterLastSeenOnlineUtc(
+            long characterId, out DateTime lastSeenOnlineUtc)
         {
-            return CharacterActivityRegistry.TryGetCharacterLastConnectedUtc(
-                characterId, out lastConnectedUtc);
+            return CharacterActivityRegistry.TryGetCharacterLastSeenOnlineUtc(
+                characterId, out lastSeenOnlineUtc);
         }
     }
 }
