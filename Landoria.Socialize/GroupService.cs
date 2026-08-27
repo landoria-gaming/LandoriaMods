@@ -8,7 +8,10 @@ namespace Landoria.Socialize
     {
         internal const string RequestRpc = "Landoria_Social_GroupRequest";
         internal const string ResponseRpc = "Landoria_Social_GroupResponse";
+        internal const string PingRequestRpc = "Landoria_Social_GroupPingRequest";
+        private const float PositionUpdateInterval = 5f;
         private static ZRoutedRpc registeredRpc;
+        private static float nextPositionUpdate;
 
         internal static void Update()
         {
@@ -20,12 +23,18 @@ namespace Landoria.Socialize
             if (ZNet.instance.IsServer())
             {
                 SocializePlugin.Settings.InitializeServer(SocializePlugin.Log);
+                if (Time.unscaledTime >= nextPositionUpdate)
+                {
+                    nextPositionUpdate = Time.unscaledTime + PositionUpdateInterval;
+                    BroadcastPositionUpdates();
+                }
             }
         }
 
         internal static void Reset()
         {
             registeredRpc = null;
+            nextPositionUpdate = 0f;
             GroupState.ClearAll();
             SocializePlugin.Settings?.ResetState();
             SocialChatSender.ApplyRangesToLoadedTalkers();
@@ -69,7 +78,10 @@ namespace Landoria.Socialize
 
         internal static void Dispatch(long sender, long playerId, string playerName, string action, string argument)
         {
-            RegisterSession(sender, playerId);
+            if (RegisterSession(sender, playerId))
+            {
+                BroadcastServerMessage(playerName + " joined the server.");
+            }
             switch (action)
             {
                 case "state": SendSnapshot(sender, playerId); break;
@@ -95,6 +107,10 @@ namespace Landoria.Socialize
             {
                 ReadSnapshot(package);
             }
+            else if (type == "positions")
+            {
+                ReadPositionUpdate(package);
+            }
             else if (type == "invite")
             {
                 ShowInvite(package.ReadString(), package.ReadString());
@@ -116,6 +132,36 @@ namespace Landoria.Socialize
         {
             rpc.Register<ZPackage>(RequestRpc, GroupRpc.RPC_Request);
             rpc.Register<ZPackage>(ResponseRpc, GroupRpc.RPC_Response);
+            rpc.Register<Vector3, UserInfo>(PingRequestRpc, GroupRpc.RPC_PingRequest);
+        }
+
+        internal static void RelayPing(long sender, Vector3 position, UserInfo user)
+        {
+            if (!GroupState.PeerPlayers.TryGetValue(sender, out long playerId))
+            {
+                SocializePlugin.Log.LogDebug("Group ping ignored because the sender is not registered.");
+                return;
+            }
+            SocialGroup group = GroupState.GetGroup(playerId);
+            if (group == null)
+            {
+                SocializePlugin.Log.LogDebug("Group ping ignored because the sender is not in a group.");
+                return;
+            }
+            int recipients = 0;
+            foreach (long member in group.Members.Keys)
+            {
+                long peer = FindPeer(member);
+                if (peer == 0L)
+                {
+                    continue;
+                }
+                ZRoutedRpc.instance.InvokeRoutedRPC(peer, "ChatMessage", position,
+                    (int)Talker.Type.Ping, user, "");
+                recipients++;
+            }
+            SocializePlugin.Log.LogDebug(
+                $"Relayed group ping from {GetPlayerName(playerId)} to {recipients} member(s).");
         }
 
         private static void Invite(long sender, long inviter, string inviterName, string targetName)
@@ -194,9 +240,11 @@ namespace Landoria.Socialize
             }
             string name = group.Members[playerId];
             GroupState.PlayerGroups.Remove(playerId);
-            ApplyRemoval(group, GroupLifecyclePolicy.Remove(group, playerId));
+            GroupRemovalResult removal = GroupLifecyclePolicy.Remove(group, playerId);
+            BroadcastMembers(removal.RemainingMembers, name + " left the group.");
+            ApplyRemoval(group, removal);
+            SendSnapshot(sender, playerId);
             SendMessage(sender, "You left the group.");
-            Broadcast(group, name + " left the group.");
             BroadcastSnapshots(group);
         }
 
@@ -210,10 +258,13 @@ namespace Landoria.Socialize
                 return;
             }
             string name = group.Members[target];
+            long targetPeer = FindPeer(target);
             GroupState.PlayerGroups.Remove(target);
-            ApplyRemoval(group, GroupLifecyclePolicy.Remove(group, target));
-            SendMessage(FindPeer(target), "You were removed from the group.");
-            Broadcast(group, name + " was removed from the group.");
+            GroupRemovalResult removal = GroupLifecyclePolicy.Remove(group, target);
+            BroadcastMembers(removal.RemainingMembers, name + " was removed from the group.");
+            ApplyRemoval(group, removal);
+            SendSnapshot(targetPeer, target);
+            SendMessage(targetPeer, "You were removed from the group.");
             BroadcastSnapshots(group);
         }
 
@@ -319,7 +370,7 @@ namespace Landoria.Socialize
             RemovePlayerSession(playerId);
         }
 
-        private static void RegisterSession(long peer, long playerId)
+        private static bool RegisterSession(long peer, long playerId)
         {
             bool sameSession = GroupState.PeerPlayers.TryGetValue(peer, out long registered) &&
                                registered == playerId;
@@ -332,6 +383,7 @@ namespace Landoria.Socialize
                 RemovePlayerSession(playerId);
             }
             GroupState.PeerPlayers[peer] = playerId;
+            return !sameSession;
         }
 
         private static void RemovePlayerSession(long playerId)
@@ -345,8 +397,9 @@ namespace Landoria.Socialize
             }
             string name = group.Members[playerId];
             GroupState.PlayerGroups.Remove(playerId);
-            ApplyRemoval(group, GroupLifecyclePolicy.Remove(group, playerId));
-            Broadcast(group, name + " left the group.");
+            GroupRemovalResult removal = GroupLifecyclePolicy.Remove(group, playerId);
+            BroadcastMembers(removal.RemainingMembers, name + " left the group.");
+            ApplyRemoval(group, removal);
             BroadcastSnapshots(group);
         }
 
@@ -383,6 +436,34 @@ namespace Landoria.Socialize
             {
                 SendSnapshot(FindPeer(member), member);
             }
+        }
+
+        private static void BroadcastPositionUpdates()
+        {
+            foreach (SocialGroup group in GroupState.Groups.Values)
+            {
+                foreach (long member in group.Members.Keys)
+                {
+                    SendPositionUpdate(FindPeer(member), group);
+                }
+            }
+        }
+
+        private static void SendPositionUpdate(long peer, SocialGroup group)
+        {
+            if (peer == 0L || group == null)
+            {
+                return;
+            }
+            ZPackage response = NewResponse("positions");
+            response.Write(group.Members.Count);
+            foreach (KeyValuePair<long, string> member in group.Members)
+            {
+                response.Write(member.Key);
+                response.Write(member.Value);
+                GroupMapSharing.WritePosition(response, member.Key);
+            }
+            ZRoutedRpc.instance.InvokeRoutedRPC(peer, ResponseRpc, response);
         }
 
         private static void SendSnapshot(long peer, long playerId)
@@ -425,6 +506,17 @@ namespace Landoria.Socialize
             SocialChatSender.ApplyRangesToLoadedTalkers();
         }
 
+        private static void ReadPositionUpdate(ZPackage package)
+        {
+            int count = package.ReadInt();
+            for (int index = 0; index < count; index++)
+            {
+                long playerId = package.ReadLong();
+                string playerName = package.ReadString();
+                GroupMapSharing.ReadPosition(package, playerId, playerName);
+            }
+        }
+
         private static void ShowInvite(string inviterId, string inviterName)
         {
             InvitationPresentation presentation = InvitationPresentationPolicy.Build(inviterName);
@@ -452,6 +544,26 @@ namespace Landoria.Socialize
             {
                 SendMessage(FindPeer(member), message);
             }
+        }
+
+        private static void BroadcastMembers(IEnumerable<long> members, string message)
+        {
+            foreach (long member in members)
+            {
+                SendMessage(FindPeer(member), message);
+            }
+        }
+
+        private static void BroadcastServerMessage(string message)
+        {
+            foreach (long peerId in new List<long>(GroupState.PeerPlayers.Keys))
+            {
+                if (ZNet.instance.GetPeer(peerId) is ZNetPeer peer && peer.IsReady())
+                {
+                    SendMessage(peerId, message);
+                }
+            }
+            SocializePlugin.Log.LogInfo(message);
         }
 
         private static void SendMessage(long peer, string message)

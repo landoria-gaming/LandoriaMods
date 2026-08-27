@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using HarmonyLib;
 using Splatform;
 using TMPro;
@@ -73,19 +72,9 @@ namespace Landoria.Socialize
             {
                 return;
             }
-            long localPlayerId = ZNet.instance.LocalPlayerCharacterID.UserID;
-            List<long> connected = new List<long>();
-            foreach (ZNet.PlayerInfo player in ZNet.instance.GetPlayerList())
-            {
-                connected.Add(player.m_characterID.UserID);
-            }
             position.y = Player.m_localPlayer.transform.position.y;
-            foreach (long recipient in MapSharingPolicy.GetGroupPingRecipients(
-                         localPlayerId, GroupState.LocalMembers, connected))
-            {
-                ZRoutedRpc.instance.InvokeRoutedRPC(recipient, "ChatMessage", position,
-                    (int)Talker.Type.Ping, UserInfo.GetLocalUser(), "");
-            }
+            ZRoutedRpc.instance.InvokeRoutedRPC(
+                GroupService.PingRequestRpc, position, UserInfo.GetLocalUser());
         }
     }
 

@@ -20,5 +20,14 @@ namespace Landoria.Socialize
         {
             GroupService.ReadResponse(package);
         }
+
+        internal static void RPC_PingRequest(long sender, UnityEngine.Vector3 position, UserInfo user)
+        {
+            if (ZNet.instance == null || !ZNet.instance.IsServer())
+            {
+                return;
+            }
+            GroupService.RelayPing(sender, position, user);
+        }
     }
 }
