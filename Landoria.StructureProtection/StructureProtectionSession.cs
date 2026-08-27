@@ -33,6 +33,7 @@ namespace Landoria.StructureProtection
         {
             PeerPlayers.Clear();
             OnlinePlayers.Clear();
+            WardQuota.ResetClientState();
             StructureProtectionPlugin.Settings?.ResetClientState();
         }
 
@@ -82,6 +83,7 @@ namespace Landoria.StructureProtection
             PeerPlayers[sender] = playerId;
             OnlinePlayers.Add(playerId);
             BroadcastSnapshot();
+            WardQuota.RegisterIdentity(sender, playerId);
         }
 
         private static bool RemoveDisconnectedPeers()
@@ -94,6 +96,7 @@ namespace Landoria.StructureProtection
                     continue;
                 }
                 OnlinePlayers.Remove(PeerPlayers[peer]);
+                WardQuota.RemoveIdentity(PeerPlayers[peer]);
                 PeerPlayers.Remove(peer);
                 changed = true;
             }
@@ -123,7 +126,7 @@ namespace Landoria.StructureProtection
 
         private static void ReceiveSnapshot(long sender, ZPackage package)
         {
-            if (!IsTrustedServer(sender))
+            if (!IsTrustedServerCore(sender))
             {
                 return;
             }
@@ -137,7 +140,7 @@ namespace Landoria.StructureProtection
             }
         }
 
-        private static bool IsTrustedServer(long sender)
+        private static bool IsTrustedServerCore(long sender)
         {
             ZNet network = ZNet.instance;
             if (network == null || network.IsServer())
@@ -145,6 +148,25 @@ namespace Landoria.StructureProtection
                 return network != null && network.IsServer();
             }
             return network.GetServerPeer()?.m_uid == sender;
+        }
+
+        internal static bool IsTrustedServer(long sender)
+        {
+            return IsTrustedServerCore(sender);
+        }
+
+        internal static bool TryGetPeer(long playerId, out long peerId)
+        {
+            foreach (KeyValuePair<long, long> mapping in PeerPlayers)
+            {
+                if (mapping.Value == playerId)
+                {
+                    peerId = mapping.Key;
+                    return true;
+                }
+            }
+            peerId = 0L;
+            return false;
         }
 
         [HarmonyPatch(typeof(Player), "OnSpawned")]

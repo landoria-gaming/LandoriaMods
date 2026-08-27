@@ -2,7 +2,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 
 [assembly: AssemblyTitle("Landoria.CharacterVault")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Stores trusted character profiles and world-scoped connection activity on the server.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("Landoria.CharacterVault")]

@@ -8,23 +8,20 @@ namespace Landoria.StructureProtection
     {
         private static readonly HashSet<PrivateArea> Wards = new HashSet<PrivateArea>();
 
-        private static bool ShouldBlockPlayerDamage(Vector3 position)
+        private static bool ShouldBlockPlayerDamage(Vector3 position, long attacker)
         {
-            bool protectedByWard = false;
-            HashSet<long> online = StructureProtectionSession.GetOnlinePlayers();
             foreach (PrivateArea ward in Wards)
             {
                 if (!TryGetWardState(ward, position, out long creator, out List<long> permitted))
                 {
                     continue;
                 }
-                protectedByWard = true;
-                if (WardProtectionPolicy.HasOnlineAuthorizedPlayer(creator, permitted, online))
+                if (!WardProtectionPolicy.IsAuthorized(creator, permitted, attacker))
                 {
-                    return false;
+                    return true;
                 }
             }
-            return protectedByWard;
+            return false;
         }
 
         private static bool TryGetWardState(
@@ -66,6 +63,7 @@ namespace Landoria.StructureProtection
             private static void Postfix(PrivateArea __instance)
             {
                 Wards.Add(__instance);
+                WardQuota.Observe(__instance);
             }
         }
 
@@ -83,9 +81,11 @@ namespace Landoria.StructureProtection
         {
             private static bool Prefix(WearNTear __instance, HitData hit)
             {
+                Player attacker = hit?.GetAttacker() as Player;
                 return !StructureProtectionPlugin.Settings.WardPlayerDamageEnabled ||
                        hit == null || hit.m_hitType != HitData.HitType.PlayerHit ||
-                       !ShouldBlockPlayerDamage(__instance.transform.position);
+                       !ShouldBlockPlayerDamage(
+                           __instance.transform.position, attacker?.GetPlayerID() ?? 0L);
             }
         }
     }

@@ -19,6 +19,22 @@ namespace Landoria.StructureProtection
                 $"Command-line switch {name} requires true or false.");
         }
 
+        internal static int ResolveMinimum(
+            string[] arguments, string name, int defaultValue, int minimum)
+        {
+            string value = ReadValue(arguments, name);
+            if (value == null)
+            {
+                return defaultValue;
+            }
+            if (int.TryParse(value, out int result) && result >= minimum)
+            {
+                return result;
+            }
+            throw new InvalidOperationException(
+                $"Command-line switch {name} requires an integer of at least {minimum}.");
+        }
+
         private static string ReadValue(string[] arguments, string name)
         {
             string value = null;

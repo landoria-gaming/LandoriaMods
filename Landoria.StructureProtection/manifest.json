@@ -2,9 +2,10 @@
   "name": "StructureProtection",
   "version_number": "1.0.1",
   "website_url": "https://valheim.landoria-gaming.com/",
-  "description": "Protects offline structures from deliberate creature targeting and player attacks inside active wards when no authorized player is online.",
+  "description": "Prevents creatures from deliberately targeting structures whose creator is offline and blocks player damage to structures inside active wards.",
   "dependencies": [
-    "denikson-BepInExPack_Valheim-5.4.2333"
+    "denikson-BepInExPack_Valheim-5.4.2333",
+    "Landoria-CharacterVault-1.0.20"
   ],
   "categories": [
     "ai-generated",

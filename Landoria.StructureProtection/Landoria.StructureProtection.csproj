@@ -30,6 +30,14 @@
     <Reference Include="UnityEngine.CoreModule"><HintPath>$(ValheimGamePath)\valheim_Data\Managed\UnityEngine.CoreModule.dll</HintPath><Private>false</Private></Reference>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Landoria.CharacterVault\Landoria.CharacterVault.csproj">
+      <Project>{70BCF48B-1C23-4B2A-8A4F-F01CC21E3EC5}</Project>
+      <Name>Landoria.CharacterVault</Name>
+      <Aliases>CharacterVaultApi</Aliases>
+      <Private>false</Private>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="CreatorActivityPolicy.cs" />
     <Compile Include="CreatureProtection.cs" />
     <Compile Include="CreatureProtectionPolicy.cs" />
@@ -41,6 +49,8 @@
     <Compile Include="PieceActivity.cs" />
     <Compile Include="WardProtection.cs" />
     <Compile Include="WardProtectionPolicy.cs" />
+    <Compile Include="WardQuota.cs" />
+    <Compile Include="WardInactivityJob.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

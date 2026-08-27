@@ -73,7 +73,7 @@ namespace Landoria.CharacterVault
             return $"{SafeSegment(accountId)}_{SafeSegment(name)}.fch";
         }
 
-        private static string SafeSegment(string value)
+        internal static string SafeSegment(string value)
         {
             const string invalid = "<>:\"/\\|?*";
             return new string(value

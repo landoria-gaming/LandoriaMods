@@ -1,6 +1,6 @@
 # Structure Protection
 
-Protects offline structures from deliberate creature targeting and player attacks inside active wards when no authorized player is online.
+Prevents creatures from deliberately targeting structures whose creator is offline and blocks player damage to structures inside active wards.
 
 ## Valheim compatibility
 
@@ -11,11 +11,20 @@ Protects offline structures from deliberate creature targeting and player attack
 
 ## Features
 
-- Prevents creatures from deliberately targeting player-built structures while their creator is offline, without blocking damage if a creature happens to hit them.
-- Protects structures inside an active ward from player weapon damage while its creator and all permitted players are offline.
-- Keeps vanilla player access, interaction, and creator-name display behavior.
+- Creatures cannot deliberately target player-built structures while their creator is offline.
+- An active ward blocks damage to structures from players who are neither the ward creator nor on its permitted-player list.
+- The ward creator and players on its permitted-player list can still damage protected structures.
+- Protection against damage from unauthorized players remains active while the ward creator or a permitted player is online.
+- Each character can have up to five wards in the world by default.
+- Active wards are disabled after 30 real calendar days without a recorded character connection.
 
-Both protections are enabled by default. Dedicated-server administrators can configure them separately with `--structure-protection-creature-targeting` and `--structure-protection-ward-player-damage`.
+Dedicated-server administrators can configure the protections with these command-line switches:
+
+- `--structure-protection-offline-creature-targeting true|false`
+- `--structure-protection-ward-player-damage true|false`
+- `--structure-protection-max-wards-per-character <number>`: defaults to `5`; use `-1` to disable the ward limit.
+- `--structure-protection-ward-inactivity-days <number>`: defaults to `30`; use `-1` to disable inactivity checks.
+- `--structure-protection-ward-inactivity-check-hours <number>`: defaults to `6` and must be at least `1`.
 
 ## Installation
 

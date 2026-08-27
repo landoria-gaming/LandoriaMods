@@ -4,16 +4,20 @@ namespace Landoria.StructureProtection
 {
     internal static class WardProtectionPolicy
     {
-        internal static bool HasOnlineAuthorizedPlayer(
-            long creator, IEnumerable<long> permittedPlayers, ISet<long> onlinePlayers)
+        internal static bool IsAuthorized(
+            long creator, IEnumerable<long> permittedPlayers, long player)
         {
-            if (onlinePlayers.Contains(creator))
+            if (player == 0L)
+            {
+                return false;
+            }
+            if (player == creator)
             {
                 return true;
             }
-            foreach (long player in permittedPlayers)
+            foreach (long permittedPlayer in permittedPlayers)
             {
-                if (onlinePlayers.Contains(player))
+                if (player == permittedPlayer)
                 {
                     return true;
                 }

@@ -4,6 +4,7 @@ using Landoria.SharedLib;
 namespace Landoria.StructureProtection
 {
     [BepInPlugin(PluginGuid, PluginName, PluginVersion)]
+    [BepInDependency("Landoria.CharacterVault", BepInDependency.DependencyFlags.HardDependency)]
     public sealed class StructureProtectionPlugin : LandoriaPlugin
     {
         private const string PluginGuid = "Landoria.StructureProtection";
@@ -23,12 +24,17 @@ namespace Landoria.StructureProtection
 
         private void Update()
         {
+            Settings.InitializeServer(Log);
             StructureProtectionSession.Update();
+            WardQuota.Update();
+            WardInactivityJob.Update();
         }
 
         private void OnDestroy()
         {
             StructureProtectionSession.Reset();
+            WardQuota.Reset();
+            WardInactivityJob.Reset();
             Log?.LogInfo($"{PluginName} {PluginVersion} is unloaded.");
             ShutdownPlugin();
             Settings = null;
