@@ -13,12 +13,15 @@ namespace Landoria.CharacterVault
         private const string ExitFilePath = "character_vault.drp";
         private const int MaximumConcurrentSaves = 4;
         private const int ShutdownTimeoutSeconds = 90;
+        private const int ClientDisconnectGraceSeconds = 2;
         private readonly HashSet<ZNetPeer> _pendingPeers = new HashSet<ZNetPeer>();
         private readonly HashSet<ZNetPeer> _requestedPeers = new HashSet<ZNetPeer>();
+        private readonly HashSet<ZRpc> _shutdownPeerRpcs = new HashSet<ZRpc>();
         private readonly Queue<ZNetPeer> _queuedPeers = new Queue<ZNetPeer>();
         private readonly FileSystemWatcher _exitFileWatcher;
         private readonly SynchronizationContext _unityContext;
         private System.Threading.Timer _timeoutTimer;
+        private System.Threading.Timer _disconnectTimer;
         private int _disposed;
         private int _exitRequestQueued;
         private volatile bool _watcherFailed;
@@ -96,7 +99,6 @@ namespace Landoria.CharacterVault
             _requestedPeers.Remove(peer);
             CharacterVaultPlugin.Log.LogMessage(
                 $"Confirmed graceful character save for {peer.m_playerName} ({_pendingPeers.Count} remaining).");
-            ZNet.instance.Disconnect(peer);
             RequestNextProfiles();
             if (_pendingPeers.Count == 0)
             {
@@ -118,6 +120,7 @@ namespace Landoria.CharacterVault
             foreach (ZNetPeer peer in network.GetPeers().Where(HasActiveCharacter))
             {
                 _pendingPeers.Add(peer);
+                _shutdownPeerRpcs.Add(peer.m_rpc);
                 _queuedPeers.Enqueue(peer);
             }
             CharacterVaultPlugin.Log.LogMessage(
@@ -166,6 +169,7 @@ namespace Landoria.CharacterVault
             Interlocked.Exchange(ref _disposed, 1);
             _exitFileWatcher?.Dispose();
             _timeoutTimer?.Dispose();
+            _disconnectTimer?.Dispose();
         }
 
         private void ProcessExitRequest()
@@ -256,8 +260,8 @@ namespace Landoria.CharacterVault
         private void Complete()
         {
             CharacterVaultPlugin.Log.LogMessage(
-                "All connected character profiles were written to disk; continuing the vanilla shutdown.");
-            ContinueVanillaShutdown();
+                "All connected character profiles were written to disk; requesting normal client disconnection.");
+            RequestClientDisconnects();
         }
 
         private void CompleteAfterTimeout()
@@ -266,12 +270,57 @@ namespace Landoria.CharacterVault
             CharacterVaultPlugin.Log.LogWarning(
                 $"The {ShutdownTimeoutSeconds}-second shutdown save timeout expired with " +
                 $"{_pendingPeers.Count} unsaved character(s): {players}.");
-            foreach (ZNetPeer peer in _pendingPeers)
+            CharacterVaultPlugin.Log.LogWarning(
+                "Requesting normal client disconnection after the character save timeout.");
+            RequestClientDisconnects();
+        }
+
+        private void RequestClientDisconnects()
+        {
+            ZNetPeer[] peers = ConnectedShutdownPeers();
+            foreach (ZNetPeer peer in peers)
+            {
+                peer.m_rpc.Invoke("Disconnect");
+            }
+            if (peers.Length == 0)
+            {
+                ContinueVanillaShutdown();
+                return;
+            }
+            CharacterVaultPlugin.Log.LogMessage(
+                $"Requested normal disconnection for {peers.Length} client(s); " +
+                $"waiting {ClientDisconnectGraceSeconds} seconds before the server fallback.");
+            _disconnectTimer = new System.Threading.Timer(
+                OnDisconnectGraceElapsed, null,
+                TimeSpan.FromSeconds(ClientDisconnectGraceSeconds),
+                System.Threading.Timeout.InfiniteTimeSpan);
+        }
+
+        private ZNetPeer[] ConnectedShutdownPeers() =>
+            (ZNet.instance?.GetPeers() ?? Enumerable.Empty<ZNetPeer>())
+            .Where(peer => peer?.m_rpc != null &&
+                           _shutdownPeerRpcs.Contains(peer.m_rpc))
+            .ToArray();
+
+        private void OnDisconnectGraceElapsed(object state)
+        {
+            if (Volatile.Read(ref _disposed) == 0)
+            {
+                _unityContext.Post(_ => CompleteClientDisconnects(), null);
+            }
+        }
+
+        private void CompleteClientDisconnects()
+        {
+            ZNetPeer[] peers = ConnectedShutdownPeers();
+            foreach (ZNetPeer peer in peers)
             {
                 ZNet.instance.Disconnect(peer);
             }
-            CharacterVaultPlugin.Log.LogWarning(
-                "Continuing the vanilla server shutdown after the character save timeout.");
+            CharacterVaultPlugin.Log.LogMessage(
+                peers.Length == 0
+                    ? "All clients disconnected normally; continuing the vanilla shutdown."
+                    : $"Closed {peers.Length} remaining client connection(s); continuing the vanilla shutdown.");
             ContinueVanillaShutdown();
         }
 
@@ -279,8 +328,11 @@ namespace Landoria.CharacterVault
         {
             _timeoutTimer?.Dispose();
             _timeoutTimer = null;
+            _disconnectTimer?.Dispose();
+            _disconnectTimer = null;
             _pendingPeers.Clear();
             _requestedPeers.Clear();
+            _shutdownPeerRpcs.Clear();
             _queuedPeers.Clear();
             _requestId = null;
             _shutdownCommitted = true;
