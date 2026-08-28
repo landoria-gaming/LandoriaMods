@@ -2,7 +2,7 @@
 
 ## 1.0.22
 
-- Save the character before an access-control disconnection.
+- Disconnect players cleanly during a graceful server shutdown.
 
 ## 1.0.21
 
