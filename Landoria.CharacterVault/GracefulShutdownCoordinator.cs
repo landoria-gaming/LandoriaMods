@@ -134,6 +134,17 @@ namespace Landoria.CharacterVault
             }
         }
 
+        internal bool TryRequestShutdown()
+        {
+            if (_shutdownCommitted || _requestId != null ||
+                !CanCoordinateShutdown())
+            {
+                return false;
+            }
+            Start(ZNet.instance);
+            return true;
+        }
+
         private void RequestNextProfiles()
         {
             while (_requestedPeers.Count < MaximumConcurrentSaves && _queuedPeers.Count > 0)

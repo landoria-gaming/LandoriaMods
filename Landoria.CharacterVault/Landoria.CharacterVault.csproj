@@ -71,6 +71,7 @@
     <Compile Include="BackupRetention.cs" />
     <Compile Include="VaultStorage.cs" />
     <Compile Include="GracefulShutdownCoordinator.cs" />
+    <Compile Include="GracefulShutdownApi.cs" />
     <Compile Include="KickSavePolicy.cs" />
     <Compile Include="VoluntaryDisconnectCoordinator.cs" />
     <Compile Include="WindowsCloseInterceptor.cs" />
