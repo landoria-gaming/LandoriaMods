@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.22
+
+- Save the character before an access-control disconnection.
+
 ## 1.0.21
 
 - Remember when each character was last online.

@@ -1,6 +1,6 @@
 {
   "name": "CharacterVault",
-  "version_number": "1.0.21",
+  "version_number": "1.0.22",
   "website_url": "https://valheim.landoria-gaming.com/",
   "description": "Stores trusted character profiles and world-scoped online activity on the server.",
   "dependencies": [

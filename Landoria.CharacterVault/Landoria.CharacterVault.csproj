@@ -79,6 +79,7 @@
     <Compile Include="WorldSavePolicy.cs" />
     <Compile Include="StartingItemGrantPolicy.cs" />
     <Compile Include="ServerDisconnectSaveCoordinator.cs" />
+    <Compile Include="ServerDisconnectApi.cs" />
     <Compile Include="ProfileSaveRpc.cs" />
     <Compile Include="CharacterVaultPlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

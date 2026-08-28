@@ -34,7 +34,7 @@ namespace Landoria.CharacterVault
 
         internal void RecordSaveReceived(ZRpc rpc, string requestId)
         {
-            if (requestId?.StartsWith("disconnect-", StringComparison.Ordinal) != true)
+            if (!IsFinalDisconnectRequest(requestId))
             {
                 return;
             }
@@ -42,6 +42,11 @@ namespace Landoria.CharacterVault
             _pending.Remove(rpc);
             _warned.Remove(rpc);
         }
+
+        private static bool IsFinalDisconnectRequest(string requestId) =>
+            requestId?.StartsWith("disconnect-", StringComparison.Ordinal) == true ||
+            requestId?.StartsWith("server-disconnect-",
+                StringComparison.Ordinal) == true;
 
         internal void Update()
         {
