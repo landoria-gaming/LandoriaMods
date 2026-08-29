@@ -2,7 +2,7 @@
 
 ## 1.0.9
 
-- Bug fix
+- Updated README.
 
 ## 1.0.8
 

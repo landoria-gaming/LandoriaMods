@@ -41,7 +41,7 @@ is never installed as a standalone mod.
 
 ## Community server
 
-All Landoria mods can be tested on the [Landoria Valheim community server](https://valheim.landoria-gaming.com/).
+All Landoria mods are used on the [Landoria Valheim public servers](https://valheim.landoria-gaming.com/).
 
 ## Contact
 

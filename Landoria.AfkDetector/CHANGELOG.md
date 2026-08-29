@@ -2,7 +2,7 @@
 
 ## 1.0.6
 
-- Add Xbox support alongside Steam.
+- Updated README.
 
 ## 1.0.5
 

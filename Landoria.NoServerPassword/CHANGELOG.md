@@ -2,7 +2,7 @@
 
 ## 1.0.6
 
-- Support crossplay servers.
+- Updated README.
 
 ## 1.0.3
 

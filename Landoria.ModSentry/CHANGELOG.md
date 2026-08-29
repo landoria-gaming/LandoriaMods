@@ -2,7 +2,7 @@
 
 ## 1.0.12
 
-- Clear a connection rejection after the player acknowledges it.
+- Updated README.
 
 ## 1.0.11
 

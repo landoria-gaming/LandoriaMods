@@ -2,7 +2,7 @@
 
 ## 1.0.6
 
-- Remove the optional No Build Cost material recovery behavior and its server switch.
+- Updated README.
 
 ## 1.0.4
 

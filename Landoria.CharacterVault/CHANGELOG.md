@@ -2,7 +2,7 @@
 
 ## 1.0.22
 
-- Disconnect players cleanly during a graceful server shutdown.
+- Updated README.
 
 ## 1.0.21
 

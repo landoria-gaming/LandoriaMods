@@ -2,7 +2,7 @@
 
 ## 1.0.6
 
-- Fix the command-switch table rendering on Thunderstore.
+- Updated README.
 
 ## 1.0.5
 
