@@ -1,4 +1,5 @@
 using System;
+using System.Security;
 
 namespace Landoria.Socialize
 {
@@ -22,6 +23,11 @@ namespace Landoria.Socialize
         internal static string FormatShout(string user, string text) =>
             "<color=orange>" + user + "</color>: <color=" + ShoutColor + ">" +
             text + "</color>";
+
+        internal static string FormatArrival(string playerName, string message) =>
+            "<color=orange>" + SecurityElement.Escape(playerName) + "</color>" +
+            "<color=white>: </color><color=" + ShoutColor + ">" +
+            SecurityElement.Escape(message) + "</color>";
 
         internal static string FormatPing(string user, string target, string message)
         {

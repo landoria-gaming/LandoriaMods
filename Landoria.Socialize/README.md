@@ -37,7 +37,7 @@ Groups are not persistent: players leave them when they disconnect and do not re
 
 ### Notifications
 
-- Announces when players join the server and when members leave, are removed, become leader, or cause a group to disband.
+- Replaces the local arrival shout with a server-wide localized arrival announcement, and announces when members leave, are removed, become leader, or cause a group to disband.
 
 ## Chat Commands
 

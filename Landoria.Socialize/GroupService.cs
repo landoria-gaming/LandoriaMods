@@ -80,7 +80,7 @@ namespace Landoria.Socialize
         {
             if (RegisterSession(sender, playerId))
             {
-                BroadcastServerMessage(playerName + " joined the server.");
+                BroadcastArrival(playerName);
             }
             switch (action)
             {
@@ -102,6 +102,10 @@ namespace Landoria.Socialize
             if (type == "message")
             {
                 Chat.instance?.AddString(package.ReadString());
+            }
+            else if (type == "arrival")
+            {
+                ShowArrival(package.ReadString());
             }
             else if (type == "snapshot")
             {
@@ -554,16 +558,36 @@ namespace Landoria.Socialize
             }
         }
 
-        private static void BroadcastServerMessage(string message)
+        private static void BroadcastArrival(string playerName)
         {
             foreach (long peerId in new List<long>(GroupState.PeerPlayers.Keys))
             {
                 if (ZNet.instance.GetPeer(peerId) is ZNetPeer peer && peer.IsReady())
                 {
-                    SendMessage(peerId, message);
+                    SendArrival(peerId, playerName);
                 }
             }
-            SocializePlugin.Log.LogInfo(message);
+            SocializePlugin.Log.LogInfo(playerName + " arrived on the server.");
+        }
+
+        private static void SendArrival(long peer, string playerName)
+        {
+            if (peer == 0L)
+            {
+                ShowArrival(playerName);
+                return;
+            }
+            ZPackage response = NewResponse("arrival");
+            response.Write(playerName ?? "");
+            ZRoutedRpc.instance.InvokeRoutedRPC(peer, ResponseRpc, response);
+        }
+
+        private static void ShowArrival(string playerName)
+        {
+            string message = Localization.instance.Localize(
+                "$text_player_arrived");
+            Chat.instance?.AddString(
+                ChatFormattingPolicy.FormatArrival(playerName, message));
         }
 
         private static void SendMessage(long peer, string message)

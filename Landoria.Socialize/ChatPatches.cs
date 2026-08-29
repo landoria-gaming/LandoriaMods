@@ -102,6 +102,10 @@ namespace Landoria.Socialize
         {
             if (type == Talker.Type.Shout)
             {
+                if (text == Localization.instance.Localize("$text_player_arrived"))
+                {
+                    return false;
+                }
                 SocialChatSender.SendShout(text);
                 return false;
             }

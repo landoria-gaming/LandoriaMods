@@ -2,7 +2,7 @@
 
 ## 1.0.12
 
-- Bug fix
+- Replace duplicate join messages with one localized server-wide arrival announcement.
 
 ## 1.0.11
 

@@ -41,6 +41,10 @@
       <HintPath>$(ValheimGamePath)\valheim_Data\Managed\assembly_valheim.dll</HintPath>
       <Private>false</Private>
     </Reference>
+    <Reference Include="assembly_guiutils">
+      <HintPath>$(ValheimGamePath)\valheim_Data\Managed\assembly_guiutils.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
     <Reference Include="assembly_utils">
       <HintPath>$(ValheimGamePath)\valheim_Data\Managed\assembly_utils.dll</HintPath>
       <Private>false</Private>
