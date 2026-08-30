@@ -39,11 +39,9 @@ is never installed as a standalone mod.
 - [Watch Landoria mod demos on YouTube](https://www.youtube.com/channel/UC7JKJ6QyDyFbWrgQGg8k5jQ).
 - [Browse all Landoria mods on Thunderstore](https://thunderstore.io/c/valheim/p/Landoria/).
 
-## Community server
-
-All Landoria mods are used on the [Landoria Valheim public servers](https://valheim.landoria-gaming.com/).
-
 ## Contact
 
 Report bugs through [GitHub Issues](https://github.com/landoria-gaming/LandoriaMods/issues).
 For questions, feedback, and other discussions, use [GitHub Discussions](https://github.com/landoria-gaming/LandoriaMods/discussions).
+
+All Landoria mods are used on the [Landoria Valheim public servers](https://valheim.landoria-gaming.com/).
