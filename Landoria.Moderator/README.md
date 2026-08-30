@@ -31,6 +31,8 @@ Gives trusted Valheim moderators server-authorized tools for helping players and
 | `summon <player>` | Teleports a player to you. |
 | `resetmap` | Clears exploration and tracking. |
 | `spawn <prefab> [amount] [level] [radius]` | Spawns a Valheim prefab. |
+| `event <name>` | Starts a named player event at your position. |
+| `stopevent` | Stops the active player event. |
 
 All commands except `moderator` require active moderator mode. The server validates access against `adminlist.txt`.
 

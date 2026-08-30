@@ -56,6 +56,7 @@ namespace Landoria.Moderator
         {
             AdminAccess.RegisterRpcs();
             PlayerPositionRpc.RegisterResponseRpc();
+            EventControlRpc.RegisterRpcs();
         }
     }
 
@@ -110,6 +111,7 @@ namespace Landoria.Moderator
             ModeratorState.SetEnabled(false);
             AdminAccess.ResetSession();
             PlayerPositionRpc.ResetSession();
+            EventControlRpc.ResetSession();
         }
     }
 }

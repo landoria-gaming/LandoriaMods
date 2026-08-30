@@ -83,7 +83,9 @@
         <Compile Include="AdminPlayerModes.cs" />
         <Compile Include="CommandRegistrationPatch.cs" />
         <Compile Include="DevCommandPatches.cs" />
+        <Compile Include="EventControlRpc.cs" />
         <Compile Include="Commands\ExploreMapCommand.cs" />
+        <Compile Include="Commands\EventCommands.cs" />
         <Compile Include="Commands\GotoCommand.cs" />
         <Compile Include="Commands\ItemSetCommand.cs" />
         <Compile Include="Commands\ModeratorCommandAudit.cs" />

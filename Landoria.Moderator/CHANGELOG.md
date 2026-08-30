@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.8
+
+- Allow active moderators to start a named player event and stop the active event.
+
 ## 1.0.7
 
 - Updated README.

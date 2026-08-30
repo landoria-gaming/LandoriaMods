@@ -11,13 +11,13 @@ namespace Landoria.Moderator
             new HashSet<string>
             {
                 "exploremap", "goto", "itemset", "playerlist", "summon",
-                "resetmap", "spawn"
+                "resetmap", "spawn", "event", "stopevent"
             };
 
         internal static ModLog ModLogger { get; private set; }
         private const string PluginGuid = "Landoria.Moderator";
         private const string PluginName = "Landoria.Moderator";
-        private const string PluginVersion = "1.0.7";
+        private const string PluginVersion = "1.0.8";
 
         private void Awake()
         {
@@ -50,6 +50,7 @@ namespace Landoria.Moderator
             SummonCommand.Register();
             ResetMapCommand.Register();
             SpawnCommand.Register();
+            EventCommands.Register();
         }
 
         internal static bool RequiresEnabledModerator(string command)
