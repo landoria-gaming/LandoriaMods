@@ -45,3 +45,5 @@ Install matching versions on the server and every participating client.
 
 Report bugs through [GitHub Issues](https://github.com/landoria-gaming/LandoriaMods/issues).
 For questions, feedback, and other discussions, use [GitHub Discussions](https://github.com/landoria-gaming/LandoriaMods/discussions).
+
+All Landoria mods are used on the [Landoria Valheim public servers](https://valheim.landoria-gaming.com/).

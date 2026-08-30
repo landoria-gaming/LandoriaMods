@@ -24,3 +24,5 @@ The private build automation supplies the shared project reference and ILRepack 
 ## Contact
 
 Report bugs through [GitHub Issues](https://github.com/landoria-gaming/LandoriaMods/issues). For other conversations, use [GitHub Discussions](https://github.com/landoria-gaming/LandoriaMods/discussions).
+
+All Landoria mods are used on the [Landoria Valheim public servers](https://valheim.landoria-gaming.com/).
