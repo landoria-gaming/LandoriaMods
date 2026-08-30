@@ -1,7 +1,7 @@
 {
   "name": "HammerFreedom",
   "version_number": "1.0.6",
-  "website_url": "https://valheim.landoria-gaming.com/",
+  "website_url": "https://github.com/landoria-gaming/LandoriaMods/tree/main/Landoria.HammerFreedom",
   "description": "Adds creative flight, stamina, durability, and building freedoms to Hammer worlds.",
   "dependencies": [
     "denikson-BepInExPack_Valheim-5.4.2333"

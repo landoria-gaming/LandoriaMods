@@ -1,7 +1,7 @@
 {
   "name": "GentleDeath",
   "version_number": "1.0.10",
-  "website_url": "https://valheim.landoria-gaming.com/",
+  "website_url": "https://github.com/landoria-gaming/LandoriaMods/tree/main/Landoria.GentleDeath",
   "description": "Keep your weapons, armor, and tools after death; only treasures and gathered materials go to your tombstone.",
   "dependencies": [
     "denikson-BepInExPack_Valheim-5.4.2333"

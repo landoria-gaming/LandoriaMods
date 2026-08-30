@@ -1,7 +1,7 @@
 {
   "name": "FirstPerson",
   "version_number": "1.0.4",
-  "website_url": "https://valheim.landoria-gaming.com/",
+  "website_url": "https://github.com/landoria-gaming/LandoriaMods/tree/main/Landoria.FirstPerson",
   "description": "Adds first-person view and persistent FOV control for the normal gameplay camera.",
   "dependencies": [
     "denikson-BepInExPack_Valheim-5.4.2333"

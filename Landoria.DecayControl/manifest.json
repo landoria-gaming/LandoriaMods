@@ -1,7 +1,7 @@
 {
   "name": "DecayControl",
   "version_number": "1.0.1",
-  "website_url": "https://valheim.landoria-gaming.com/",
+  "website_url": "https://github.com/landoria-gaming/LandoriaMods/tree/main/Landoria.DecayControl",
   "description": "Controls rain wear and fuel consumption for player-built pieces.",
   "dependencies": [
     "denikson-BepInExPack_Valheim-5.4.2333"

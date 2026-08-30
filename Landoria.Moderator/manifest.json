@@ -1,7 +1,7 @@
 {
   "name": "Moderator",
   "version_number": "1.0.7",
-  "website_url": "https://valheim.landoria-gaming.com/",
+  "website_url": "https://github.com/landoria-gaming/LandoriaMods/tree/main/Landoria.Moderator",
   "description": "Adds multiplayer moderation, teleportation, spawning, map, and player commands.",
   "dependencies": [
     "denikson-BepInExPack_Valheim-5.4.2333"
