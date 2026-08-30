@@ -16,7 +16,7 @@ Thunderstore. A mod may also include a changelog.
 | [CharacterVault](Landoria.CharacterVault/) | Both | Stores authoritative server profiles and checkpoints characters with world saves. |
 | [DecayControl](Landoria.DecayControl/) | Both | Controls rain damage and fuel use for player-built structures. |
 | [GentleDeath](Landoria.GentleDeath/) | Client-only | Keeps equipable gear on the player after death and moves other items to the tombstone. |
-| [GetMyTrophyBack](Landoria.GetMyTrophyBack/) | Both | Drops a mounted boss trophy five seconds after its guardian power is selected. |
+| [GetMyTrophyBack](Landoria.GetMyTrophyBack/) | Both | Returns a mounted boss trophy after selecting or reusing its guardian power. |
 | [HammerFreedom](Landoria.HammerFreedom/) | Both | Adds server-authorized creative freedoms to Hammer worlds. |
 | [FreeFlyCommand](Landoria.FreeFlyCommand/) | Both | Allows server-authorized native free-camera commands within 50 metres of the player. |
 | [First Person](Landoria.FirstPerson/) | Client-only | Adds first-person view at the closest camera zoom level. |

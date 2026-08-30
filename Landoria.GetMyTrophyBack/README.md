@@ -12,6 +12,8 @@ Returns a boss trophy after its Sacrificial Stone power is selected.
 ## Features
 
 - Starts a five-second return timer when a player selects a guardian power.
+- Makes the trophy removable fifteen seconds after targeting it when its guardian power is already active.
+- Shows the normal use prompt instead of the inactive current-power label.
 - Drops the mounted trophy as a recoverable world item.
 - Preserves the trophy's stored item data.
 - Uses the stone's network owner for an authoritative synchronized drop.
@@ -24,6 +26,8 @@ Returns a boss trophy after its Sacrificial Stone power is selected.
 |---|---|
 | Trophy mounted | Its guardian power remains available. |
 | Power selected | The five-second return timer starts. |
+| Power already active | Targeting the stone starts a fifteen-second delay, then the use prompt appears. |
+| Active-power prompt visible | Interacting again drops the trophy immediately. |
 | Timer completed | The trophy drops into the world. |
 | Trophy already absent | No additional trophy is created. |
 

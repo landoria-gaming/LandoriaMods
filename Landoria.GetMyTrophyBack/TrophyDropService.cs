@@ -11,16 +11,21 @@ namespace Landoria.GetMyTrophyBack
         internal static IEnumerator DropAfterDelay(ItemStand itemStand)
         {
             yield return new WaitForSeconds(DropDelaySeconds);
+            RequestDrop(itemStand);
+        }
+
+        internal static void RequestDrop(ItemStand itemStand)
+        {
             if (itemStand == null || !itemStand.HaveAttachment())
             {
-                yield break;
+                return;
             }
 
             ZNetView netView = GetNetView(itemStand);
             if (netView == null || !netView.IsValid())
             {
                 GetMyTrophyBackPlugin.Log.LogWarning("Could not request the trophy drop because its network view is invalid.");
-                yield break;
+                return;
             }
 
             netView.InvokeRPC(RpcName);
@@ -44,7 +49,7 @@ namespace Landoria.GetMyTrophyBack
 
             SpawnTrophy(itemStand, prefab, zdo);
             ClearAttachment(netView, zdo);
-            GetMyTrophyBackPlugin.Log.LogDebug($"Dropped trophy {itemName} after power activation by peer {sender}.");
+            GetMyTrophyBackPlugin.Log.LogDebug($"Dropped trophy {itemName} after request by peer {sender}.");
         }
 
         private static ZNetView GetNetView(ItemStand itemStand)
