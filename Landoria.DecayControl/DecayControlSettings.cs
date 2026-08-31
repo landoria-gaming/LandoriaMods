@@ -13,6 +13,9 @@ namespace Landoria.DecayControl
 
         internal DecayControlMode FuelConsumption { get; private set; }
         internal DecayControlMode EnvironmentalBuildingWear { get; private set; }
+        internal bool UsesPlayerActivity =>
+            FuelConsumption == DecayControlMode.PlayerOnline ||
+            EnvironmentalBuildingWear == DecayControlMode.PlayerOnline;
 
         internal void InitializeServer(ModLog logger)
         {

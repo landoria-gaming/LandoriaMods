@@ -17,12 +17,14 @@ namespace Landoria.DecayControl
         {
             Log = InitializePlugin(PluginGuid);
             Settings = new DecayControlSettings();
+            ShowDecayCommand.Register();
             Settings.InitializeServer(Log);
             Log.LogInfo($"{PluginName} {PluginVersion} is loaded.");
         }
 
         private void Update()
         {
+            Settings.InitializeServer(Log);
             DecayStateRpc.Update();
         }
 
@@ -30,6 +32,7 @@ namespace Landoria.DecayControl
         {
             DecayStateRpc.ResetSession();
             DecayProtection.Reset();
+            DecayIndicators.Reset();
             Log?.LogInfo($"{PluginName} {PluginVersion} is unloaded.");
             ShutdownPlugin();
             Settings = null;

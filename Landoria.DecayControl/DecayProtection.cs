@@ -21,9 +21,10 @@ namespace Landoria.DecayControl
             initializedFireplaces = new ConditionalWeakTable<Fireplace, object>();
         }
 
-        internal static void WriteState(ZPackage package)
+        internal static void WriteState(ZPackage package, IEnumerable<long> onlinePlayers)
         {
-            HashSet<long> activeCreators = GetActiveCreators();
+            HashSet<long> activeCreators =
+                CreatorActivityPolicy.GetActiveCreators(onlinePlayers);
             package.Write(activeCreators.Count);
             foreach (long playerId in activeCreators)
             {
@@ -42,6 +43,39 @@ namespace Landoria.DecayControl
             hasServerState = true;
         }
 
+        internal static void ClearActivityState()
+        {
+            ActiveCreators.Clear();
+            hasServerState = false;
+        }
+
+        internal static int ActiveCreatorCount => ActiveCreators.Count;
+
+        internal static bool IsFuelDecayOff(Piece piece)
+        {
+            if (piece == null || !piece.IsPlacedByPlayer())
+            {
+                return false;
+            }
+            DecayControlMode mode = DecayControlPlugin.Settings.FuelConsumption;
+            return mode == DecayControlMode.Disabled ||
+                (mode == DecayControlMode.PlayerOnline &&
+                 GetActivityMultiplier(piece) <= 0f);
+        }
+
+        internal static bool IsEnvironmentalWearOff(Piece piece)
+        {
+            if (piece == null || !piece.IsPlacedByPlayer())
+            {
+                return false;
+            }
+            DecayControlMode mode =
+                DecayControlPlugin.Settings.EnvironmentalBuildingWear;
+            return mode == DecayControlMode.Disabled ||
+                (mode == DecayControlMode.PlayerOnline &&
+                 GetActivityMultiplier(piece) <= 0f);
+        }
+
         internal static float GetActivityMultiplier(Piece piece)
         {
             if (piece == null || !piece.IsPlacedByPlayer())
@@ -55,15 +89,10 @@ namespace Landoria.DecayControl
             }
             if (ZNet.instance != null && ZNet.instance.IsServer())
             {
-                return IsCreatorActive(creator, GetOnlinePlayers()) ? 1f : 0f;
+                return IsCreatorActive(
+                    creator, DecayStateRpc.GetOnlinePlayers()) ? 1f : 0f;
             }
             return !hasServerState || ActiveCreators.Contains(creator) ? 1f : 0f;
-        }
-
-        private static HashSet<long> GetActiveCreators()
-        {
-            HashSet<long> onlinePlayers = GetOnlinePlayers();
-            return CreatorActivityPolicy.GetActiveCreators(onlinePlayers);
         }
 
         private static bool IsCreatorActive(long creator, HashSet<long> onlinePlayers)
@@ -71,32 +100,17 @@ namespace Landoria.DecayControl
             return CreatorActivityPolicy.IsCreatorActive(creator, onlinePlayers);
         }
 
-        private static HashSet<long> GetOnlinePlayers()
-        {
-            HashSet<long> players = new HashSet<long>();
-            if (ZNet.instance == null)
-            {
-                return players;
-            }
-            foreach (ZNetPeer peer in ZNet.instance.GetPeers())
-            {
-                if (peer.IsReady() && !peer.m_characterID.IsNone())
-                {
-                    players.Add(peer.m_characterID.UserID);
-                }
-            }
-            if (!ServerRole.IsDedicatedServer && Game.instance != null)
-            {
-                players.Add(Game.instance.GetPlayerProfile().GetPlayerID());
-            }
-            return players;
-        }
-
         [HarmonyPatch(typeof(WearNTear), nameof(WearNTear.ApplyDamage))]
         private static class RainDamagePatch
         {
             private static bool Prefix(WearNTear __instance, float damage, HitData hitData)
             {
+                DecayControlMode mode =
+                    DecayControlPlugin.Settings.EnvironmentalBuildingWear;
+                if (mode != DecayControlMode.PlayerOnline)
+                {
+                    return true;
+                }
                 float rainDamage = __instance.m_health * VanillaRainDamageFraction;
                 bool isVanillaRainTick = hitData == null && __instance.IsWet() &&
                     __instance.GetHealthPercentage() > 0.5f &&
@@ -105,8 +119,7 @@ namespace Landoria.DecayControl
                 bool isPlayerBuilt = piece != null && piece.IsPlacedByPlayer();
                 float activity = GetActivityMultiplier(piece);
                 return DecayEffectPolicy.ShouldApplyEnvironmentalWear(isVanillaRainTick,
-                    isPlayerBuilt, DecayControlPlugin.Settings.EnvironmentalBuildingWear,
-                    activity);
+                    isPlayerBuilt, mode, activity);
             }
         }
 
@@ -115,10 +128,15 @@ namespace Landoria.DecayControl
         {
             private static void Prefix(WearNTear __instance)
             {
+                DecayControlMode mode =
+                    DecayControlPlugin.Settings.EnvironmentalBuildingWear;
+                if (mode != DecayControlMode.Disabled)
+                {
+                    return;
+                }
                 Piece piece = __instance.GetComponent<Piece>();
                 bool isPlayerBuilt = piece != null && piece.IsPlacedByPlayer();
-                if (DecayEffectPolicy.ShouldDisableNativeRoofWear(isPlayerBuilt,
-                    DecayControlPlugin.Settings.EnvironmentalBuildingWear))
+                if (DecayEffectPolicy.ShouldDisableNativeRoofWear(isPlayerBuilt, mode))
                 {
                     __instance.m_noRoofWear = false;
                 }
@@ -131,8 +149,18 @@ namespace Landoria.DecayControl
             private static void Prefix(Fireplace __instance, out float __state)
             {
                 __state = __instance.m_secPerFuel;
+                DecayControlMode mode = DecayControlPlugin.Settings.FuelConsumption;
+                if (mode == DecayControlMode.Default)
+                {
+                    return;
+                }
                 Piece piece = __instance.GetComponent<Piece>();
                 bool isPlayerBuilt = piece != null && piece.IsPlacedByPlayer();
+                if (DecayEffectPolicy.ShouldUseNativeInfiniteFuel(isPlayerBuilt, mode))
+                {
+                    __instance.m_infiniteFuel = true;
+                    return;
+                }
                 bool firstUpdate = isPlayerBuilt &&
                     !initializedFireplaces.TryGetValue(__instance, out _);
                 if (firstUpdate)
@@ -140,12 +168,7 @@ namespace Landoria.DecayControl
                     initializedFireplaces.Add(__instance, new object());
                 }
                 float activity = GetActivityMultiplier(piece);
-                DecayControlMode mode = DecayControlPlugin.Settings.FuelConsumption;
-                if (DecayEffectPolicy.ShouldUseNativeInfiniteFuel(isPlayerBuilt, mode))
-                {
-                    __instance.m_infiniteFuel = true;
-                }
-                else if (DecayEffectPolicy.ShouldPauseFuel(isPlayerBuilt, firstUpdate,
+                if (DecayEffectPolicy.ShouldPauseFuel(isPlayerBuilt, firstUpdate,
                     mode, activity))
                 {
                     __instance.m_secPerFuel = float.PositiveInfinity;

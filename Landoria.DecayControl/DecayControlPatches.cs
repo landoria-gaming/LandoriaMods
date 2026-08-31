@@ -2,6 +2,15 @@ using HarmonyLib;
 
 namespace Landoria.DecayControl
 {
+    [HarmonyPatch(typeof(Terminal), "InitTerminal")]
+    internal static class ShowDecayCommandRegistrationPatch
+    {
+        private static void Postfix()
+        {
+            ShowDecayCommand.Register();
+        }
+    }
+
     [HarmonyPatch(typeof(Player), "OnSpawned")]
     internal static class DecayStateOnSpawnPatch
     {
@@ -20,6 +29,7 @@ namespace Landoria.DecayControl
         private static void Prefix()
         {
             DecayStateRpc.ResetSession();
+            DecayIndicators.Reset();
         }
     }
 }
