@@ -11,7 +11,8 @@ namespace Landoria.Moderator
             new HashSet<string>
             {
                 "exploremap", "goto", "itemset", "playerlist", "summon",
-                "resetmap", "spawn", "event", "stopevent", "env", "resetenv"
+                "resetmap", "spawn", "event", "stopevent", "env", "resetenv",
+                "nextday"
             };
 
         internal static ModLog ModLogger { get; private set; }
@@ -52,6 +53,7 @@ namespace Landoria.Moderator
             SpawnCommand.Register();
             EventCommands.Register();
             WeatherCommands.Register();
+            NextDayCommand.Register();
         }
 
         internal static bool RequiresEnabledModerator(string command)

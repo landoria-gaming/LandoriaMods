@@ -35,6 +35,7 @@ Gives trusted Valheim moderators server-authorized tools for helping players and
 | `stopevent` | Stops the active player event. |
 | `env <environment>` | Overrides the weather. |
 | `resetenv` | Restores automatic weather. |
+| `nextday` | Advances the world to the next morning. |
 
 All commands except `moderator` require active moderator mode. The server validates access against `adminlist.txt`.
 
