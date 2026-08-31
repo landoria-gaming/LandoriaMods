@@ -1,11 +1,8 @@
 # Changelog
 
-## 1.0.9
-
-- Allow active moderators to override the weather or restore automatic weather.
-
 ## 1.0.8
 
+- Allow active moderators to override the weather or restore automatic weather.
 - Allow active moderators to start a named player event and stop the active event.
 
 ## 1.0.7
