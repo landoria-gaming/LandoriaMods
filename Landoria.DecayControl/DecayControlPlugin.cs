@@ -8,7 +8,7 @@ namespace Landoria.DecayControl
     {
         private const string PluginGuid = "Landoria.DecayControl";
         private const string PluginName = "Landoria.DecayControl";
-        private const string PluginVersion = "1.0.1";
+        private const string PluginVersion = "1.0.2";
 
         internal static ModLog Log { get; private set; }
         internal static DecayControlSettings Settings { get; private set; }
