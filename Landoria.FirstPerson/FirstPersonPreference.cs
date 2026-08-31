@@ -15,7 +15,7 @@ namespace Landoria.FirstPerson
         internal static void Initialize(ConfigFile config)
         {
             enabled = config.Bind(
-                "Camera", "FirstPersonEnabled", true,
+                "Camera", "FirstPersonEnabled", false,
                 "Whether first-person view is enabled at minimum camera zoom.");
             fieldOfView = config.Bind(
                 "Camera", "FieldOfView", DefaultFieldOfView,

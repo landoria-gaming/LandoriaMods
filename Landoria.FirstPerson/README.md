@@ -13,7 +13,7 @@ held in either hand remain visible without changing how other players see you.
 
 ## Highlights
 
-- Enabled by default and instantly toggleable with `firstperson`.
+- Disabled by default and instantly toggleable with `firstperson`.
 - Camera positioned exactly at eye level, including when looking up or down.
 - Stable helmet lighting while moving in any direction.
 - A saved FOV setting with 15 extra degrees applied only in first person.
