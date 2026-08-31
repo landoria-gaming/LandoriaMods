@@ -33,6 +33,8 @@ Gives trusted Valheim moderators server-authorized tools for helping players and
 | `spawn <prefab> [amount] [level] [radius]` | Spawns a Valheim prefab. |
 | `event <name>` | Starts a named player event at your position. |
 | `stopevent` | Stops the active player event. |
+| `env <environment>` | Overrides the weather. |
+| `resetenv` | Restores automatic weather. |
 
 All commands except `moderator` require active moderator mode. The server validates access against `adminlist.txt`.
 

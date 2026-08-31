@@ -11,13 +11,13 @@ namespace Landoria.Moderator
             new HashSet<string>
             {
                 "exploremap", "goto", "itemset", "playerlist", "summon",
-                "resetmap", "spawn", "event", "stopevent"
+                "resetmap", "spawn", "event", "stopevent", "env", "resetenv"
             };
 
         internal static ModLog ModLogger { get; private set; }
         private const string PluginGuid = "Landoria.Moderator";
         private const string PluginName = "Landoria.Moderator";
-        private const string PluginVersion = "1.0.8";
+        private const string PluginVersion = "1.0.9";
 
         private void Awake()
         {
@@ -51,6 +51,7 @@ namespace Landoria.Moderator
             ResetMapCommand.Register();
             SpawnCommand.Register();
             EventCommands.Register();
+            WeatherCommands.Register();
         }
 
         internal static bool RequiresEnabledModerator(string command)

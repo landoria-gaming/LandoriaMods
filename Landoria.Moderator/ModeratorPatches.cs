@@ -57,6 +57,7 @@ namespace Landoria.Moderator
             AdminAccess.RegisterRpcs();
             PlayerPositionRpc.RegisterResponseRpc();
             EventControlRpc.RegisterRpcs();
+            WeatherControlRpc.RegisterRpcs();
         }
     }
 
@@ -112,6 +113,7 @@ namespace Landoria.Moderator
             AdminAccess.ResetSession();
             PlayerPositionRpc.ResetSession();
             EventControlRpc.ResetSession();
+            WeatherControlRpc.ResetSession();
         }
     }
 }
