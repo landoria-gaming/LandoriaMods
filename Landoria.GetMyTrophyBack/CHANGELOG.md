@@ -1,28 +1,8 @@
 # Changelog
 
-## 1.0.13
-
-- Wait fifteen seconds before showing the active-power trophy interaction.
-
-## 1.0.12
-
-- Start the five-second active-power interaction delay automatically when targeting the stone.
-
-## 1.0.11
-
-- Wait five seconds before making an active-power trophy removable.
-
-## 1.0.10
-
-- Drop the trophy immediately when its Forsaken power is already active.
-
-## 1.0.9
-
-- Show the interaction prompt when the selected Forsaken power is already active.
-
 ## 1.0.8
 
-- Allow returning a trophy when its Forsaken power is already selected.
+- Bug fix
 
 ## 1.0.7
 
