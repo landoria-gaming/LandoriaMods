@@ -15,6 +15,9 @@ with another save or a restored backup.
 - The server records when each platform account and character was first connected and last seen online.
 - Last-seen timestamps are updated when a character is admitted and before each world save, entirely on the server.
 
+Server-side mods can provide a verified character when it is not yet present on the current world. See the
+[character restore provider integration guide](CHARACTER_RESTORE_PROVIDER.md).
+
 ## When characters are saved
 
 Characters are saved:
