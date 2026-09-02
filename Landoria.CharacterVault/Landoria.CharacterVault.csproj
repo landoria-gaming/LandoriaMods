@@ -49,6 +49,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CharacterVaultSettings.cs" />
+    <Compile Include="CharacterRestoreApi.cs" />
     <Compile Include="CharacterVaultArgumentPolicy.cs" />
     <Compile Include="CharacterAdmissionPolicy.cs" />
     <Compile Include="CharacterVaultRejection.cs" />

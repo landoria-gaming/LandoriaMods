@@ -16,8 +16,23 @@ namespace Landoria.CharacterVault
         internal bool TryRead(string accountId, string name, out byte[] data)
         {
             string path = ProfilePath(accountId, name);
+            if (!File.Exists(path))
+            {
+                path = FindProfilePath(accountId, name);
+            }
             data = File.Exists(path) ? File.ReadAllBytes(path) : null;
             return data != null;
+        }
+
+        private static string FindProfilePath(string accountId, string name)
+        {
+            string prefix = SafeSegment(accountId) + "_";
+            string root = StorageRoot();
+            if (!Directory.Exists(root)) return string.Empty;
+            return Directory.GetFiles(root, prefix + "*.fch", SearchOption.TopDirectoryOnly)
+                .FirstOrDefault(path => string.Equals(
+                    Path.GetFileNameWithoutExtension(path).Substring(prefix.Length),
+                    name, StringComparison.OrdinalIgnoreCase)) ?? string.Empty;
         }
 
         internal bool HasProfile(string accountId)

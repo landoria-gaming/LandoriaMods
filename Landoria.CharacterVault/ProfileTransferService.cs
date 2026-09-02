@@ -102,6 +102,22 @@ namespace Landoria.CharacterVault
                 return true;
             }
 
+            CharacterRestoreResult restored = TryRestore(session);
+            if (restored?.Status == CharacterRestoreStatus.Restored)
+            {
+                ProfileUploadValidator.Validate(session, restored.Profile);
+                _storage.Commit(session.AccountId, session.Name, restored.Profile);
+                SendDownload(rpc, session, restored.Profile);
+                session.State.Admitted = true;
+                return true;
+            }
+            if (restored?.Status == CharacterRestoreStatus.Failed)
+            {
+                _sessions.Remove(rpc);
+                Reject(rpc, "Your saved character could not be restored right now. Please try again in a moment.");
+                return false;
+            }
+
             session.State.Admitted = AdmitEnrollment(rpc, session);
             return session.State.Admitted;
         }
@@ -166,6 +182,29 @@ namespace Landoria.CharacterVault
                     continue;
                 }
                 CharacterActivityRegistry.Record(session, DateTime.UtcNow);
+            }
+        }
+
+        private static CharacterRestoreResult TryRestore(VaultSession session)
+        {
+            ICharacterRestoreProvider provider = CharacterRestoreApi.GetProvider();
+            if (provider == null) return null;
+            using (CancellationTokenSource timeout = new CancellationTokenSource(TimeSpan.FromSeconds(10)))
+            {
+                try
+                {
+                    CharacterRestoreResult result = provider.RestoreAsync(
+                        session.AccountId, session.Name, timeout.Token).GetAwaiter().GetResult();
+                    if (result?.Status == CharacterRestoreStatus.Restored &&
+                        (result.Profile == null || result.Profile.Length == 0 ||
+                         result.Profile.Length > MaximumProfileBytes)) return CharacterRestoreResult.Failed();
+                    return result ?? CharacterRestoreResult.Failed();
+                }
+                catch (Exception exception)
+                {
+                    CharacterVaultPlugin.Log.LogWarning("Character restore failed: " + exception.GetType().Name);
+                    return CharacterRestoreResult.Failed();
+                }
             }
         }
 
