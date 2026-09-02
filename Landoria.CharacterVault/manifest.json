@@ -1,6 +1,6 @@
 {
   "name": "CharacterVault",
-  "version_number": "1.0.23-draft",
+  "version_number": "1.0.23",
   "website_url": "https://github.com/landoria-gaming/LandoriaMods/tree/main/Landoria.CharacterVault",
   "description": "Stores trusted character profiles and world-scoped online activity on the server.",
   "dependencies": [
