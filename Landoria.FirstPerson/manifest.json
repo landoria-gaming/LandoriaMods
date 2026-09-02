@@ -1,6 +1,6 @@
 {
   "name": "FirstPerson",
-  "version_number": "1.0.5-draft",
+  "version_number": "1.0.5",
   "website_url": "https://github.com/landoria-gaming/LandoriaMods/tree/main/Landoria.FirstPerson",
   "description": "Adds first-person view and persistent FOV control for the normal gameplay camera.",
   "dependencies": [
