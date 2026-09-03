@@ -19,6 +19,10 @@ Gives trusted Valheim moderators server-authorized tools for helping players and
 - Shows a green `[Moderator]` label beside active moderators' names.
 - Records every moderator command for accountability.
 
+## Video demo
+
+[Watch Moderator mod in action on YouTube](https://youtu.be/ak86gUHFPnQ)
+
 ## Commands
 
 | Command | Purpose |
