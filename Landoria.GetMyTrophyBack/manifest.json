@@ -1,6 +1,6 @@
 {
   "name": "GetMyTrophyBack",
-  "version_number": "1.0.9-draft",
+  "version_number": "1.0.9",
   "website_url": "https://github.com/landoria-gaming/LandoriaMods/tree/main/Landoria.GetMyTrophyBack",
   "description": "Returns a boss trophy from its Sacrificial Stone after selecting or reusing the associated power.",
   "dependencies": [

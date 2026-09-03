@@ -1,6 +1,6 @@
 {
   "name": "FreeFlyCommand",
-  "version_number": "1.0.8-draft",
+  "version_number": "1.0.8",
   "website_url": "https://github.com/landoria-gaming/LandoriaMods/tree/main/Landoria.FreeFlyCommand",
   "description": "Adds native freefly and ffsmooth camera commands within 50 metres of the player.",
   "dependencies": [
