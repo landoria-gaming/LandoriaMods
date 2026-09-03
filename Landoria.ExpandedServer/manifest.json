@@ -1,6 +1,6 @@
 {
   "name": "ExpandedServer",
-  "version_number": "1.0.9",
+  "version_number": "1.0.10-draft",
   "website_url": "https://github.com/landoria-gaming/LandoriaMods/tree/main/Landoria.ExpandedServer",
   "description": "Increases server capacity to up to 100 players",
   "dependencies": [
