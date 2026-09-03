@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.24
+
+- Updated documentation
+
 ## 1.0.23
 
 - Optionally use a CharacterVault-verified character across multiple worlds.

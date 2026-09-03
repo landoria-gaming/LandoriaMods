@@ -33,6 +33,14 @@ Returns a boss trophy after its Sacrificial Stone power is selected.
 
 ## Installation
 
+Most of Landoria mods need to be installed also on the dedicated server, we show you in this video how to do it on windows:
+
+[Setup a Valheim Modded dedicated server on Windows](https://youtu.be/AxPDgOXEh8M)
+
+| Crossplay support | Steam network support |
+|---|---
+| Yes | No
+
 | Client required | Server required (dedicated) | Player-hosted server |
 |---|---|---|
 | Yes | Yes | Not Supported |

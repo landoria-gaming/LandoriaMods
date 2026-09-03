@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.7
+
+- Updated documentation
+
 ## 1.0.6
 
 - Updated README.

@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.14
+
+- Updated documentation
+
 ## 1.0.12
 
 - Replace duplicate join messages with one localized server-wide arrival announcement.

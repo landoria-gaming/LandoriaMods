@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.8
+
+- Updated documentation
+
 ## 1.0.7
 
 - Add the SealedTombstone video demo to the package documentation.

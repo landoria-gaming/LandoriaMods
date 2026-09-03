@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.9
+
+- Updated documentation
+
 ## 1.0.8
 
 - Allow active moderators to override the weather or restore automatic weather.

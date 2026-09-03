@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.4
+
+- Updated documentation
+
 ## 1.0.2
 
 - Keep warded structures protected from unauthorized player attacks while permitted players are online.

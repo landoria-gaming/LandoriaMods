@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.3
+
+- Updated documentation
+
 ## 1.0.2
 
 - Add the `showdecay` command to show or hide fuel and building health indicators.
