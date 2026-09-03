@@ -3,6 +3,7 @@
 ## 1.0.14
 
 - Updated documentation
+- Fixed player communication between xbox and steam platform
 
 ## 1.0.12
 
