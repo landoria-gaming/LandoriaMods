@@ -26,6 +26,8 @@ Groups are not persistent: players leave them when they disconnect and do not re
 - Removes the public server-wide chat channel: normal chat reaches nearby players, while shouts travel farther within server-defined ranges.
 - Adds private group chat for connected group members.
 - Adds world-wide private messages and optional animated pings for a chosen player.
+- Confirms private messages, targeted pings, group messages, and invitations only after delivery.
+- Applies platform text permissions and filtering before displaying custom messages.
 - Keeps the selected normal, shout, group, or private chat channel active for following messages.
 - Keeps private messages inside the chat window instead of displaying them above the character.
 
@@ -59,18 +61,6 @@ Groups are not persistent: players leave them when they disconnect and do not re
 | `/group remove <PlayerName>` | Removes a member; leader only. |
 | `/group promote <PlayerName>` | Transfers leadership. |
 | `/group info` | Lists group members and status. |
-
-## Configuration
-
-| Dedicated-server switch | Default |
-|---|---:|
-| `--socialize-restrict-public-positions true or false` | `true` |
-| `--socialize-restrict-public-pings true or false` | `true` |
-| `--socialize-shout-distance <metres>` | `30` |
-| `--socialize-say-distance <metres>` | `15` |
-
-Distance values must be positive finite numbers. The server reads these switches once
-and sends its in-memory configuration to each client after spawning.
 
 ## Installation
 

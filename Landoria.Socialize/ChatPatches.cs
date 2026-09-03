@@ -213,6 +213,11 @@ namespace Landoria.Socialize
                 ChatFormatting.AddShout(__instance, name, text, timestamp);
                 return false;
             }
+            if (type == Talker.Type.Normal)
+            {
+                __instance.AddString(name, text, type, timestamp);
+                return false;
+            }
             return true;
         }
 

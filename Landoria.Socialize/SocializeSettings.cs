@@ -4,6 +4,8 @@ namespace Landoria.Socialize
 {
     internal sealed class SocializeSettings
     {
+        private const float FixedShoutDistance = 70f;
+        private const float FixedSayDistance = 15f;
         private bool serverInitialized;
 
         internal SocializeSettings()
@@ -19,13 +21,6 @@ namespace Landoria.Socialize
         internal void InitializeServer(ModLog logger)
         {
             if (serverInitialized || !ServerRole.IsDedicatedServer) return;
-            SocializeServerConfiguration configuration =
-                SocializeServerConfiguration.FromArguments(
-                    System.Environment.GetCommandLineArgs());
-            RestrictPublicPositions = configuration.RestrictPublicPositions;
-            RestrictPublicPings = configuration.RestrictPublicPings;
-            ShoutDistance = configuration.ShoutDistance;
-            SayDistance = configuration.SayDistance;
             serverInitialized = true;
             LogSettings(logger);
         }
@@ -59,8 +54,8 @@ namespace Landoria.Socialize
             if (serverInitialized) return;
             RestrictPublicPositions = true;
             RestrictPublicPings = true;
-            ShoutDistance = 30f;
-            SayDistance = 15f;
+            ShoutDistance = FixedShoutDistance;
+            SayDistance = FixedSayDistance;
         }
     }
 }

@@ -13,11 +13,19 @@ namespace Landoria.Socialize
             long playerId = package.ReadLong();
             string playerName = package.ReadString();
             string argument = package.ReadString().Trim();
-            GroupService.Dispatch(sender, playerId, playerName, action, argument);
+            UserInfo user = new UserInfo();
+            user.Deserialize(ref package);
+            GroupService.Dispatch(sender, playerId, playerName, action, argument, user);
         }
 
         internal static void RPC_Response(long sender, ZPackage package)
         {
+            if (!GroupService.IsExpectedServer(sender))
+            {
+                SocializePlugin.Log.LogWarning(
+                    $"Ignored group response from unexpected peer={sender}.");
+                return;
+            }
             GroupService.ReadResponse(package);
         }
 
@@ -28,6 +36,15 @@ namespace Landoria.Socialize
                 return;
             }
             GroupService.RelayPing(sender, position, user);
+        }
+
+        internal static void RPC_ChatReceipt(long sender, string requestId, int result)
+        {
+            if (ZNet.instance != null && ZNet.instance.IsServer())
+            {
+                GroupService.ReceiveChatReceipt(sender, requestId,
+                    (RelationsManagerPermissionResult)result);
+            }
         }
     }
 }

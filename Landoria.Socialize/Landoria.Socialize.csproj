@@ -100,11 +100,10 @@
     <Compile Include="MapPrivacyPatches.cs" />
     <Compile Include="MapSharingPolicy.cs" />
     <Compile Include="SocializePlugin.cs" />
-    <Compile Include="SocializeArgumentPolicy.cs" />
     <Compile Include="SocializeSettings.cs" />
-    <Compile Include="SocializeServerConfiguration.cs" />
     <Compile Include="SocialGroup.cs" />
     <Compile Include="TargetPingService.cs" />
+    <Compile Include="TextPermissionService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

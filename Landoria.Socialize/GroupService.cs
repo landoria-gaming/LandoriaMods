@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Splatform;
 using UnityEngine;
 
 namespace Landoria.Socialize
@@ -9,9 +10,34 @@ namespace Landoria.Socialize
         internal const string RequestRpc = "Landoria_Social_GroupRequest";
         internal const string ResponseRpc = "Landoria_Social_GroupResponse";
         internal const string PingRequestRpc = "Landoria_Social_GroupPingRequest";
+        internal const string ChatReceiptRpc = "Landoria_Social_GroupChatReceipt";
         private const float PositionUpdateInterval = 2f;
+        private const float ChatReceiptTimeout = 15f;
         private static ZRoutedRpc registeredRpc;
         private static float nextPositionUpdate;
+        private static bool awaitingInitialState;
+        private static float nextInitialStateRequest;
+        private static readonly Dictionary<string, PendingGroupChat> PendingChats =
+            new Dictionary<string, PendingGroupChat>();
+        private static readonly Dictionary<long, PendingInvite> PendingInvites =
+            new Dictionary<long, PendingInvite>();
+
+        private sealed class PendingGroupChat
+        {
+            internal long Sender;
+            internal UserInfo User;
+            internal string Message;
+            internal readonly HashSet<long> Waiting = new HashSet<long>();
+            internal int Rejected;
+            internal float SentAt;
+        }
+
+        private sealed class PendingInvite
+        {
+            internal long InviterPeer;
+            internal string TargetName;
+            internal float SentAt;
+        }
 
         internal static void Update()
         {
@@ -28,6 +54,13 @@ namespace Landoria.Socialize
                     nextPositionUpdate = Time.unscaledTime + PositionUpdateInterval;
                     BroadcastPositionUpdates();
                 }
+                ExpireGroupChats();
+                ExpireInvites();
+            }
+            else if (awaitingInitialState && Player.m_localPlayer != null &&
+                     Time.unscaledTime >= nextInitialStateRequest)
+            {
+                SendInitialStateRequest();
             }
         }
 
@@ -35,6 +68,10 @@ namespace Landoria.Socialize
         {
             registeredRpc = null;
             nextPositionUpdate = 0f;
+            awaitingInitialState = false;
+            nextInitialStateRequest = 0f;
+            PendingChats.Clear();
+            PendingInvites.Clear();
             GroupState.ClearAll();
             SocializePlugin.Settings?.ResetState();
             SocialChatSender.ApplyRangesToLoadedTalkers();
@@ -46,6 +83,14 @@ namespace Landoria.Socialize
                    GroupState.LocalMembers.Contains(Game.instance.GetPlayerProfile().GetPlayerID());
         }
 
+        internal static bool IsExpectedServer(long sender)
+        {
+            if (ZNet.instance == null) return false;
+            if (ZNet.instance.IsServer()) return true;
+            ZNetPeer server = ZNet.instance.GetServerPeer();
+            return server != null && server.m_uid == sender;
+        }
+
         internal static void SendChat(string message)
         {
             if (!IsLocalPlayerInGroup())
@@ -53,7 +98,74 @@ namespace Landoria.Socialize
                 Chat.instance?.AddString("You are not in a group.");
                 return;
             }
-            SendRequest("chat", message);
+            if (!PlatformManager.DistributionPlatform.PrivilegeProvider
+                    .CheckPrivilege(Privilege.TextCommunication).IsGranted())
+            {
+                SocializePlugin.Log.LogWarning("Group chat blocked by the sender's text privilege.");
+                Chat.instance?.AddString("Text communication is not permitted for this account.");
+                return;
+            }
+            BeginGroupChatPermissionCheck(message);
+        }
+
+        private static void BeginGroupChatPermissionCheck(string message)
+        {
+            List<ZNet.PlayerInfo> recipients = new List<ZNet.PlayerInfo>();
+            long local = ZNet.instance.LocalPlayerCharacterID.UserID;
+            foreach (ZNet.PlayerInfo player in ZNet.instance.GetPlayerList())
+            {
+                if (player.m_characterID.UserID != local &&
+                    GroupState.LocalMembers.Contains(player.m_characterID.UserID))
+                {
+                    recipients.Add(player);
+                }
+            }
+            if (recipients.Count == 0)
+            {
+                SendChatRequest(message);
+                return;
+            }
+
+            int remaining = recipients.Count;
+            bool denied = false;
+            SocializePlugin.Log.LogInfo(
+                $"Checking sender permission for group chat against {recipients.Count} recipient(s).");
+            foreach (ZNet.PlayerInfo recipient in recipients)
+            {
+                ZNet.PlayerInfo captured = recipient;
+                TextPermissionService.Check(captured.m_userInfo.m_id, true, result =>
+                    {
+                        SocializePlugin.Log.LogInfo(
+                            $"Sender permission result for group member '{captured.m_name}': {result}.");
+                        if (!result.IsGranted()) denied = true;
+                        remaining--;
+                        if (remaining != 0) return;
+                        if (denied)
+                        {
+                            Chat.instance?.AddString(
+                                "Group message is not permitted for every connected member.");
+                            SocializePlugin.Log.LogWarning(
+                                "Group chat cancelled because at least one sender permission check failed.");
+                        }
+                        else
+                        {
+                            SendChatRequest(message);
+                        }
+                    });
+            }
+        }
+
+        private static void SendChatRequest(string message)
+        {
+            EnsureRpcs();
+            if (ZRoutedRpc.instance == null || Game.instance == null || Player.m_localPlayer == null)
+            {
+                return;
+            }
+            Chat.GetChatMessageData(message, true, out UserInfo user, out string filtered);
+            ZPackage package = NewRequest("chat", filtered);
+            SocializePlugin.Log.LogInfo($"Sending group chat request (length={filtered.Length}).");
+            ZRoutedRpc.instance.InvokeRoutedRPC(RequestRpc, package);
         }
 
         internal static void SendRequest(string action, string argument)
@@ -63,21 +175,50 @@ namespace Landoria.Socialize
             {
                 return;
             }
+            ZPackage package = NewRequest(action, argument);
+            ZRoutedRpc.instance.InvokeRoutedRPC(RequestRpc, package);
+        }
+
+        private static ZPackage NewRequest(string action, string argument)
+        {
             ZPackage package = new ZPackage();
             package.Write(action);
             package.Write(Game.instance.GetPlayerProfile().GetPlayerID());
             package.Write(Game.instance.GetPlayerProfile().GetName());
             package.Write(argument ?? "");
-            ZRoutedRpc.instance.InvokeRoutedRPC(RequestRpc, package);
+            UserInfo.GetLocalUser().Serialize(ref package);
+            return package;
         }
 
         internal static void RequestInitialState()
         {
+            awaitingInitialState = true;
+            SendInitialStateRequest();
+        }
+
+        private static void SendInitialStateRequest()
+        {
+            nextInitialStateRequest = Time.unscaledTime + PositionUpdateInterval;
+            SocializePlugin.Log.LogDebug("Requesting initial group state from the server.");
             SendRequest("state", "");
         }
 
-        internal static void Dispatch(long sender, long playerId, string playerName, string action, string argument)
+        internal static void Dispatch(long sender, long playerId, string playerName, string action,
+            string argument, UserInfo user)
         {
+            if (!TryValidateIdentity(sender, playerId, playerName, user,
+                    out ZNet.PlayerInfo connected, out string reason))
+            {
+                SocializePlugin.Log.LogWarning(
+                    $"Rejected group action '{action}' from peer={sender}: {reason}");
+                if (action != "state")
+                {
+                    SendMessage(sender, "Group action rejected because the player identity could not be verified.");
+                }
+                return;
+            }
+            SocializePlugin.Log.LogInfo(
+                $"Processing group action '{action}' from '{connected.m_name}' (peer={sender}).");
             if (RegisterSession(sender, playerId))
             {
                 BroadcastArrival(playerName);
@@ -86,13 +227,18 @@ namespace Landoria.Socialize
             {
                 case "state": SendSnapshot(sender, playerId); break;
                 case "invite": Invite(sender, playerId, playerName, argument); break;
+                case "invite-received": ConfirmInviteReceipt(sender, playerId, argument); break;
                 case "accept": Accept(sender, playerId, playerName, argument); break;
                 case "reject": Reject(sender, playerId, argument); break;
                 case "leave": Leave(sender, playerId); break;
                 case "remove": Remove(sender, playerId, argument); break;
                 case "promote": Promote(sender, playerId, argument); break;
                 case "info": SendInfo(sender, playerId); break;
-                case "chat": SendGroupChat(sender, playerId, argument); break;
+                case "chat": SendGroupChat(sender, playerId, argument, user); break;
+                default:
+                    SocializePlugin.Log.LogWarning(
+                        $"Ignored unknown group action '{action}' from peer={sender}.");
+                    break;
             }
         }
 
@@ -119,6 +265,14 @@ namespace Landoria.Socialize
             {
                 ShowInvite(package.ReadString(), package.ReadString());
             }
+            else if (type == "groupChat")
+            {
+                ReadGroupChat(package);
+            }
+            else if (type == "groupChatResult")
+            {
+                ReadGroupChatResult(package);
+            }
         }
 
         private static void EnsureRpcs()
@@ -137,6 +291,7 @@ namespace Landoria.Socialize
             rpc.Register<ZPackage>(RequestRpc, GroupRpc.RPC_Request);
             rpc.Register<ZPackage>(ResponseRpc, GroupRpc.RPC_Response);
             rpc.Register<Vector3, UserInfo>(PingRequestRpc, GroupRpc.RPC_PingRequest);
+            rpc.Register<string, int>(ChatReceiptRpc, GroupRpc.RPC_ChatReceipt);
         }
 
         internal static void RelayPing(long sender, Vector3 position, UserInfo user)
@@ -152,6 +307,12 @@ namespace Landoria.Socialize
                 SocializePlugin.Log.LogDebug("Group ping ignored because the sender is not in a group.");
                 return;
             }
+            if (!TryGetAuthoritativeUser(sender, user, out UserInfo authoritative))
+            {
+                SocializePlugin.Log.LogWarning(
+                    $"Group ping ignored because peer={sender} supplied an invalid identity.");
+                return;
+            }
             int recipients = 0;
             foreach (long member in group.Members.Keys)
             {
@@ -161,7 +322,7 @@ namespace Landoria.Socialize
                     continue;
                 }
                 ZRoutedRpc.instance.InvokeRoutedRPC(peer, "ChatMessage", position,
-                    (int)Talker.Type.Ping, user, "");
+                    (int)Talker.Type.Ping, authoritative, "");
                 recipients++;
             }
             SocializePlugin.Log.LogDebug(
@@ -193,12 +354,37 @@ namespace Landoria.Socialize
             ZPackage response = NewResponse("invite");
             response.Write(inviter.ToString());
             response.Write(inviterName);
+            PendingInvites[target] = new PendingInvite
+            {
+                InviterPeer = sender,
+                TargetName = targetName,
+                SentAt = Time.realtimeSinceStartup
+            };
             ZRoutedRpc.instance.InvokeRoutedRPC(targetPeer, ResponseRpc, response);
-            SendMessage(sender, "Group invitation sent.");
+            SocializePlugin.Log.LogInfo(
+                $"Group invitation queued from peer={sender} for peer={targetPeer}; awaiting display receipt.");
+        }
+
+        private static void ConfirmInviteReceipt(long sender, long playerId, string inviterText)
+        {
+            if (!long.TryParse(inviterText, out long inviter) ||
+                !GroupState.Invitations.TryGetValue(playerId, out long expectedInviter) ||
+                inviter != expectedInviter)
+            {
+                SocializePlugin.Log.LogWarning(
+                    $"Invalid group invitation receipt from peer={sender} for inviter={inviterText}.");
+                return;
+            }
+            long inviterPeer = FindPeer(inviter);
+            PendingInvites.Remove(playerId);
+            SendMessage(inviterPeer, "Group invitation delivered.");
+            SocializePlugin.Log.LogInfo(
+                $"Group invitation from player={inviter} displayed for player={playerId}.");
         }
 
         private static void Accept(long sender, long playerId, string playerName, string inviterText)
         {
+            PendingInvites.Remove(playerId);
             GroupAcceptanceResult result = GroupAcceptancePolicy.Accept(
                 playerId, playerName, inviterText, GroupState.Invitations,
                 GetOrCreateGroup, GroupState.PlayerGroups);
@@ -226,6 +412,7 @@ namespace Landoria.Socialize
 
         private static void Reject(long sender, long playerId, string inviterText)
         {
+            PendingInvites.Remove(playerId);
             GroupState.Invitations.Remove(playerId);
             SendMessage(sender, "Group invitation rejected.");
             if (long.TryParse(inviterText, out long inviter))
@@ -328,17 +515,254 @@ namespace Landoria.Socialize
             GroupState.Groups.Remove(group.Id);
         }
 
-        private static void SendGroupChat(long sender, long actor, string message)
+        private static void SendGroupChat(long sender, long actor, string message, UserInfo user)
         {
             SocialGroup group = GroupState.GetGroup(actor);
             GroupChatResult result = GroupChatPolicy.Prepare(group, actor, message,
-                member => FindPeer(member) != 0L, ChatFormatting.FormatGroup);
+                member => FindPeer(member) != 0L, (name, text) => text);
             if (!result.Broadcast)
             {
                 SendMessage(sender, result.Message);
                 return;
             }
-            Broadcast(group, result.Message);
+            if (!TryGetAuthoritativeUser(sender, user, out UserInfo authoritative))
+            {
+                SocializePlugin.Log.LogWarning($"Rejected group chat from peer={sender}: identity mismatch.");
+                SendMessage(sender, "Group message rejected because the sender identity could not be verified.");
+                return;
+            }
+
+            string requestId = System.Guid.NewGuid().ToString("N").Substring(0, 12);
+            PendingGroupChat pending = new PendingGroupChat
+            {
+                Sender = sender,
+                User = authoritative,
+                Message = result.Message,
+                SentAt = Time.realtimeSinceStartup
+            };
+            foreach (long member in group.Members.Keys)
+            {
+                long peer = FindPeer(member);
+                if (peer == 0L || peer == sender) continue;
+                pending.Waiting.Add(peer);
+            }
+            PendingChats[requestId] = pending;
+            foreach (long peer in pending.Waiting)
+            {
+                SendGroupChatDelivery(peer, requestId, authoritative, result.Message);
+            }
+            SocializePlugin.Log.LogInfo(
+                $"Group chat [{requestId}] accepted from peer={sender}; waiting for {pending.Waiting.Count} receipt(s).");
+            if (pending.Waiting.Count == 0)
+            {
+                CompleteGroupChat(requestId, pending);
+            }
+        }
+
+        private static void SendGroupChatDelivery(long peer, string requestId, UserInfo user, string message)
+        {
+            ZPackage response = NewResponse("groupChat");
+            response.Write(requestId);
+            user.Serialize(ref response);
+            response.Write(message);
+            ZRoutedRpc.instance.InvokeRoutedRPC(peer, ResponseRpc, response);
+        }
+
+        private static void ReadGroupChat(ZPackage package)
+        {
+            string requestId = package.ReadString();
+            UserInfo user = new UserInfo();
+            user.Deserialize(ref package);
+            string message = package.ReadString();
+            SocializePlugin.Log.LogInfo(
+                $"Group chat [{requestId}] received from '{user.GetDisplayName()}' (length={message.Length}); checking permission.");
+            TextPermissionService.Check(user.UserId, false,
+                result => CompleteGroupChatReceive(requestId, user, message, result));
+        }
+
+        private static void CompleteGroupChatReceive(string requestId, UserInfo user, string message,
+            RelationsManagerPermissionResult result)
+        {
+            SocializePlugin.Log.LogInfo($"Group chat [{requestId}] permission result: {result}.");
+            if (result.IsGranted() && Chat.instance != null)
+            {
+                string displayed = message.Replace('<', ' ').Replace('>', ' ');
+                if (result == RelationsManagerPermissionResult.GrantedRequiresFiltering)
+                {
+                    CensorShittyWords.Filter(displayed, out displayed);
+                }
+                Chat.instance.AddString(ChatFormatting.FormatGroup(user.GetDisplayName(), displayed));
+                SocializePlugin.Log.LogInfo($"Group chat [{requestId}] displayed; sending receipt.");
+            }
+            else if (result.IsGranted())
+            {
+                result = RelationsManagerPermissionResult.Error;
+            }
+            ZRoutedRpc.instance?.InvokeRoutedRPC(ChatReceiptRpc, requestId, (int)result);
+        }
+
+        internal static void ReceiveChatReceipt(long sender, string requestId,
+            RelationsManagerPermissionResult result)
+        {
+            if (!PendingChats.TryGetValue(requestId, out PendingGroupChat pending) ||
+                !pending.Waiting.Remove(sender))
+            {
+                SocializePlugin.Log.LogWarning(
+                    $"Ignoring unknown group chat receipt [{requestId}] from peer={sender}.");
+                return;
+            }
+            if (!result.IsGranted()) pending.Rejected++;
+            SocializePlugin.Log.LogInfo(
+                $"Group chat [{requestId}] receipt from peer={sender}: {result}; remaining={pending.Waiting.Count}.");
+            if (pending.Waiting.Count == 0) CompleteGroupChat(requestId, pending);
+        }
+
+        private static void CompleteGroupChat(string requestId, PendingGroupChat pending)
+        {
+            PendingChats.Remove(requestId);
+            ZPackage response = NewResponse("groupChatResult");
+            response.Write(requestId);
+            response.Write(pending.Rejected == 0);
+            pending.User.Serialize(ref response);
+            response.Write(pending.Message);
+            response.Write(pending.Rejected);
+            ZRoutedRpc.instance.InvokeRoutedRPC(pending.Sender, ResponseRpc, response);
+        }
+
+        private static void ReadGroupChatResult(ZPackage package)
+        {
+            string requestId = package.ReadString();
+            bool delivered = package.ReadBool();
+            UserInfo user = new UserInfo();
+            user.Deserialize(ref package);
+            string message = package.ReadString();
+            int rejected = package.ReadInt();
+            if (delivered)
+            {
+                string displayed = message.Replace('<', ' ').Replace('>', ' ');
+                Chat.instance?.AddString(ChatFormatting.FormatGroup(user.GetDisplayName(), displayed));
+                SocializePlugin.Log.LogInfo($"Group chat [{requestId}] confirmed and shown to the sender.");
+            }
+            else
+            {
+                Chat.instance?.AddString("Group message was not delivered to every member.");
+                SocializePlugin.Log.LogWarning(
+                    $"Group chat [{requestId}] completed with {rejected} rejected delivery attempt(s).");
+            }
+        }
+
+        private static void ExpireGroupChats()
+        {
+            List<string> expired = null;
+            foreach (KeyValuePair<string, PendingGroupChat> entry in PendingChats)
+            {
+                if (Time.realtimeSinceStartup - entry.Value.SentAt >= ChatReceiptTimeout)
+                {
+                    (expired ??= new List<string>()).Add(entry.Key);
+                }
+            }
+            if (expired == null) return;
+            foreach (string requestId in expired)
+            {
+                PendingGroupChat pending = PendingChats[requestId];
+                PendingChats.Remove(requestId);
+                SendMessage(pending.Sender, "Group message was not confirmed by every member.");
+                SocializePlugin.Log.LogWarning(
+                    $"Group chat [{requestId}] timed out with {pending.Waiting.Count} missing receipt(s).");
+            }
+        }
+
+        private static void ExpireInvites()
+        {
+            List<long> expired = null;
+            foreach (KeyValuePair<long, PendingInvite> entry in PendingInvites)
+            {
+                if (Time.realtimeSinceStartup - entry.Value.SentAt >= ChatReceiptTimeout)
+                {
+                    (expired ??= new List<long>()).Add(entry.Key);
+                }
+            }
+            if (expired == null) return;
+            foreach (long target in expired)
+            {
+                PendingInvite pending = PendingInvites[target];
+                PendingInvites.Remove(target);
+                GroupState.Invitations.Remove(target);
+                SendMessage(pending.InviterPeer,
+                    "Group invitation to " + pending.TargetName + " was not confirmed.");
+                SocializePlugin.Log.LogWarning(
+                    $"Group invitation to player={target} timed out waiting for display confirmation.");
+            }
+        }
+
+        private static bool TryGetAuthoritativeUser(long sender, UserInfo claimed, out UserInfo user)
+        {
+            user = null;
+            if (claimed == null || !TryGetPlayerInfo(sender, out ZNet.PlayerInfo player)) return false;
+            if (player.m_name != claimed.Name ||
+                player.m_userInfo.m_id.ToString() != claimed.UserId.ToString()) return false;
+            user = new UserInfo { Name = player.m_name, UserId = player.m_userInfo.m_id };
+            return true;
+        }
+
+        private static bool TryGetPlayerInfo(long peer, out ZNet.PlayerInfo player)
+        {
+            if (ZNet.instance != null)
+            {
+                foreach (ZNet.PlayerInfo candidate in ZNet.instance.GetPlayerList())
+                {
+                    if (candidate.m_characterID.UserID == peer)
+                    {
+                        player = candidate;
+                        return true;
+                    }
+                }
+            }
+            player = default;
+            return false;
+        }
+
+        private static bool IsPlayerIdClaimedByOtherPeer(long peer, long playerId)
+        {
+            foreach (KeyValuePair<long, long> mapping in GroupState.PeerPlayers)
+            {
+                if (mapping.Key != peer && mapping.Value == playerId) return true;
+            }
+            return false;
+        }
+
+        private static bool TryValidateIdentity(long peer, long playerId, string playerName,
+            UserInfo claimed, out ZNet.PlayerInfo connected, out string reason)
+        {
+            if (!TryGetPlayerInfo(peer, out connected))
+            {
+                reason = "the peer is not present in the server player list yet";
+                return false;
+            }
+            if (claimed == null)
+            {
+                reason = "the request did not contain a platform identity";
+                return false;
+            }
+            if (connected.m_name != playerName || connected.m_name != claimed.Name)
+            {
+                reason = $"name mismatch (connected='{connected.m_name}', player='{playerName}', platform='{claimed.Name}')";
+                return false;
+            }
+            string connectedUserId = connected.m_userInfo.m_id.ToString();
+            string claimedUserId = claimed.UserId.ToString();
+            if (connectedUserId != claimedUserId)
+            {
+                reason = $"platform user mismatch (connected='{connectedUserId}', claimed='{claimedUserId}')";
+                return false;
+            }
+            if (IsPlayerIdClaimedByOtherPeer(peer, playerId))
+            {
+                reason = $"player id '{playerId}' is already associated with another peer";
+                return false;
+            }
+            reason = null;
+            return true;
         }
 
         private static void SendInfo(long sender, long playerId)
@@ -421,11 +845,13 @@ namespace Landoria.Socialize
         private static void RemoveInvitations(long playerId)
         {
             GroupState.Invitations.Remove(playerId);
+            PendingInvites.Remove(playerId);
             foreach (long target in new List<long>(GroupState.Invitations.Keys))
             {
                 if (GroupState.Invitations[target] == playerId)
                 {
                     GroupState.Invitations.Remove(target);
+                    PendingInvites.Remove(target);
                 }
             }
         }
@@ -495,6 +921,7 @@ namespace Landoria.Socialize
 
         private static void ReadSnapshot(ZPackage package)
         {
+            awaitingInitialState = false;
             package.ReadLong();
             GroupState.LocalMembers.Clear();
             GroupMapSharing.Clear();
@@ -530,6 +957,7 @@ namespace Landoria.Socialize
                 () => RespondToInvite(presentation.AcceptAction, inviterId),
                 () => RespondToInvite(presentation.RejectAction, inviterId),
                 localizeText: false));
+            SendRequest("invite-received", inviterId);
         }
 
         private static void RespondToInvite(string action, string inviterId)

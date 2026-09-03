@@ -22,14 +22,18 @@ namespace Landoria.Socialize
 
         private void Update()
         {
+            TextPermissionService.Update();
             GroupService.Update();
             TargetPingService.Update();
+            PrivateChat.Update();
         }
 
         private void OnDestroy()
         {
             GroupService.Reset();
             TargetPingService.Reset();
+            PrivateChat.Reset();
+            TextPermissionService.Reset();
             Log?.LogInfo($"{PluginName} {PluginVersion} is unloaded.");
             ShutdownPlugin();
             Settings = null;

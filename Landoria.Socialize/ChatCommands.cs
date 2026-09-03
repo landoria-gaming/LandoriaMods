@@ -1,4 +1,7 @@
 using System;
+using System.Collections.Generic;
+using Splatform;
+using UnityEngine;
 
 namespace Landoria.Socialize
 {
@@ -94,6 +97,60 @@ namespace Landoria.Socialize
 
     internal static class PrivateChat
     {
+        private const string MessageRpc = "Landoria_Social_PrivateMessage";
+        private const string ReceiptRpc = "Landoria_Social_PrivateReceipt";
+        private const float ReceiptTimeoutSeconds = 15f;
+        private static readonly Dictionary<string, PendingMessage> Pending =
+            new Dictionary<string, PendingMessage>();
+        private static ZRoutedRpc registeredRpc;
+
+        private sealed class PendingMessage
+        {
+            internal long TargetPeer;
+            internal string TargetName;
+            internal string Message;
+            internal Terminal Context;
+            internal float SentAt;
+        }
+
+        internal static void Update()
+        {
+            EnsureRpcs();
+            if (Pending.Count == 0)
+            {
+                return;
+            }
+
+            List<string> expired = null;
+            foreach (KeyValuePair<string, PendingMessage> entry in Pending)
+            {
+                if (Time.realtimeSinceStartup - entry.Value.SentAt < ReceiptTimeoutSeconds)
+                {
+                    continue;
+                }
+                (expired ??= new List<string>()).Add(entry.Key);
+            }
+
+            if (expired == null)
+            {
+                return;
+            }
+            foreach (string requestId in expired)
+            {
+                PendingMessage pending = Pending[requestId];
+                Pending.Remove(requestId);
+                SocializePlugin.Log.LogWarning(
+                    $"Private message [{requestId}] to '{pending.TargetName}' timed out waiting for a delivery receipt.");
+                pending.Context?.AddString("Private message to " + pending.TargetName + " was not confirmed.");
+            }
+        }
+
+        internal static void Reset()
+        {
+            Pending.Clear();
+            registeredRpc = null;
+        }
+
         internal static bool Send(string targetName, string message, Terminal context)
         {
             bool found = TryFindPlayer(targetName, out ZNet.PlayerInfo target);
@@ -104,22 +161,151 @@ namespace Landoria.Socialize
                 context?.AddString(decision.Message);
                 return false;
             }
-            SendToTarget(target, message);
-            string localName = Game.instance.GetPlayerProfile().GetName();
-            ChatFormatting.AddPrivate(context, localName, "to " + target.m_name + ": " + message, false);
+            if (!PlatformManager.DistributionPlatform.PrivilegeProvider
+                    .CheckPrivilege(Privilege.TextCommunication).IsGranted())
+            {
+                SocializePlugin.Log.LogWarning(
+                    $"Private message to '{target.m_name}' blocked by the sender's text privilege.");
+                context?.AddString("Text communication is not permitted for this account.");
+                return false;
+            }
+
+            EnsureRpcs();
+            SocializePlugin.Log.LogInfo(
+                $"Checking sender permission for private message to '{target.m_name}' (peer={target.m_characterID.UserID}).");
+            TextPermissionService.Check(
+                target.m_userInfo.m_id, true,
+                result => CompleteSendPermission(target, message, context, result));
             return true;
         }
 
-        private static void SendToTarget(ZNet.PlayerInfo target, string message)
+        private static void CompleteSendPermission(ZNet.PlayerInfo target, string message,
+            Terminal context, RelationsManagerPermissionResult result)
         {
-            Chat.GetChatMessageData(message, true, out UserInfo user, out string filteredMessage);
+            SocializePlugin.Log.LogInfo(
+                $"Sender permission result for private message to '{target.m_name}': {result}.");
+            if (!result.IsGranted())
+            {
+                context?.AddString("Private message to " + target.m_name + " is not permitted.");
+                return;
+            }
+            Chat.GetChatMessageData(message,
+                result == RelationsManagerPermissionResult.GrantedRequiresFiltering,
+                out UserInfo user, out string filteredMessage);
+            string requestId = Guid.NewGuid().ToString("N").Substring(0, 12);
+            long targetPeer = target.m_characterID.UserID;
+            Pending[requestId] = new PendingMessage
+            {
+                TargetPeer = targetPeer,
+                TargetName = target.m_name,
+                Message = filteredMessage,
+                Context = context,
+                SentAt = Time.realtimeSinceStartup
+            };
+            SocializePlugin.Log.LogInfo(
+                $"Sending private message [{requestId}] to '{target.m_name}' (peer={targetPeer}, length={filteredMessage.Length}).");
             ZRoutedRpc.instance.InvokeRoutedRPC(
-                target.m_characterID.UserID,
-                "ChatMessage",
-                Player.m_localPlayer.GetHeadPoint(),
-                (int)Talker.Type.Whisper,
+                targetPeer,
+                MessageRpc,
+                requestId,
                 user,
                 filteredMessage);
+        }
+
+        private static void EnsureRpcs()
+        {
+            RpcRegistry.RegisterIfChanged(ref registeredRpc, RegisterRpcs);
+        }
+
+        private static void RegisterRpcs(ZRoutedRpc rpc)
+        {
+            rpc.Register<string, UserInfo, string>(MessageRpc, RPC_PrivateMessage);
+            rpc.Register<string, int>(ReceiptRpc, RPC_PrivateReceipt);
+            SocializePlugin.Log.LogDebug("Private message RPCs registered.");
+        }
+
+        private static void RPC_PrivateMessage(long sender, string requestId, UserInfo user, string message)
+        {
+            if (!IsExpectedUser(sender, user))
+            {
+                SocializePlugin.Log.LogWarning(
+                    $"Private message [{requestId}] rejected because peer={sender} supplied an invalid identity.");
+                ZRoutedRpc.instance?.InvokeRoutedRPC(
+                    sender, ReceiptRpc, requestId, (int)RelationsManagerPermissionResult.Error);
+                return;
+            }
+            SocializePlugin.Log.LogInfo(
+                $"Private message [{requestId}] received from peer={sender} (user='{user.GetDisplayName()}', length={message.Length}); checking text permission.");
+            TextPermissionService.Check(
+                user.UserId, false,
+                result => CompleteReceive(sender, requestId, user, message, result));
+        }
+
+        private static void CompleteReceive(
+            long sender,
+            string requestId,
+            UserInfo user,
+            string message,
+            RelationsManagerPermissionResult result)
+        {
+            SocializePlugin.Log.LogInfo(
+                $"Private message [{requestId}] permission result for peer={sender}: {result}.");
+            if (!result.IsGranted())
+            {
+                ZRoutedRpc.instance?.InvokeRoutedRPC(sender, ReceiptRpc, requestId, (int)result);
+                return;
+            }
+            if (Chat.instance == null)
+            {
+                SocializePlugin.Log.LogWarning(
+                    $"Private message [{requestId}] cannot be displayed because Chat is unavailable.");
+                ZRoutedRpc.instance?.InvokeRoutedRPC(
+                    sender, ReceiptRpc, requestId, (int)RelationsManagerPermissionResult.Error);
+                return;
+            }
+
+            string displayedMessage = message.Replace('<', ' ').Replace('>', ' ');
+            if (result == RelationsManagerPermissionResult.GrantedRequiresFiltering)
+            {
+                CensorShittyWords.Filter(displayedMessage, out displayedMessage);
+            }
+            ChatFormatting.AddPrivate(Chat.instance, user.GetDisplayName(), displayedMessage, false);
+            SocializePlugin.Log.LogInfo(
+                $"Private message [{requestId}] displayed; sending delivery receipt to peer={sender}.");
+            ZRoutedRpc.instance?.InvokeRoutedRPC(
+                sender, ReceiptRpc, requestId, (int)result);
+        }
+
+        private static void RPC_PrivateReceipt(long sender, string requestId, int resultValue)
+        {
+            RelationsManagerPermissionResult result = (RelationsManagerPermissionResult)resultValue;
+            if (!Pending.TryGetValue(requestId, out PendingMessage pending))
+            {
+                SocializePlugin.Log.LogWarning(
+                    $"Ignoring unknown private message receipt [{requestId}] from peer={sender}, result={result}.");
+                return;
+            }
+            if (pending.TargetPeer != sender)
+            {
+                SocializePlugin.Log.LogWarning(
+                    $"Ignoring private message receipt [{requestId}] from unexpected peer={sender}; expected={pending.TargetPeer}.");
+                return;
+            }
+
+            Pending.Remove(requestId);
+            if (!result.IsGranted())
+            {
+                SocializePlugin.Log.LogWarning(
+                    $"Private message [{requestId}] to '{pending.TargetName}' was rejected: {result}.");
+                pending.Context?.AddString("Private message to " + pending.TargetName + " was not delivered.");
+                return;
+            }
+
+            string localName = Game.instance.GetPlayerProfile().GetName();
+            ChatFormatting.AddPrivate(
+                pending.Context, localName, "to " + pending.TargetName + ": " + pending.Message, false);
+            SocializePlugin.Log.LogInfo(
+                $"Private message [{requestId}] to '{pending.TargetName}' confirmed and shown to the sender.");
         }
 
         private static bool TryFindPlayer(string name, out ZNet.PlayerInfo player)
@@ -141,6 +327,20 @@ namespace Landoria.Socialize
             return ZNet.instance != null
                    && player.m_characterID.UserID
                    == ZNet.instance.LocalPlayerCharacterID.UserID;
+        }
+
+        private static bool IsExpectedUser(long sender, UserInfo user)
+        {
+            if (user == null || ZNet.instance == null) return false;
+            foreach (ZNet.PlayerInfo player in ZNet.instance.GetPlayerList())
+            {
+                if (player.m_characterID.UserID == sender)
+                {
+                    return player.m_name == user.Name &&
+                           player.m_userInfo.m_id.ToString() == user.UserId.ToString();
+                }
+            }
+            return false;
         }
     }
 }
