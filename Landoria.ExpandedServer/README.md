@@ -7,6 +7,10 @@ Raises dedicated-server capacity to a configurable limit of up to 100 players.
 - Uses a default limit of 20 players.
 - Reports the configured capacity through PlayFab.
 
+## Video demo
+
+[Watch ExpandedServer mod in action on YouTube](https://youtu.be/WJ_pFQg02Qw)
+
 ## Configuration
 
 | Switch | Default | Purpose |
