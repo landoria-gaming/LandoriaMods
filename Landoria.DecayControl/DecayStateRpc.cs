@@ -33,6 +33,11 @@ namespace Landoria.DecayControl
         internal static void ResetSession()
         {
             registeredRpc = null;
+            ResetNetworkState();
+        }
+
+        internal static void ResetNetworkState()
+        {
             identityServer = 0L;
             PeerPlayers.Clear();
             DecayControlPlugin.Settings?.ResetState();

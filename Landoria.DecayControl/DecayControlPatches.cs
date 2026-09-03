@@ -28,7 +28,7 @@ namespace Landoria.DecayControl
     {
         private static void Prefix()
         {
-            DecayStateRpc.ResetSession();
+            DecayStateRpc.ResetNetworkState();
             DecayIndicators.Reset();
         }
     }
