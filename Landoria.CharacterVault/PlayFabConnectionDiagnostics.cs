@@ -17,17 +17,17 @@ namespace Landoria.CharacterVault
 
         internal static void Enable()
         {
-            if (!CharacterVaultPlugin.PlayFabVerboseLogging)
-            {
-                return;
-            }
-
             PlayFabMultiplayerManager manager = PlayFabMultiplayerManager.Get();
             if (manager == null)
             {
                 return;
             }
             CharacterVaultLeaveNetworkDiagnosticsPatch.Observe(manager);
+            PlayFabEndpointDiagnostics.Observe(manager);
+            if (!CharacterVaultPlugin.PlayFabVerboseLogging)
+            {
+                return;
+            }
             manager.LogLevel = PlayFabMultiplayerManager.LogLevelType.Verbose;
             if (!logged)
             {
@@ -96,8 +96,11 @@ namespace Landoria.CharacterVault
         {
             if (!Attempts.TryGetValue(socket, out Attempt attempt)) return;
             attempt.Failed = true;
-            attempt.AddFailure(
-                PlayFabConnectionErrorMessages.ForMatchmaking(reason), reason.ToString());
+            if (attempt.Failures.Count == 0)
+            {
+                attempt.AddFailure(
+                    PlayFabConnectionErrorMessages.ForMatchmaking(reason), reason.ToString());
+            }
             CharacterVaultPlugin.Log?.LogWarning(
                 $"PlayFab connection attempt {attempt.Id} failed while locating the network: {reason}.");
         }

@@ -85,6 +85,7 @@
     <Compile Include="ServerDisconnectApi.cs" />
     <Compile Include="ProfileSaveRpc.cs" />
     <Compile Include="PlayFabConnectionDiagnostics.cs" />
+    <Compile Include="PlayFabEndpointDiagnostics.cs" />
     <Compile Include="PlayFabConnectionErrorMessages.cs" />
     <Compile Include="PlayFabDisconnectDiagnostics.cs" />
     <Compile Include="CharacterVaultPlugin.cs" />
