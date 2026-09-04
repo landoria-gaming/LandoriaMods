@@ -1,3 +1,4 @@
+using System;
 using HarmonyLib;
 using Landoria.SharedLib;
 using Splatform;
@@ -125,11 +126,39 @@ namespace Landoria.CharacterVault
     {
         private static void Prefix(ZNetPeer peer)
         {
+            bool server = ZNet.instance?.IsServer() == true;
+            string state = CharacterVaultPlugin.Transfers?.DescribeDisconnect(peer, server) ??
+                "state unavailable";
+            CharacterVaultPlugin.Log?.LogInfo(
+                $"Observed peer disconnection before CharacterVault cleanup: {state}.");
+            if (!server)
+            {
+                CharacterVaultPlugin.Log?.LogInfo(
+                    "Client ZNet.Disconnect call stack:\n" + Environment.StackTrace);
+            }
             CharacterVaultPlugin.Transfers?.Remove(peer);
             if (peer?.m_rpc != null)
             {
                 CharacterVaultRejection.Remove(peer.m_rpc);
             }
+        }
+    }
+
+    [HarmonyPatch(typeof(ZNet), "OnDestroy")]
+    internal static class CharacterVaultClientNetworkDestroyPatch
+    {
+        private static void Prefix(ZNet __instance)
+        {
+            if (__instance.IsServer())
+            {
+                return;
+            }
+
+            ZNetPeer serverPeer = __instance.GetServerPeer();
+            string state = CharacterVaultPlugin.Transfers?.DescribeDisconnect(
+                serverPeer, false) ?? "state unavailable";
+            CharacterVaultPlugin.Log?.LogInfo(
+                $"Observed client network teardown before CharacterVault cleanup: {state}.");
         }
     }
 
@@ -195,6 +224,10 @@ namespace Landoria.CharacterVault
     {
         private static bool Prefix(Game __instance, bool save, bool changeToStartScene)
         {
+            CharacterVaultPlugin.Log.LogInfo(
+                $"Game.Logout invoked: save={save}, changeToStartScene={changeToStartScene}, " +
+                $"pendingCharacterSave={CharacterVaultPlugin.DisconnectCoordinator?.HasPendingSave == true}. " +
+                "Call stack:\n" + Environment.StackTrace);
             return CharacterVaultPlugin.DisconnectCoordinator?.AllowLogout(
                 __instance, save, changeToStartScene) ?? true;
         }
@@ -205,8 +238,48 @@ namespace Landoria.CharacterVault
     {
         private static bool Prefix(Game __instance, bool saveWorld)
         {
+            CharacterVaultPlugin.Log.LogInfo(
+                $"Game.Shutdown invoked: saveWorld={saveWorld}, " +
+                $"pendingCharacterSave={CharacterVaultPlugin.DisconnectCoordinator?.HasPendingSave == true}. " +
+                "Call stack:\n" + Environment.StackTrace);
             return CharacterVaultPlugin.DisconnectCoordinator?.AllowShutdown(
                 __instance, saveWorld) ?? true;
+        }
+    }
+
+    [HarmonyPatch(typeof(Game), "ContinueLogout")]
+    internal static class CharacterVaultContinueLogoutDiagnosticsPatch
+    {
+        private static void Prefix(bool save, bool shouldExit, bool changeToStartScene)
+        {
+            CharacterVaultPlugin.Log.LogInfo(
+                $"Game.ContinueLogout invoked: save={save}, shouldExit={shouldExit}, " +
+                $"changeToStartScene={changeToStartScene}, " +
+                $"pendingCharacterSave={CharacterVaultPlugin.DisconnectCoordinator?.HasPendingSave == true}. " +
+                "Call stack:\n" + Environment.StackTrace);
+        }
+    }
+
+    [HarmonyPatch(typeof(Game), "OnDestroy")]
+    internal static class CharacterVaultGameDestroyDiagnosticsPatch
+    {
+        private static void Prefix()
+        {
+            CharacterVaultPlugin.Log.LogInfo(
+                $"Game.OnDestroy invoked: " +
+                $"pendingCharacterSave={CharacterVaultPlugin.DisconnectCoordinator?.HasPendingSave == true}. " +
+                "Call stack:\n" + Environment.StackTrace);
+        }
+    }
+
+    [HarmonyPatch(typeof(Menu), nameof(Menu.OnLogout))]
+    internal static class CharacterVaultLogoutButtonDiagnosticsPatch
+    {
+        private static void Prefix()
+        {
+            CharacterVaultPlugin.Log?.LogWarning(
+                "The in-game Disconnect button was pressed. Call stack:\n" +
+                Environment.StackTrace);
         }
     }
 

@@ -22,6 +22,8 @@ namespace Landoria.CharacterVault
             Application.wantsToQuit += AllowApplicationQuit;
         }
 
+        internal bool HasPendingSave => _requestId != null;
+
         internal bool AllowLogout(Game game, bool save, bool changeToStartScene)
         {
             if (_allowLogout)
