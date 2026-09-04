@@ -12,6 +12,10 @@ namespace Landoria.ModSentry
         internal const string AcceptanceRpc = "Landoria_ModSentry_Acceptance";
         internal const string CharacterPositionRpc =
             "Landoria_ModSentry_CharacterPosition";
+        internal const string CheatDetectionRpc =
+            "Landoria_ModSentry_CheatDetection";
+        internal const string CheatDetectionEnableRpc =
+            "Landoria_ModSentry_CheatDetectionEnable";
         internal const int ProtocolVersion = 1;
         public const int GuestControllerProtocolVersion =
             UnverifiedGuestControllerRegistry.ProtocolVersion;
@@ -48,6 +52,13 @@ namespace Landoria.ModSentry
         private void Awake()
         {
             Log = InitializePlugin(PluginGuid);
+            ModSentrySettings.Initialize();
+            if (UnityEngine.Application.isBatchMode)
+            {
+                Log.LogInfo("Known managed cheat protection is " +
+                    (ModSentrySettings.KnownCheatProtectionEnabled
+                        ? "enabled." : "disabled."));
+            }
             Log.LogInfo($"{PluginName} {PluginVersion} is loaded.");
         }
 
@@ -67,6 +78,7 @@ namespace Landoria.ModSentry
         {
             PendingDisconnects.Tick();
             ClientVerificationState.Update();
+            ManagedCheatDetector.Update();
         }
 
         private void OnDestroy()
@@ -79,6 +91,7 @@ namespace Landoria.ModSentry
             ClientVerificationState.Clear();
             VerifiedCharacterPositions.Clear();
             UnverifiedGuestControllerRegistry.Clear();
+            ManagedCheatDetector.Shutdown();
             Policy = null;
             ShutdownPlugin();
             Log = null;

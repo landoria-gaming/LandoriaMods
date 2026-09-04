@@ -18,6 +18,8 @@ conditions.
 - Automatically rejects the player when a difference is detected and shows
   an error identifying any extra, missing, or outdated mod.
 - Supports an optional guest lobby for clients without ModSentry.
+- Detects known ValheimTooler, ValheimHack223, and valheim-hax managed
+  assemblies and lets the server kick the reporting client.
 
 ## Installation
 
@@ -49,6 +51,14 @@ Any client DLL listed in neither folder is rejected.
 
 Server-only mods stay in `BepInEx/plugins` and are not copied into either policy
 folder.
+
+Known managed cheat detection is disabled by default. Enable it on the dedicated
+server with:
+
+`--modsentry-known-cheat-protection true`
+
+The server asks verified ModSentry clients to activate the inspection for that
+connection. Use `false` or omit the switch to keep it disabled.
 
 To accept players who do not have ModSentry, see the
 [guest lobby integration guide](https://github.com/landoria-gaming/LandoriaMods/blob/main/Landoria.ModSentry/GUEST_LOBBY.md).

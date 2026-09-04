@@ -26,16 +26,16 @@
     <Reference Include="Splatform"><HintPath>$(ValheimGamePath)\valheim_Data\Managed\Splatform.dll</HintPath><Private>false</Private></Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CharacterPositionMemory.cs" /><Compile Include="ClientMessage.cs" /><Compile Include="ClientRejectionState.cs" /><Compile Include="ConnectionPatches.cs" /><Compile Include="HandshakeRegistry.cs" /><Compile Include="HandshakeState.cs" />
+    <Compile Include="CharacterPositionMemory.cs" /><Compile Include="ClientMessage.cs" /><Compile Include="ClientRejectionState.cs" /><Compile Include="ConnectionPatches.cs" /><Compile Include="HandshakeRegistry.cs" /><Compile Include="HandshakeState.cs" /><Compile Include="KnownCheatCatalog.cs" /><Compile Include="KnownCheatReport.cs" /><Compile Include="ManagedCheatDetector.cs" />
     <Compile Include="GuestAdmissions.cs" /><Compile Include="GuestPermissionPolicy.cs" /><Compile Include="IUnverifiedGuestController.cs" />
-    <Compile Include="ModSentryGuestMarker.cs" /><Compile Include="ModSentryHandshake.cs" /><Compile Include="ModSentryPlugin.cs" /><Compile Include="PluginDescriptor.cs" />
+    <Compile Include="ModSentryGuestMarker.cs" /><Compile Include="ModSentryHandshake.cs" /><Compile Include="ModSentryPlugin.cs" /><Compile Include="ModSentrySettings.cs" /><Compile Include="PluginDescriptor.cs" />
     <Compile Include="PendingDisconnects.cs" />
     <Compile Include="PluginInventory.cs" /><Compile Include="PluginPolicy.cs" /><Compile Include="PluginPolicyLoader.cs" /><Compile Include="PolicyValidator.cs" />
     <Compile Include="UnverifiedGuestControllerRegistry.cs" /><Compile Include="ValidationResult.cs" /><Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="icon.png" /><Content Include="LICENSE" /><Content Include="manifest.json" />
-    <Content Include="README.md" /><Content Include="CHANGELOG.md" />
+    <Content Include="README.md" /><Content Include="CHANGELOG.md" /><Content Include="SECURITY.md" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

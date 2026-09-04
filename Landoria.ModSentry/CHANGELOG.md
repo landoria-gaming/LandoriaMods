@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Detect known ValheimTooler, ValheimHack223, and valheim-hax managed assemblies
+  and kick the reporting client.
+- Keep known managed cheat detection disabled unless the server enables it with
+  `--modsentry-known-cheat-protection true`.
+
 ## 1.0.13
 
 - Updated documentation

@@ -116,6 +116,7 @@ namespace Landoria.ModSentry
             if (ZNet.instance?.IsServer() != true)
             {
                 ClientVerificationState.Clear();
+                ManagedCheatDetector.Shutdown();
             }
         }
     }
