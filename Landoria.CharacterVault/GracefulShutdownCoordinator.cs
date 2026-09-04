@@ -43,7 +43,7 @@ namespace Landoria.CharacterVault
             catch (Exception exception)
             {
                 CharacterVaultPlugin.Log.LogError(
-                    $"Could not watch {ExitFilePath}; shutdown requests cannot be detected: {exception.Message}");
+                    $"Could not watch {ExitFilePath}; shutdown requests cannot be detected: {exception}");
             }
         }
 
@@ -79,7 +79,7 @@ namespace Landoria.CharacterVault
             catch (Exception exception)
             {
                 CharacterVaultPlugin.Log.LogError(
-                    $"Could not process {ExitFilePath}: {exception.Message}");
+                    $"Could not process {ExitFilePath}: {exception}");
             }
         }
 

@@ -49,8 +49,10 @@ namespace Landoria.ModSentry
                     return CreateDescriptor(path, attribute);
                 }
             }
-            catch (BadImageFormatException)
+            catch (BadImageFormatException exception)
             {
+                ModSentryPlugin.Log.LogDebug(
+                    $"Using a fallback descriptor for {path}: {exception}");
                 return CreateFallbackDescriptor(null, path);
             }
         }

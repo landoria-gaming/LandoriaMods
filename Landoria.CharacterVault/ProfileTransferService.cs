@@ -221,7 +221,7 @@ namespace Landoria.CharacterVault
                 }
                 catch (Exception exception)
                 {
-                    CharacterVaultPlugin.Log.LogWarning("Character restore failed: " + exception.GetType().Name);
+                    CharacterVaultPlugin.Log.LogWarning("Character restore failed: " + exception);
                     return CharacterRestoreResult.Failed();
                 }
             }

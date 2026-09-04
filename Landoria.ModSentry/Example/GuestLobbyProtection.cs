@@ -154,8 +154,10 @@ namespace GuestLobbyExample
             {
                 ReadZdoRecords(new ZPackage(package.GetArray()), ids);
             }
-            catch (Exception)
+            catch (Exception exception)
             {
+                ModSentryPlugin.Log.LogWarning(
+                    "Could not read guest lobby ZDO records: " + exception);
                 ids.Clear();
             }
             return ids;

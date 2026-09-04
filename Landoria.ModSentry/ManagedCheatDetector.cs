@@ -108,8 +108,7 @@ namespace Landoria.ModSentry
             catch (Exception exception)
             {
                 ModSentryPlugin.Log.LogDebug(
-                    "Managed assembly inspection skipped one assembly: " +
-                    exception.GetType().Name + ".");
+                    "Managed assembly inspection skipped one assembly: " + exception);
             }
         }
 
@@ -135,6 +134,8 @@ namespace Landoria.ModSentry
             }
             catch (ReflectionTypeLoadException exception)
             {
+                ModSentryPlugin.Log.LogDebug(
+                    "Loaded the available types from a partially loadable assembly: " + exception);
                 return exception.Types ?? Array.Empty<Type>();
             }
         }

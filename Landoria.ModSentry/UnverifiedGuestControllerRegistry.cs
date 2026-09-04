@@ -17,8 +17,10 @@ namespace Landoria.ModSentry
                 {
                     return _controller?.IsReady == true;
                 }
-                catch
+                catch (Exception exception)
                 {
+                    ModSentryPlugin.Log.LogWarning(
+                        "Could not read the unverified guest controller state: " + exception);
                     return false;
                 }
             }
@@ -61,6 +63,8 @@ namespace Landoria.ModSentry
             }
             catch (Exception exception)
             {
+                ModSentryPlugin.Log.LogWarning(
+                    "Could not notify the unverified guest controller: " + exception);
                 failure = $"{exception.GetType().Name}: {exception.Message}";
                 return false;
             }

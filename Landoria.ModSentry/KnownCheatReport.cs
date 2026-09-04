@@ -60,6 +60,8 @@ namespace Landoria.ModSentry
             }
             catch (Exception exception)
             {
+                ModSentryPlugin.Log.LogWarning(
+                    "Known-cheat report parsing failed: " + exception);
                 failure = "parsing_failure_" + exception.GetType().Name;
                 return false;
             }

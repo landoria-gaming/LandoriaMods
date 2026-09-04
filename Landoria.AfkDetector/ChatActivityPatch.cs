@@ -47,7 +47,7 @@ namespace Landoria.AfkDetector
             }
             catch (Exception exception)
             {
-                AfkDetectorPlugin.Log.LogDebug($"Ignored unreadable chat activity: {exception.Message}");
+                AfkDetectorPlugin.Log.LogDebug($"Ignored unreadable chat activity: {exception}");
             }
         }
 

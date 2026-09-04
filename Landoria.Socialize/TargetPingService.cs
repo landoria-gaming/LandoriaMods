@@ -162,7 +162,7 @@ namespace Landoria.Socialize
             catch (Exception exception)
             {
                 SocializePlugin.Log.LogError(
-                    $"Target ping [{requestId}] display failed: {exception.GetBaseException().Message}");
+                    $"Target ping [{requestId}] display failed: {exception}");
                 ZRoutedRpc.instance?.InvokeRoutedRPC(
                     sender, ReceiptRpc, requestId, (int)RelationsManagerPermissionResult.Error);
                 return;

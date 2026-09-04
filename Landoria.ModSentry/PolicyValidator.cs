@@ -58,6 +58,8 @@ namespace Landoria.ModSentry
             }
             catch (ArgumentException exception)
             {
+                ModSentryPlugin.Log.LogError(
+                    $"Duplicate plugin GUID in {source} inventory: {exception}");
                 throw new InvalidOperationException($"Duplicate plugin GUID in {source} inventory.", exception);
             }
         }
