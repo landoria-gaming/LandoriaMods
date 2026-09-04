@@ -32,7 +32,7 @@ namespace Landoria.CharacterVault
             if (!logged)
             {
                 logged = true;
-                CharacterVaultPlugin.Log?.LogInfo("Verbose PlayFab Party logging is enabled.");
+                CharacterVaultPlugin.Log?.LogDebug("Verbose PlayFab Party logging is enabled.");
             }
         }
     }
@@ -52,7 +52,7 @@ namespace Landoria.CharacterVault
             Attempts.Add(socket, attempt);
             currentClientSocket = new WeakReference(socket);
             selectedOrigin = "unknown";
-            CharacterVaultPlugin.Log?.LogInfo(
+            CharacterVaultPlugin.Log?.LogDebug(
                 $"PlayFab connection attempt {attempt.Id} started; origin={attempt.Origin}.");
         }
 
@@ -61,7 +61,7 @@ namespace Landoria.CharacterVault
         internal static void SessionFound(ZPlayFabSocket socket, PlayFabMatchmakingServerData server)
         {
             if (!Attempts.TryGetValue(socket, out Attempt attempt)) return;
-            CharacterVaultPlugin.Log?.LogInfo(
+            CharacterVaultPlugin.Log?.LogDebug(
                 $"PlayFab connection attempt {attempt.Id} resolved lobby={Fingerprint(server?.lobbyId)}, " +
                 $"network={Fingerprint(server?.networkId)}.");
         }
@@ -69,7 +69,7 @@ namespace Landoria.CharacterVault
         internal static void NetworkJoined(ZPlayFabSocket socket, string networkId)
         {
             if (!Attempts.TryGetValue(socket, out Attempt attempt)) return;
-            CharacterVaultPlugin.Log?.LogInfo(
+            CharacterVaultPlugin.Log?.LogDebug(
                 $"PlayFab connection attempt {attempt.Id} joined network={Fingerprint(networkId)}.");
         }
 
@@ -77,7 +77,7 @@ namespace Landoria.CharacterVault
         {
             if (!Attempts.TryGetValue(socket, out Attempt attempt) || attempt.Connected) return;
             attempt.Connected = true;
-            CharacterVaultPlugin.Log?.LogInfo(
+            CharacterVaultPlugin.Log?.LogDebug(
                 $"PlayFab connection attempt {attempt.Id} established the remote transport.");
         }
 
@@ -88,7 +88,7 @@ namespace Landoria.CharacterVault
             attempt.Admitted = true;
             attempt.Failures.Clear();
             CharacterVaultRejection.ClearPendingClientMessage();
-            CharacterVaultPlugin.Log?.LogInfo(
+            CharacterVaultPlugin.Log?.LogDebug(
                 $"PlayFab connection attempt {attempt.Id} completed the Valheim peer handshake.");
         }
 
@@ -110,7 +110,7 @@ namespace Landoria.CharacterVault
             if (!Attempts.TryGetValue(socket, out Attempt attempt)) return;
             string outcome = attempt.Failed ? "failed" : attempt.Admitted ? "admitted" :
                 attempt.Connected ? "transport-only" : "incomplete";
-            CharacterVaultPlugin.Log?.LogInfo(
+            CharacterVaultPlugin.Log?.LogDebug(
                 $"PlayFab connection attempt {attempt.Id} socket closed; outcome={outcome}, " +
                 $"status={ZNet.GetConnectionStatus()}.");
             if (!attempt.Admitted) PublishFailures(attempt);
@@ -122,7 +122,7 @@ namespace Landoria.CharacterVault
         {
             if (error?.Error == PlayFabErrorCode.LobbyPlayerAlreadyJoined)
             {
-                CharacterVaultPlugin.Log?.LogInfo(
+                CharacterVaultPlugin.Log?.LogDebug(
                     $"PlayFab lobby stage {stage} reported an existing membership for " +
                     $"lobby={Fingerprint(lobbyId)}; continuing.");
                 return;

@@ -20,7 +20,7 @@ namespace Landoria.CharacterVault
             if (manager == null || !Observed.Add(manager)) return;
             manager.OnRemotePlayerJoined += PlayerJoined;
             manager.OnRemotePlayerLeft += PlayerLeft;
-            CharacterVaultPlugin.Log.LogInfo("PlayFab endpoint diagnostics started: " +
+            CharacterVaultPlugin.Log.LogDebug("PlayFab endpoint diagnostics started: " +
                 DescribeManager(manager) + ".");
         }
 
@@ -59,7 +59,7 @@ namespace Landoria.CharacterVault
         private static void LogPlayerEvent(string action, PlayFabMultiplayerManager manager,
             PlayFabPlayer player)
         {
-            CharacterVaultPlugin.Log.LogInfo(
+            CharacterVaultPlugin.Log.LogDebug(
                 $"PlayFab remote player {action}: player={DescribePlayer(player)}, " +
                 $"{DescribeManager(manager)}.");
         }

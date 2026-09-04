@@ -11,15 +11,14 @@ namespace Landoria.CharacterVault
     {
         private static void Prefix(ZNet __instance, bool suspending)
         {
-            CharacterVaultPlugin.Log.LogInfo(
+            CharacterVaultPlugin.Log.LogDebug(
                 $"PlayFab teardown: entering ZNet.StopAll(suspending={suspending}), " +
-                $"isServer={__instance.IsServer()}, peers={__instance.GetPeers().Count}. " +
-                "Call stack:\n" + Environment.StackTrace);
+                $"isServer={__instance.IsServer()}, peers={__instance.GetPeers().Count}.");
         }
 
         private static void Postfix(ZNet __instance, bool suspending)
         {
-            CharacterVaultPlugin.Log.LogInfo(
+            CharacterVaultPlugin.Log.LogDebug(
                 $"PlayFab teardown: ZNet.StopAll(suspending={suspending}) returned, " +
                 $"isServer={__instance.IsServer()}, peers={__instance.GetPeers().Count}.");
         }
@@ -30,14 +29,13 @@ namespace Landoria.CharacterVault
     {
         private static void Prefix(ZPlayFabSocket __instance)
         {
-            CharacterVaultPlugin.Log.LogInfo(
-                "PlayFab teardown: entering ZPlayFabSocket.Dispose: " + Describe(__instance) +
-                ". Call stack:\n" + Environment.StackTrace);
+            CharacterVaultPlugin.Log.LogDebug(
+                "PlayFab teardown: entering ZPlayFabSocket.Dispose: " + Describe(__instance) + ".");
         }
 
         private static void Postfix(ZPlayFabSocket __instance)
         {
-            CharacterVaultPlugin.Log.LogInfo(
+            CharacterVaultPlugin.Log.LogDebug(
                 "PlayFab teardown: ZPlayFabSocket.Dispose returned: " + Describe(__instance) + ".");
         }
 
@@ -56,9 +54,8 @@ namespace Landoria.CharacterVault
     {
         private static void Prefix(string lobbyId)
         {
-            CharacterVaultPlugin.Log.LogInfo(
-                $"PlayFab teardown: requesting LeaveLobby for {lobbyId ?? "<null>"}. " +
-                "Call stack:\n" + Environment.StackTrace);
+            CharacterVaultPlugin.Log.LogDebug(
+                $"PlayFab teardown: requesting LeaveLobby for {lobbyId ?? "<null>"}.");
         }
     }
 
@@ -72,15 +69,14 @@ namespace Landoria.CharacterVault
         {
             Observe(__instance);
 
-            CharacterVaultPlugin.Log.LogInfo(
+            CharacterVaultPlugin.Log.LogDebug(
                 $"PlayFab teardown: requesting LeaveNetwork: state={__instance.State}, " +
-                $"networkId={__instance.NetworkId ?? "<null>"}. Call stack:\n" +
-                Environment.StackTrace);
+                $"networkId={__instance.NetworkId ?? "<null>"}.");
         }
 
         private static void Postfix(PlayFabMultiplayerManager __instance)
         {
-            CharacterVaultPlugin.Log.LogInfo(
+            CharacterVaultPlugin.Log.LogDebug(
                 $"PlayFab teardown: LeaveNetwork returned: state={__instance.State}, " +
                 $"networkId={__instance.NetworkId ?? "<null>"}.");
         }
@@ -97,7 +93,7 @@ namespace Landoria.CharacterVault
         private static void NetworkLeft(object sender, string networkId)
         {
             PlayFabMultiplayerManager manager = sender as PlayFabMultiplayerManager;
-            CharacterVaultPlugin.Log.LogInfo(
+            CharacterVaultPlugin.Log.LogDebug(
                 $"PlayFab teardown: OnNetworkLeft completed for networkId={networkId ?? "<null>"}, " +
                 $"state={manager?.State.ToString() ?? "<unknown>"}, " +
                 $"currentNetworkId={manager?.NetworkId ?? "<null>"}.");
@@ -123,8 +119,7 @@ namespace Landoria.CharacterVault
         private static void Prefix()
         {
             CharacterVaultPlugin.Log.LogWarning(
-                "PlayFab recovery: ZPlayFabSocket.ScheduleResetParty requested. Call stack:\n" +
-                Environment.StackTrace);
+                "PlayFab recovery: ZPlayFabSocket.ScheduleResetParty requested.");
         }
 
         private static void Postfix()
@@ -142,8 +137,7 @@ namespace Landoria.CharacterVault
         private static void Prefix(ZPlayFabSocket __instance)
         {
             CharacterVaultPlugin.Log.LogWarning(
-                "PlayFab recovery: entering socket ResetPartyTimeout. " +
-                Describe(__instance) + ". Call stack:\n" + Environment.StackTrace);
+                "PlayFab recovery: entering socket ResetPartyTimeout. " + Describe(__instance) + ".");
         }
 
         private static void Postfix(ZPlayFabSocket __instance)
@@ -170,7 +164,7 @@ namespace Landoria.CharacterVault
         private static void Prefix(ZPlayFabSocket __instance)
         {
             Traverse fields = Traverse.Create(__instance);
-            CharacterVaultPlugin.Log.LogInfo(
+            CharacterVaultPlugin.Log.LogDebug(
                 $"PlayFab recovery: CancelResetParty: " +
                 $"remotePlayerId={__instance.m_remotePlayerId ?? "<null>"}, " +
                 $"resetRemaining={fields.Field<float>("m_partyResetTimeout").Value:0.000}s, " +
@@ -185,8 +179,7 @@ namespace Landoria.CharacterVault
         {
             CharacterVaultPlugin.Log.LogWarning(
                 $"PlayFab recovery: entering ResetParty: state={__instance.State}, " +
-                $"networkId={__instance.NetworkId ?? "<null>"}. Call stack:\n" +
-                Environment.StackTrace);
+                $"networkId={__instance.NetworkId ?? "<null>"}.");
         }
 
         private static void Postfix(PlayFabMultiplayerManager __instance)
@@ -217,7 +210,7 @@ namespace Landoria.CharacterVault
         private static void Prefix(object __instance, MethodBase __originalMethod)
         {
             PlayFabMultiplayerManager manager = PlayFabMultiplayerManager.Get();
-            CharacterVaultPlugin.Log.LogInfo(
+            CharacterVaultPlugin.Log.LogDebug(
                 $"PlayFab recovery task: {__instance.GetType().Name}.{__originalMethod.Name} entering; " +
                 $"managerState={manager.State}, networkId={manager.NetworkId ?? "<null>"}.");
         }
@@ -225,7 +218,7 @@ namespace Landoria.CharacterVault
         private static void Postfix(object __instance, MethodBase __originalMethod)
         {
             PlayFabMultiplayerManager manager = PlayFabMultiplayerManager.Get();
-            CharacterVaultPlugin.Log.LogInfo(
+            CharacterVaultPlugin.Log.LogDebug(
                 $"PlayFab recovery task: {__instance.GetType().Name}.{__originalMethod.Name} returned; " +
                 $"managerState={manager.State}, networkId={manager.NetworkId ?? "<null>"}.");
         }
@@ -246,7 +239,7 @@ namespace Landoria.CharacterVault
 
         private static void LobbyLeft(bool success)
         {
-            CharacterVaultPlugin.Log.LogInfo(
+            CharacterVaultPlugin.Log.LogDebug(
                 $"PlayFab teardown: LobbyLeft callback completed with success={success}.");
         }
     }
