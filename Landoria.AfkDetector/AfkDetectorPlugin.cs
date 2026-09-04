@@ -11,7 +11,7 @@ namespace Landoria.AfkDetector
         internal const string DisconnectReasonRpc = "Landoria_AfkDisconnectReason";
         private const string PluginGuid = "Landoria.AfkDetector";
         private const string PluginName = "Landoria.AfkDetector";
-        private const string PluginVersion = "1.0.7";
+        private const string PluginVersion = "1.0.8";
         private const int DefaultTimeoutMinutes = 30;
         private const string TimeoutArgument = "--afktimeout";
         private const float DefaultMovementTolerance = 0.75f;
