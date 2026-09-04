@@ -21,7 +21,7 @@ namespace Landoria.ModSentry
             UnverifiedGuestControllerRegistry.ProtocolVersion;
         private const string PluginGuid = "Landoria.ModSentry";
         private const string PluginName = "Landoria.ModSentry";
-        private const string PluginVersion = "1.0.14";
+        private const string PluginVersion = "1.0.15";
 
         internal static ModLog Log { get; private set; }
         internal static PluginPolicy Policy { get; private set; }
