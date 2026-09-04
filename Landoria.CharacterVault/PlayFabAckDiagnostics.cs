@@ -40,6 +40,16 @@ namespace Landoria.CharacterVault
                 $"Queue history:\n{GetHistory(queue)}\nCall stack:\n{Environment.StackTrace}");
         }
 
+        internal static void RecordIncomingBuffer(ZPlayFabSocket socket, byte[] buffer,
+            bool isClient, bool useCompression, string stage)
+        {
+            if (buffer == null || buffer.Length < 5 || buffer[buffer.Length - 1] != 42) return;
+            CharacterVaultPlugin.Log.LogWarning(
+                $"PlayFab ACK-shaped buffer at {stage}: {DescribePayload(buffer)}, " +
+                $"compression={useCompression}, socket={DescribeSocket(socket, isClient)}, " +
+                $"first={DescribeBytes(buffer, 0)}, last={DescribeBytes(buffer, Math.Max(0, buffer.Length - 32))}.");
+        }
+
         internal static void AckProcessed(ZPlayFabSocket socket, uint messageId,
             ZPlayFabSocket.InFlightQueue queue, bool isClient)
         {
@@ -90,6 +100,34 @@ namespace Landoria.CharacterVault
             uint id = (uint)(payload[offset] | payload[offset + 1] << 8 |
                 payload[offset + 2] << 16 | payload[offset + 3] << 24);
             return $"id={id}, type={payload[payload.Length - 1]}, bytes={payload.Length}";
+        }
+
+        private static string DescribeBytes(byte[] payload, int offset)
+        {
+            int count = Math.Min(32, payload.Length - offset);
+            return count > 0 ? BitConverter.ToString(payload, offset, count) : "<empty>";
+        }
+    }
+
+    [HarmonyPatch(typeof(ZPlayFabSocket), "OnDataMessageReceived")]
+    internal static class CharacterVaultPlayFabRawReceiveDiagnosticsPatch
+    {
+        private static void Prefix(ZPlayFabSocket __instance, byte[] compressedBuffer,
+            bool ___m_isClient, bool ___m_useCompression)
+        {
+            PlayFabAckDiagnostics.RecordIncomingBuffer(__instance, compressedBuffer,
+                ___m_isClient, ___m_useCompression, "raw receive");
+        }
+    }
+
+    [HarmonyPatch(typeof(ZPlayFabSocket), "OnDataMessageReceivedCont")]
+    internal static class CharacterVaultPlayFabDecodedReceiveDiagnosticsPatch
+    {
+        private static void Prefix(ZPlayFabSocket __instance, byte[] buffer,
+            bool ___m_isClient, bool ___m_useCompression)
+        {
+            PlayFabAckDiagnostics.RecordIncomingBuffer(__instance, buffer,
+                ___m_isClient, ___m_useCompression, "decoded receive");
         }
     }
 
