@@ -130,6 +130,9 @@ namespace Landoria.CharacterVault
             if (___m_useCompression || from?.EntityKey?.Id != __instance.m_remotePlayerId ||
                 !PlayFabAckDiagnostics.IsEarlyCompressedBuffer(compressedBuffer)) return true;
 
+            // PlayFab can deliver compressed data before the preceding VersionMatch packet.
+            // Decode only this buffer so it is not mistaken for an ACK, closing the client
+            // socket and causing the server's subsequent 4098 "invalid handle" error.
             PlayFabAckDiagnostics.EarlyCompressedBufferQueued(
                 __instance, compressedBuffer, ___m_isClient);
             ___m_zlibWorkQueue.Decompress(compressedBuffer);
