@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.26
+
+- Fixed intermittent PlayFab invalid handle connection failures.
+
 ## 1.0.24
 
 - Updated documentation
