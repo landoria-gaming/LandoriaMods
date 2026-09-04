@@ -129,13 +129,8 @@ namespace Landoria.CharacterVault
             bool server = ZNet.instance?.IsServer() == true;
             string state = CharacterVaultPlugin.Transfers?.DescribeDisconnect(peer, server) ??
                 "state unavailable";
-            CharacterVaultPlugin.Log?.LogInfo(
+            CharacterVaultPlugin.Log?.LogDebug(
                 $"Observed peer disconnection before CharacterVault cleanup: {state}.");
-            if (!server)
-            {
-                CharacterVaultPlugin.Log?.LogInfo(
-                    "Client ZNet.Disconnect call stack:\n" + Environment.StackTrace);
-            }
             CharacterVaultPlugin.Transfers?.Remove(peer);
             if (peer?.m_rpc != null)
             {
@@ -157,7 +152,7 @@ namespace Landoria.CharacterVault
             ZNetPeer serverPeer = __instance.GetServerPeer();
             string state = CharacterVaultPlugin.Transfers?.DescribeDisconnect(
                 serverPeer, false) ?? "state unavailable";
-            CharacterVaultPlugin.Log?.LogInfo(
+            CharacterVaultPlugin.Log?.LogDebug(
                 $"Observed client network teardown before CharacterVault cleanup: {state}.");
         }
     }
@@ -197,10 +192,9 @@ namespace Landoria.CharacterVault
     {
         private static bool Prefix(Game __instance, bool save, bool changeToStartScene)
         {
-            CharacterVaultPlugin.Log.LogInfo(
+            CharacterVaultPlugin.Log.LogDebug(
                 $"Game.Logout invoked: save={save}, changeToStartScene={changeToStartScene}, " +
-                $"pendingCharacterSave={CharacterVaultPlugin.DisconnectCoordinator?.HasPendingSave == true}. " +
-                "Call stack:\n" + Environment.StackTrace);
+                $"pendingCharacterSave={CharacterVaultPlugin.DisconnectCoordinator?.HasPendingSave == true}.");
             return CharacterVaultPlugin.DisconnectCoordinator?.AllowLogout(
                 __instance, save, changeToStartScene) ?? true;
         }
@@ -211,10 +205,9 @@ namespace Landoria.CharacterVault
     {
         private static bool Prefix(Game __instance, bool saveWorld)
         {
-            CharacterVaultPlugin.Log.LogInfo(
+            CharacterVaultPlugin.Log.LogDebug(
                 $"Game.Shutdown invoked: saveWorld={saveWorld}, " +
-                $"pendingCharacterSave={CharacterVaultPlugin.DisconnectCoordinator?.HasPendingSave == true}. " +
-                "Call stack:\n" + Environment.StackTrace);
+                $"pendingCharacterSave={CharacterVaultPlugin.DisconnectCoordinator?.HasPendingSave == true}.");
             return CharacterVaultPlugin.DisconnectCoordinator?.AllowShutdown(
                 __instance, saveWorld) ?? true;
         }
@@ -225,11 +218,10 @@ namespace Landoria.CharacterVault
     {
         private static void Prefix(bool save, bool shouldExit, bool changeToStartScene)
         {
-            CharacterVaultPlugin.Log.LogInfo(
+            CharacterVaultPlugin.Log.LogDebug(
                 $"Game.ContinueLogout invoked: save={save}, shouldExit={shouldExit}, " +
                 $"changeToStartScene={changeToStartScene}, " +
-                $"pendingCharacterSave={CharacterVaultPlugin.DisconnectCoordinator?.HasPendingSave == true}. " +
-                "Call stack:\n" + Environment.StackTrace);
+                $"pendingCharacterSave={CharacterVaultPlugin.DisconnectCoordinator?.HasPendingSave == true}.");
         }
     }
 
@@ -238,10 +230,9 @@ namespace Landoria.CharacterVault
     {
         private static void Prefix()
         {
-            CharacterVaultPlugin.Log.LogInfo(
+            CharacterVaultPlugin.Log.LogDebug(
                 $"Game.OnDestroy invoked: " +
-                $"pendingCharacterSave={CharacterVaultPlugin.DisconnectCoordinator?.HasPendingSave == true}. " +
-                "Call stack:\n" + Environment.StackTrace);
+                $"pendingCharacterSave={CharacterVaultPlugin.DisconnectCoordinator?.HasPendingSave == true}.");
         }
     }
 
@@ -250,9 +241,7 @@ namespace Landoria.CharacterVault
     {
         private static void Prefix()
         {
-            CharacterVaultPlugin.Log?.LogWarning(
-                "The in-game Disconnect button was pressed. Call stack:\n" +
-                Environment.StackTrace);
+            CharacterVaultPlugin.Log?.LogDebug("The in-game Disconnect button was pressed.");
         }
     }
 
