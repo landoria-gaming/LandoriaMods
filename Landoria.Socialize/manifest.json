@@ -1,6 +1,6 @@
 {
   "name": "Socialize",
-  "version_number": "1.0.15-draft",
+  "version_number": "1.0.15",
   "website_url": "https://github.com/landoria-gaming/LandoriaMods/tree/main/Landoria.Socialize",
   "description": "Adds groups and an enhanced chat to Valheim.",
   "dependencies": [
