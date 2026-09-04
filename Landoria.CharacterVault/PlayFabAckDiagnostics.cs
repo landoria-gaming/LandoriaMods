@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using HarmonyLib;
+using PlayFab.Party;
 
 namespace Landoria.CharacterVault
 {
@@ -47,6 +48,22 @@ namespace Landoria.CharacterVault
             CharacterVaultPlugin.Log.LogWarning(
                 $"PlayFab ACK-shaped buffer at {stage}: {DescribePayload(buffer)}, " +
                 $"compression={useCompression}, socket={DescribeSocket(socket, isClient)}, " +
+                $"first={DescribeBytes(buffer, 0)}, last={DescribeBytes(buffer, Math.Max(0, buffer.Length - 32))}.");
+        }
+
+        internal static bool IsEarlyCompressedBuffer(byte[] buffer)
+        {
+            if (buffer == null || buffer.Length <= 5) return false;
+            int header = buffer[0] << 8 | buffer[1];
+            return (buffer[0] & 15) == 8 && header % 31 == 0;
+        }
+
+        internal static void EarlyCompressedBufferQueued(ZPlayFabSocket socket, byte[] buffer,
+            bool isClient)
+        {
+            CharacterVaultPlugin.Log.LogWarning(
+                $"PlayFab compressed buffer arrived before VersionMatch; queued for selective " +
+                $"decompression: bytes={buffer.Length}, socket={DescribeSocket(socket, isClient)}, " +
                 $"first={DescribeBytes(buffer, 0)}, last={DescribeBytes(buffer, Math.Max(0, buffer.Length - 32))}.");
         }
 
@@ -112,11 +129,19 @@ namespace Landoria.CharacterVault
     [HarmonyPatch(typeof(ZPlayFabSocket), "OnDataMessageReceived")]
     internal static class CharacterVaultPlayFabRawReceiveDiagnosticsPatch
     {
-        private static void Prefix(ZPlayFabSocket __instance, byte[] compressedBuffer,
-            bool ___m_isClient, bool ___m_useCompression)
+        private static bool Prefix(ZPlayFabSocket __instance, PlayFabPlayer from,
+            byte[] compressedBuffer, bool ___m_isClient, bool ___m_useCompression,
+            PlayFabZLibWorkQueue ___m_zlibWorkQueue)
         {
             PlayFabAckDiagnostics.RecordIncomingBuffer(__instance, compressedBuffer,
                 ___m_isClient, ___m_useCompression, "raw receive");
+            if (___m_useCompression || from?.EntityKey?.Id != __instance.m_remotePlayerId ||
+                !PlayFabAckDiagnostics.IsEarlyCompressedBuffer(compressedBuffer)) return true;
+
+            PlayFabAckDiagnostics.EarlyCompressedBufferQueued(
+                __instance, compressedBuffer, ___m_isClient);
+            ___m_zlibWorkQueue.Decompress(compressedBuffer);
+            return false;
         }
     }
 
