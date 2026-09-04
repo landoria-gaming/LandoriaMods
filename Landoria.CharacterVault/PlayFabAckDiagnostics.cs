@@ -44,7 +44,7 @@ namespace Landoria.CharacterVault
         internal static void RecordIncomingBuffer(ZPlayFabSocket socket, byte[] buffer,
             bool isClient, bool useCompression, string stage)
         {
-            if (buffer == null || buffer.Length < 5 || buffer[buffer.Length - 1] != 42) return;
+            if (buffer == null || buffer.Length <= 5 || buffer[buffer.Length - 1] != 42) return;
             CharacterVaultPlugin.Log.LogWarning(
                 $"PlayFab ACK-shaped buffer at {stage}: {DescribePayload(buffer)}, " +
                 $"compression={useCompression}, socket={DescribeSocket(socket, isClient)}, " +
@@ -74,14 +74,6 @@ namespace Landoria.CharacterVault
             CharacterVaultPlugin.Log.LogError(
                 $"PlayFab ACK closed the socket: ack={messageId}, {DescribeQueue(queue)}, " +
                 $"socket={DescribeSocket(socket, isClient)}. Queue history:\n{GetHistory(queue)}");
-        }
-
-        internal static void AckSent(ZPlayFabSocket socket, uint messageId,
-            ZPlayFabSocket.InFlightQueue queue, bool isClient)
-        {
-            CharacterVaultPlugin.Log.LogInfo(
-                $"PlayFab ACK sent: ack={messageId}, {DescribeQueue(queue)}, " +
-                $"socket={DescribeSocket(socket, isClient)}.");
         }
 
         private static void Record(ZPlayFabSocket.InFlightQueue queue, string entry)
@@ -200,14 +192,4 @@ namespace Landoria.CharacterVault
         }
     }
 
-    [HarmonyPatch(typeof(ZPlayFabSocket), "SendAck")]
-    internal static class CharacterVaultPlayFabSendAckDiagnosticsPatch
-    {
-        private static void Prefix(ZPlayFabSocket __instance, uint nextMsgId,
-            ZPlayFabSocket.InFlightQueue ___m_inFlightQueue, bool ___m_isClient)
-        {
-            PlayFabAckDiagnostics.AckSent(
-                __instance, nextMsgId, ___m_inFlightQueue, ___m_isClient);
-        }
-    }
 }
