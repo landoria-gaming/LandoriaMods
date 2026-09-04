@@ -8,7 +8,7 @@ namespace Landoria.Socialize
     {
         private const string PluginGuid = "Landoria.Socialize";
         private const string PluginName = "Landoria.Socialize";
-        private const string PluginVersion = "1.0.14";
+        private const string PluginVersion = "1.0.15";
 
         internal static ModLog Log { get; private set; }
         internal static SocializeSettings Settings { get; private set; }
