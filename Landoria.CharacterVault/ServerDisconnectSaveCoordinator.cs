@@ -125,6 +125,11 @@ namespace Landoria.CharacterVault
             }
         }
 
+        internal bool HasPendingSave(ZRpc rpc)
+        {
+            return rpc != null && HasPendingRequest(rpc);
+        }
+
         public void Dispose()
         {
             _authorizedDisconnects.Clear();

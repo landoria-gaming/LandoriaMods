@@ -34,6 +34,7 @@ namespace Landoria.CharacterVault
             WindowsClose = new WindowsCloseInterceptor();
             ServerDisconnects = new ServerDisconnectSaveCoordinator();
             SaveStatus = new CharacterSaveStatusDisplay();
+            CharacterVaultLobbyLeftDiagnostics.Register();
             Log.LogInfo($"{PluginName} {PluginVersion} is loaded.");
         }
 
@@ -78,6 +79,7 @@ namespace Landoria.CharacterVault
 
         private void OnDestroy()
         {
+            CharacterVaultLobbyLeftDiagnostics.Unregister();
             DisconnectCoordinator?.Dispose();
             WindowsClose?.Dispose();
             ServerDisconnects?.Dispose();

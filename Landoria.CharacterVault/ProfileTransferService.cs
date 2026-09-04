@@ -185,6 +185,25 @@ namespace Landoria.CharacterVault
             }
         }
 
+        internal string DescribeDisconnect(ZNetPeer peer, bool server)
+        {
+            ZRpc rpc = peer?.m_rpc;
+            VaultSession session = null;
+            bool tracked = rpc != null && _sessions.TryGetValue(rpc, out session);
+            ServerProfileSessionState state = tracked ? session.State : null;
+            bool pendingSave = server
+                ? CharacterVaultPlugin.ServerDisconnects?.HasPendingSave(rpc) == true
+                : CharacterVaultPlugin.DisconnectCoordinator?.HasPendingSave == true;
+            return $"side={(server ? "server" : "client")}, peerReady={peer?.IsReady() == true}, " +
+                $"sessionTracked={tracked}, verified={state?.Verified == true}, " +
+                $"admitted={state?.Admitted == true}, permissionChecked={state?.PermissionChecked == true}, " +
+                $"permitted={state?.Permitted == true}, canSave={state?.CanSave == true}, " +
+                $"clientActive={_clientLifecycle.IsActive}, enrolling={_clientLifecycle.IsEnrolling}, " +
+                $"spawned={_clientLifecycle.HasSpawned}, uploadBusy={_clientUploadBusy}, " +
+                $"incomingUpload={rpc != null && _uploads.ContainsKey(rpc)}, " +
+                $"incomingDownload={_download != null}, pendingSave={pendingSave}";
+        }
+
         private static CharacterRestoreResult TryRestore(VaultSession session)
         {
             ICharacterRestoreProvider provider = CharacterRestoreApi.GetProvider();
@@ -560,7 +579,6 @@ namespace Landoria.CharacterVault
             CharacterVaultPlugin.SaveStatus?.ShowAccepted(requestId);
             CharacterVaultPlugin.Log.LogInfo(
                 $"Server accepted character save request {requestId}.");
-            CharacterVaultPlugin.DisconnectCoordinator?.RecordSaveCommitted(requestId);
             if (_pendingRequest != null)
             {
                 Game.instance.SavePlayerProfile(true);
@@ -572,6 +590,7 @@ namespace Landoria.CharacterVault
             CharacterVaultPlugin.SaveStatus?.ShowCommitted(requestId);
             CharacterVaultPlugin.Log.LogInfo(
                 $"Server confirmed durable character save request {requestId}.");
+            CharacterVaultPlugin.DisconnectCoordinator?.RecordSaveCommitted(requestId);
         }
 
         private void ResetClientState()

@@ -8,6 +8,8 @@ namespace Landoria.CharacterVault
 
         internal bool IsActive => _active;
         internal bool CanUpload => _active && _spawned;
+        internal bool IsEnrolling => _enrolling;
+        internal bool HasSpawned => _spawned;
 
         internal void ActivateExisting()
         {

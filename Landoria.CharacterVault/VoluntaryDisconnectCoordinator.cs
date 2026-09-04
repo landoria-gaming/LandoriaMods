@@ -9,8 +9,11 @@ namespace Landoria.CharacterVault
         private const float ConfirmationTimeoutSeconds = 10;
         private bool _allowApplicationQuit;
         private bool _allowLogout;
+        private bool _allowLogoutPrompt;
+        private bool _logoutPromptScheduled;
         private bool _allowShutdown;
         private Game _game;
+        private Menu _menu;
         private bool _logoutSave;
         private bool _logoutStartScene;
         private string _requestId;
@@ -22,22 +25,46 @@ namespace Landoria.CharacterVault
             Application.wantsToQuit += AllowApplicationQuit;
         }
 
+        internal bool HasPendingSave => _requestId != null;
+
+        internal bool AllowLogoutPrompt(Menu menu)
+        {
+            if (_allowLogoutPrompt)
+            {
+                _allowLogoutPrompt = false;
+                CharacterVaultPlugin.Log.LogInfo(
+                    "Allowing the vanilla disconnect confirmation after the final character save was accepted.");
+                return true;
+            }
+
+            if (_logoutPromptScheduled)
+            {
+                CharacterVaultPlugin.Log.LogInfo(
+                    "Ignoring a repeated Disconnect click while the confirmed dialog is scheduled.");
+                return false;
+            }
+
+            bool delayed = Start(VoluntaryExitKind.LogoutPrompt, Game.instance, true, true);
+            if (delayed)
+            {
+                _menu = menu;
+                CharacterVaultPlugin.Log.LogMessage(
+                    "Intercepted the Disconnect button before its confirmation dialog; waiting for the final save acceptance.");
+            }
+            return !delayed;
+        }
+
         internal bool AllowLogout(Game game, bool save, bool changeToStartScene)
         {
             if (_allowLogout)
             {
                 _allowLogout = false;
                 CharacterVaultPlugin.Log.LogInfo(
-                    "Allowing voluntary logout after the final character save was accepted.");
+                    "Allowing Game.Logout after the final character save was accepted.");
                 return true;
             }
 
-            if (!save || !Start(VoluntaryExitKind.Logout, game, save, changeToStartScene))
-            {
-                return true;
-            }
-
-            return false;
+            return !Start(VoluntaryExitKind.Logout, game, save, changeToStartScene);
         }
 
         internal void RecordSaveCommitted(string requestId)
@@ -55,6 +82,7 @@ namespace Landoria.CharacterVault
 
         internal void RecordConnectionStarted()
         {
+            _allowLogout = false;
             _playerEnteredWorld = false;
             ClearPendingRequest();
         }
@@ -185,10 +213,27 @@ namespace Landoria.CharacterVault
         {
             VoluntaryExitKind exitKind = _exitKind;
             Game game = _game;
+            Menu menu = _menu;
             bool logoutSave = _logoutSave;
             bool logoutStartScene = _logoutStartScene;
             ClearPendingRequest();
-            _allowShutdown = true;
+            if (exitKind == VoluntaryExitKind.LogoutPrompt)
+            {
+                if (menu == null)
+                {
+                    CharacterVaultPlugin.Log.LogWarning(
+                        "Canceled the disconnect confirmation because the Menu instance was destroyed.");
+                    return;
+                }
+
+                _logoutPromptScheduled = true;
+                CharacterVaultPlugin.Log.LogInfo(
+                    $"Scheduling the unmodified vanilla disconnect confirmation one second {reason}.");
+                CharacterVaultPlugin.Instance.Run(
+                    OpenLogoutPromptAfterDelay(menu, reason));
+                return;
+            }
+
             if (exitKind == VoluntaryExitKind.ApplicationQuit)
             {
                 _allowApplicationQuit = true;
@@ -198,26 +243,67 @@ namespace Landoria.CharacterVault
                 return;
             }
 
+            CharacterVaultPlugin.Log.LogInfo(
+                $"Deferring the vanilla Game.Logout until the next Unity frame {reason}.");
+            CharacterVaultPlugin.Instance.Run(
+                LogoutNextFrame(game, logoutSave, logoutStartScene, reason));
+        }
+
+        private IEnumerator LogoutNextFrame(Game game, bool save, bool startScene, string reason)
+        {
+            yield return null;
+            if (game == null)
+            {
+                CharacterVaultPlugin.Log.LogWarning(
+                    "Canceled the deferred Game.Logout because the Game instance was destroyed.");
+                yield break;
+            }
+
             _allowLogout = true;
-            CharacterVaultPlugin.Log.LogInfo($"Allowing logout {reason}.");
-            game.Logout(logoutSave, logoutStartScene);
+            _allowShutdown = true;
+            CharacterVaultPlugin.Log.LogInfo(
+                $"Calling the unmodified vanilla Game.Logout on the next Unity frame {reason}.");
+            game.Logout(save, startScene);
+        }
+
+        private IEnumerator OpenLogoutPromptAfterDelay(Menu menu, string reason)
+        {
+            yield return new WaitForSecondsRealtime(1f);
+            _logoutPromptScheduled = false;
+            if (menu == null)
+            {
+                CharacterVaultPlugin.Log.LogWarning(
+                    "Canceled the delayed disconnect confirmation because the Menu instance was destroyed.");
+                yield break;
+            }
+
+            _allowLogoutPrompt = true;
+            CharacterVaultPlugin.Log.LogInfo(
+                $"Opening the unmodified vanilla disconnect confirmation one second {reason}.");
+            menu.OnLogout();
         }
 
         private void ClearPendingRequest()
         {
             _requestId = null;
             _game = null;
+            _menu = null;
         }
 
         private static string Describe(VoluntaryExitKind kind)
         {
-            return kind == VoluntaryExitKind.ApplicationQuit ? "application quit" : "logout";
+            return kind == VoluntaryExitKind.ApplicationQuit
+                ? "application quit"
+                : kind == VoluntaryExitKind.LogoutPrompt
+                    ? "disconnect confirmation"
+                    : "logout";
         }
     }
 
     internal enum VoluntaryExitKind
     {
         Logout,
+        LogoutPrompt,
         ApplicationQuit
     }
 
