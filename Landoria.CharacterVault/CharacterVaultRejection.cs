@@ -25,15 +25,18 @@ namespace Landoria.CharacterVault
         internal static void RegisterClient(ZRpc rpc)
         {
             ClearClient();
-            rpc.Register<string>(MessageRpc, ReceiveMessage);
+            rpc.Register<ZPackage>(MessageRpc, ReceiveMessage);
         }
 
-        internal static void Reject(ZRpc rpc, string message)
+        internal static void Reject(ZRpc rpc, string message, string systemMessage = null)
         {
             CharacterVaultPlugin.Log.LogWarning(
                 $"CharacterVault rejected {rpc.GetSocket().GetHostName()}: {message}");
             Deadlines[rpc] = Time.unscaledTime + DisconnectFallbackSeconds;
-            rpc.Invoke(MessageRpc, message);
+            ZPackage package = new ZPackage();
+            package.Write(message);
+            package.Write(systemMessage ?? message);
+            rpc.Invoke(MessageRpc, package);
         }
 
         internal static void RecordPermittedListRejection(string hostName)
@@ -80,10 +83,14 @@ namespace Landoria.CharacterVault
             ClearClient();
         }
 
-        private static void ReceiveMessage(ZRpc rpc, string message)
+        private static void ReceiveMessage(ZRpc rpc, ZPackage package)
         {
-            ConnectionFailureMessages.Push("Landoria.CharacterVault", message);
-            CharacterVaultPlugin.Log.LogWarning($"Server rejected the character: {message}");
+            string message = package.ReadString();
+            string systemMessage = package.ReadString();
+            ConnectionFailureMessages.Push(
+                "Landoria.CharacterVault", message, systemMessage);
+            CharacterVaultPlugin.Log.LogWarning(
+                $"Server rejected the character: {message} System detail: {systemMessage}");
             rpc.Invoke(AckRpc);
             CharacterVaultPlugin.Log.LogDebug(
                 "Acknowledged the CharacterVault rejection; waiting for the server disconnect.");

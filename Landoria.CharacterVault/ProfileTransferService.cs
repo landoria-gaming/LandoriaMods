@@ -105,7 +105,7 @@ namespace Landoria.CharacterVault
             CharacterRestoreResult restored = TryRestore(session);
             if (restored?.Status == CharacterRestoreStatus.Restored)
             {
-                ProfileUploadValidator.Validate(session, restored.Profile);
+                if (!ValidateProfile(rpc, session, restored.Profile)) return false;
                 _storage.Commit(session.AccountId, session.Name, restored.Profile);
                 SendDownload(rpc, session, restored.Profile);
                 session.State.Admitted = true;
@@ -675,7 +675,7 @@ namespace Landoria.CharacterVault
 
             _uploads.Remove(rpc);
             byte[] data = transfer.Complete(transferId);
-            ProfileUploadValidator.Validate(session, data);
+            if (!ValidateProfile(rpc, session, data)) return;
             _finalSaveMonitor.RecordSaveReceived(rpc, transfer.RequestId);
             if (!SaveAcknowledgementPolicy.CanAcknowledge(session.State))
             {
@@ -746,6 +746,27 @@ namespace Landoria.CharacterVault
         {
             session = null;
             return _sessions.TryGetValue(rpc, out session) && session.State.CanSave;
+        }
+
+        private bool ValidateProfile(ZRpc rpc, VaultSession session, byte[] data)
+        {
+            try
+            {
+                ProfileUploadValidator.Validate(session, data);
+                return true;
+            }
+            catch (InvalidDataException exception)
+            {
+                CharacterVaultPlugin.Log.LogError(
+                    $"Character profile validation failed for {session.Name}: {exception}");
+                _sessions.Remove(rpc);
+                _uploads.Remove(rpc);
+                ReleaseEnrollment(rpc);
+                CharacterVaultRejection.Reject(rpc,
+                    "Your character data could not be validated. Please restart the game and try again.",
+                    exception.Message);
+                return false;
+            }
         }
 
         private bool ReserveEnrollment(ZRpc rpc, VaultSession session)
