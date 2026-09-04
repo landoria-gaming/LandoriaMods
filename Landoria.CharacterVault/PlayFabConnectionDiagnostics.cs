@@ -8,7 +8,7 @@ using HarmonyLib;
 using PlayFab;
 using PlayFab.MultiplayerModels;
 
-namespace Landoria.ExpandedServer
+namespace Landoria.CharacterVault
 {
     internal static class PlayFabConnectionDiagnostics
     {
@@ -24,7 +24,7 @@ namespace Landoria.ExpandedServer
             Attempts.Add(socket, attempt);
             currentClientSocket = new WeakReference(socket);
             selectedOrigin = "unknown";
-            ExpandedServerPlugin.Log?.LogInfo(
+            CharacterVaultPlugin.Log?.LogInfo(
                 $"PlayFab connection attempt {attempt.Id} started; origin={attempt.Origin}.");
         }
 
@@ -33,7 +33,7 @@ namespace Landoria.ExpandedServer
         internal static void SessionFound(ZPlayFabSocket socket, PlayFabMatchmakingServerData server)
         {
             if (!Attempts.TryGetValue(socket, out Attempt attempt)) return;
-            ExpandedServerPlugin.Log?.LogInfo(
+            CharacterVaultPlugin.Log?.LogInfo(
                 $"PlayFab connection attempt {attempt.Id} resolved lobby={Fingerprint(server?.lobbyId)}, " +
                 $"network={Fingerprint(server?.networkId)}.");
         }
@@ -41,7 +41,7 @@ namespace Landoria.ExpandedServer
         internal static void NetworkJoined(ZPlayFabSocket socket, string networkId)
         {
             if (!Attempts.TryGetValue(socket, out Attempt attempt)) return;
-            ExpandedServerPlugin.Log?.LogInfo(
+            CharacterVaultPlugin.Log?.LogInfo(
                 $"PlayFab connection attempt {attempt.Id} joined network={Fingerprint(networkId)}.");
         }
 
@@ -49,7 +49,7 @@ namespace Landoria.ExpandedServer
         {
             if (!Attempts.TryGetValue(socket, out Attempt attempt) || attempt.Connected) return;
             attempt.Connected = true;
-            ExpandedServerPlugin.Log?.LogInfo(
+            CharacterVaultPlugin.Log?.LogInfo(
                 $"PlayFab connection attempt {attempt.Id} established the remote transport.");
         }
 
@@ -58,7 +58,7 @@ namespace Landoria.ExpandedServer
             ZPlayFabSocket socket = currentClientSocket?.Target as ZPlayFabSocket;
             if (socket == null || !Attempts.TryGetValue(socket, out Attempt attempt) || attempt.Admitted) return;
             attempt.Admitted = true;
-            ExpandedServerPlugin.Log?.LogInfo(
+            CharacterVaultPlugin.Log?.LogInfo(
                 $"PlayFab connection attempt {attempt.Id} completed the Valheim peer handshake.");
         }
 
@@ -66,7 +66,7 @@ namespace Landoria.ExpandedServer
         {
             if (!Attempts.TryGetValue(socket, out Attempt attempt)) return;
             attempt.Failed = true;
-            ExpandedServerPlugin.Log?.LogWarning(
+            CharacterVaultPlugin.Log?.LogWarning(
                 $"PlayFab connection attempt {attempt.Id} failed while locating the network: {reason}.");
         }
 
@@ -75,7 +75,7 @@ namespace Landoria.ExpandedServer
             if (!Attempts.TryGetValue(socket, out Attempt attempt)) return;
             string outcome = attempt.Failed ? "failed" : attempt.Admitted ? "admitted" :
                 attempt.Connected ? "transport-only" : "incomplete";
-            ExpandedServerPlugin.Log?.LogInfo(
+            CharacterVaultPlugin.Log?.LogInfo(
                 $"PlayFab connection attempt {attempt.Id} socket closed; outcome={outcome}, " +
                 $"status={ZNet.GetConnectionStatus()}.");
             Attempts.Remove(socket);
@@ -86,12 +86,12 @@ namespace Landoria.ExpandedServer
         {
             if (error?.Error == PlayFabErrorCode.LobbyPlayerAlreadyJoined)
             {
-                ExpandedServerPlugin.Log?.LogInfo(
+                CharacterVaultPlugin.Log?.LogInfo(
                     $"PlayFab lobby stage {stage} reported an existing membership for " +
                     $"lobby={Fingerprint(lobbyId)}; continuing.");
                 return;
             }
-            ExpandedServerPlugin.Log?.LogWarning(
+            CharacterVaultPlugin.Log?.LogWarning(
                 $"PlayFab lobby stage {stage} failed for lobby={Fingerprint(lobbyId)}: " +
                 $"code={error?.Error}, http={error?.HttpCode}, message={error?.ErrorMessage ?? "unavailable"}.");
         }

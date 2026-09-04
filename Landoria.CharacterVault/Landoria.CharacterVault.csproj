@@ -32,6 +32,7 @@
     <Reference Include="0Harmony"><HintPath>$(BepInExPath)\core\0Harmony.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="assembly_valheim"><HintPath>$(ValheimGamePath)\valheim_Data\Managed\assembly_valheim.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="assembly_utils"><HintPath>$(ValheimGamePath)\valheim_Data\Managed\assembly_utils.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="PlayFab"><HintPath>$(ValheimGamePath)\valheim_Data\Managed\PlayFab.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="PlayFabParty"><HintPath>$(ValheimGamePath)\valheim_Data\Managed\PlayFabParty.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="Splatform"><HintPath>$(ValheimGamePath)\valheim_Data\Managed\Splatform.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="UnityEngine"><HintPath>$(ValheimGamePath)\valheim_Data\Managed\UnityEngine.dll</HintPath><Private>false</Private></Reference>
@@ -83,6 +84,7 @@
     <Compile Include="ServerDisconnectSaveCoordinator.cs" />
     <Compile Include="ServerDisconnectApi.cs" />
     <Compile Include="ProfileSaveRpc.cs" />
+    <Compile Include="PlayFabConnectionDiagnostics.cs" />
     <Compile Include="PlayFabDisconnectDiagnostics.cs" />
     <Compile Include="CharacterVaultPlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
