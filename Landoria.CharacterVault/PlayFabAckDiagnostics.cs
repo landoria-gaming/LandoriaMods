@@ -27,7 +27,7 @@ namespace Landoria.CharacterVault
         }
 
         internal static void AckReceived(ZPlayFabSocket socket, uint messageId,
-            ZPlayFabSocket.InFlightQueue queue, bool isClient, object state)
+            ZPlayFabSocket.InFlightQueue queue, bool isClient)
         {
             uint outstanding = queue.Head - queue.Tail;
             uint acknowledged = messageId - queue.Tail;
@@ -36,25 +36,25 @@ namespace Landoria.CharacterVault
             CharacterVaultPlugin.Log.LogError(
                 $"Invalid PlayFab ACK received: ack={messageId}, acknowledged={acknowledged}, " +
                 $"outstanding={outstanding}, {DescribeQueue(queue)}, " +
-                $"socket={DescribeSocket(socket, isClient, state)}. " +
+                $"socket={DescribeSocket(socket, isClient)}. " +
                 $"Queue history:\n{GetHistory(queue)}\nCall stack:\n{Environment.StackTrace}");
         }
 
         internal static void AckProcessed(ZPlayFabSocket socket, uint messageId,
-            ZPlayFabSocket.InFlightQueue queue, bool isClient, object state)
+            ZPlayFabSocket.InFlightQueue queue, bool isClient)
         {
             if (socket.IsConnected()) return;
             CharacterVaultPlugin.Log.LogError(
                 $"PlayFab ACK closed the socket: ack={messageId}, {DescribeQueue(queue)}, " +
-                $"socket={DescribeSocket(socket, isClient, state)}. Queue history:\n{GetHistory(queue)}");
+                $"socket={DescribeSocket(socket, isClient)}. Queue history:\n{GetHistory(queue)}");
         }
 
         internal static void AckSent(ZPlayFabSocket socket, uint messageId,
-            ZPlayFabSocket.InFlightQueue queue, bool isClient, object state)
+            ZPlayFabSocket.InFlightQueue queue, bool isClient)
         {
             CharacterVaultPlugin.Log.LogInfo(
                 $"PlayFab ACK sent: ack={messageId}, {DescribeQueue(queue)}, " +
-                $"socket={DescribeSocket(socket, isClient, state)}.");
+                $"socket={DescribeSocket(socket, isClient)}.");
         }
 
         private static void Record(ZPlayFabSocket.InFlightQueue queue, string entry)
@@ -76,11 +76,10 @@ namespace Landoria.CharacterVault
                 $"tail={queue.Tail}, bytes={queue.Bytes}, empty={queue.IsEmpty}";
         }
 
-        private static string DescribeSocket(ZPlayFabSocket socket, bool isClient,
-            object state)
+        private static string DescribeSocket(ZPlayFabSocket socket, bool isClient)
         {
             return $"object={RuntimeHelpers.GetHashCode(socket):X8}, " +
-                $"side={(isClient ? "client" : "server")}, state={state}, " +
+                $"side={(isClient ? "client" : "server")}, connected={socket.IsConnected()}, " +
                 $"remote={PlayFabConnectionDiagnostics.Fingerprint(socket.m_remotePlayerId)}";
         }
 
@@ -124,19 +123,17 @@ namespace Landoria.CharacterVault
     internal static class CharacterVaultPlayFabProcessAckDiagnosticsPatch
     {
         private static void Prefix(ZPlayFabSocket __instance, uint msgId,
-            ZPlayFabSocket.InFlightQueue ___m_inFlightQueue, bool ___m_isClient,
-            object ___m_state)
+            ZPlayFabSocket.InFlightQueue ___m_inFlightQueue, bool ___m_isClient)
         {
             PlayFabAckDiagnostics.AckReceived(
-                __instance, msgId, ___m_inFlightQueue, ___m_isClient, ___m_state);
+                __instance, msgId, ___m_inFlightQueue, ___m_isClient);
         }
 
         private static void Postfix(ZPlayFabSocket __instance, uint msgId,
-            ZPlayFabSocket.InFlightQueue ___m_inFlightQueue, bool ___m_isClient,
-            object ___m_state)
+            ZPlayFabSocket.InFlightQueue ___m_inFlightQueue, bool ___m_isClient)
         {
             PlayFabAckDiagnostics.AckProcessed(
-                __instance, msgId, ___m_inFlightQueue, ___m_isClient, ___m_state);
+                __instance, msgId, ___m_inFlightQueue, ___m_isClient);
         }
     }
 
@@ -144,11 +141,10 @@ namespace Landoria.CharacterVault
     internal static class CharacterVaultPlayFabSendAckDiagnosticsPatch
     {
         private static void Prefix(ZPlayFabSocket __instance, uint nextMsgId,
-            ZPlayFabSocket.InFlightQueue ___m_inFlightQueue, bool ___m_isClient,
-            object ___m_state)
+            ZPlayFabSocket.InFlightQueue ___m_inFlightQueue, bool ___m_isClient)
         {
             PlayFabAckDiagnostics.AckSent(
-                __instance, nextMsgId, ___m_inFlightQueue, ___m_isClient, ___m_state);
+                __instance, nextMsgId, ___m_inFlightQueue, ___m_isClient);
         }
     }
 }
