@@ -70,11 +70,7 @@ namespace Landoria.CharacterVault
 
         private static void Prefix(PlayFabMultiplayerManager __instance)
         {
-            if (Observed.Add(__instance))
-            {
-                __instance.OnNetworkLeft += NetworkLeft;
-                __instance.OnError += NetworkError;
-            }
+            Observe(__instance);
 
             CharacterVaultPlugin.Log.LogInfo(
                 $"PlayFab teardown: requesting LeaveNetwork: state={__instance.State}, " +
@@ -89,6 +85,15 @@ namespace Landoria.CharacterVault
                 $"networkId={__instance.NetworkId ?? "<null>"}.");
         }
 
+        internal static void Observe(PlayFabMultiplayerManager manager)
+        {
+            if (manager != null && Observed.Add(manager))
+            {
+                manager.OnNetworkLeft += NetworkLeft;
+                manager.OnError += NetworkError;
+            }
+        }
+
         private static void NetworkLeft(object sender, string networkId)
         {
             PlayFabMultiplayerManager manager = sender as PlayFabMultiplayerManager;
@@ -101,6 +106,10 @@ namespace Landoria.CharacterVault
         private static void NetworkError(object sender, PlayFabMultiplayerManagerErrorArgs args)
         {
             PlayFabMultiplayerManager manager = sender as PlayFabMultiplayerManager;
+            if (args != null)
+            {
+                PlayFabConnectionDiagnostics.ManagerError(args.Code, args.Message);
+            }
             CharacterVaultPlugin.Log.LogError(
                 $"PlayFab manager error: code={args?.Code}, type={args?.Type}, " +
                 $"message={args?.Message ?? "<null>"}, state={manager?.State.ToString() ?? "<unknown>"}, " +

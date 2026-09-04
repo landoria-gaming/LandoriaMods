@@ -163,38 +163,11 @@ namespace Landoria.CharacterVault
     }
 
     [HarmonyPatch(typeof(FejdStartup), "ShowConnectError")]
-    internal static class CharacterVaultShowRejectionPatch
+    internal static class CharacterVaultPublishPlayFabFailurePatch
     {
-        private static void Postfix(TMP_Text ___m_connectionFailedError)
+        private static void Prefix()
         {
-            if (CharacterVaultRejection.TryGetMessage(out string message))
-            {
-                ___m_connectionFailedError.text = message;
-            }
-        }
-    }
-
-    [HarmonyPatch(typeof(FejdStartup), "Start")]
-    internal static class CharacterVaultShowRejectionAfterMenuLoadPatch
-    {
-        private static void Postfix(
-            GameObject ___m_connectionFailedPanel,
-            TMP_Text ___m_connectionFailedError)
-        {
-            if (CharacterVaultRejection.TryGetMessage(out string message))
-            {
-                ___m_connectionFailedError.text = message;
-                ___m_connectionFailedPanel.SetActive(true);
-            }
-        }
-    }
-
-    [HarmonyPatch(typeof(FejdStartup), nameof(FejdStartup.OnConnectionFailedOk))]
-    internal static class CharacterVaultAcknowledgeRejectionPatch
-    {
-        private static void Postfix()
-        {
-            CharacterVaultRejection.AcknowledgeClientMessage();
+            PlayFabConnectionDiagnostics.PublishBlockingFailure();
         }
     }
 

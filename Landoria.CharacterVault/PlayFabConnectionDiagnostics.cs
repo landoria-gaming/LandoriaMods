@@ -7,9 +7,36 @@ using System.Threading;
 using HarmonyLib;
 using PlayFab;
 using PlayFab.MultiplayerModels;
+using PlayFab.Party;
 
 namespace Landoria.CharacterVault
 {
+    internal static class PlayFabVerboseDiagnostics
+    {
+        private static bool logged;
+
+        internal static void Enable()
+        {
+            if (!CharacterVaultPlugin.PlayFabVerboseLogging)
+            {
+                return;
+            }
+
+            PlayFabMultiplayerManager manager = PlayFabMultiplayerManager.Get();
+            if (manager == null)
+            {
+                return;
+            }
+            CharacterVaultLeaveNetworkDiagnosticsPatch.Observe(manager);
+            manager.LogLevel = PlayFabMultiplayerManager.LogLevelType.Verbose;
+            if (!logged)
+            {
+                logged = true;
+                CharacterVaultPlugin.Log?.LogInfo("Verbose PlayFab Party logging is enabled.");
+            }
+        }
+    }
+
     internal static class PlayFabConnectionDiagnostics
     {
         private static readonly ConditionalWeakTable<ZPlayFabSocket, Attempt> Attempts =
@@ -20,6 +47,7 @@ namespace Landoria.CharacterVault
 
         internal static void Start(ZPlayFabSocket socket)
         {
+            CharacterVaultRejection.ClearPendingClientMessage();
             var attempt = new Attempt(Interlocked.Increment(ref nextAttempt), selectedOrigin);
             Attempts.Add(socket, attempt);
             currentClientSocket = new WeakReference(socket);
@@ -58,6 +86,8 @@ namespace Landoria.CharacterVault
             ZPlayFabSocket socket = currentClientSocket?.Target as ZPlayFabSocket;
             if (socket == null || !Attempts.TryGetValue(socket, out Attempt attempt) || attempt.Admitted) return;
             attempt.Admitted = true;
+            attempt.Failures.Clear();
+            CharacterVaultRejection.ClearPendingClientMessage();
             CharacterVaultPlugin.Log?.LogInfo(
                 $"PlayFab connection attempt {attempt.Id} completed the Valheim peer handshake.");
         }
@@ -66,6 +96,8 @@ namespace Landoria.CharacterVault
         {
             if (!Attempts.TryGetValue(socket, out Attempt attempt)) return;
             attempt.Failed = true;
+            attempt.AddFailure(
+                PlayFabConnectionErrorMessages.ForMatchmaking(reason), reason.ToString());
             CharacterVaultPlugin.Log?.LogWarning(
                 $"PlayFab connection attempt {attempt.Id} failed while locating the network: {reason}.");
         }
@@ -78,6 +110,7 @@ namespace Landoria.CharacterVault
             CharacterVaultPlugin.Log?.LogInfo(
                 $"PlayFab connection attempt {attempt.Id} socket closed; outcome={outcome}, " +
                 $"status={ZNet.GetConnectionStatus()}.");
+            if (!attempt.Admitted) PublishFailures(attempt);
             Attempts.Remove(socket);
             if (ReferenceEquals(currentClientSocket?.Target, socket)) currentClientSocket = null;
         }
@@ -91,9 +124,54 @@ namespace Landoria.CharacterVault
                     $"lobby={Fingerprint(lobbyId)}; continuing.");
                 return;
             }
+            RecordCurrentFailure(
+                PlayFabConnectionErrorMessages.ForApi(error), DescribeApiError(stage, error));
             CharacterVaultPlugin.Log?.LogWarning(
                 $"PlayFab lobby stage {stage} failed for lobby={Fingerprint(lobbyId)}: " +
                 $"code={error?.Error}, http={error?.HttpCode}, message={error?.ErrorMessage ?? "unavailable"}.");
+        }
+
+        internal static void ManagerError(int code, string systemMessage)
+        {
+            RecordCurrentFailure(
+                PlayFabConnectionErrorMessages.ForParty(code), systemMessage ?? $"PlayFab Party error {code}");
+        }
+
+        internal static void PublishBlockingFailure()
+        {
+            ZPlayFabSocket socket = currentClientSocket?.Target as ZPlayFabSocket;
+            if (socket == null || !Attempts.TryGetValue(socket, out Attempt attempt) ||
+                attempt.Admitted || attempt.Failures.Count == 0)
+            {
+                return;
+            }
+            PublishFailures(attempt);
+            CharacterVaultPlugin.Log?.LogWarning(
+                $"Published {attempt.Failures.Count} blocking PlayFab error(s) for " +
+                $"connection attempt {attempt.Id}.");
+        }
+
+        private static void RecordCurrentFailure(string userMessage, string systemMessage)
+        {
+            ZPlayFabSocket socket = currentClientSocket?.Target as ZPlayFabSocket;
+            if (socket != null && Attempts.TryGetValue(socket, out Attempt attempt) && !attempt.Admitted)
+            {
+                attempt.AddFailure(userMessage, systemMessage);
+            }
+        }
+
+        private static void PublishFailures(Attempt attempt)
+        {
+            if (attempt.FailuresPublished) return;
+            foreach (Tuple<string, string> failure in attempt.Failures)
+                CharacterVaultRejection.SetClientMessage(failure.Item1, failure.Item2);
+            attempt.FailuresPublished = true;
+        }
+
+        private static string DescribeApiError(string stage, PlayFabError error)
+        {
+            return $"PlayFab {stage} failed: code={error?.Error}, http={error?.HttpCode}, " +
+                $"message={error?.ErrorMessage ?? "unavailable"}";
         }
 
         internal static string Fingerprint(string value)
@@ -118,6 +196,15 @@ namespace Landoria.CharacterVault
             internal bool Connected { get; set; }
             internal bool Admitted { get; set; }
             internal bool Failed { get; set; }
+            internal List<Tuple<string, string>> Failures { get; } =
+                new List<Tuple<string, string>>();
+            internal bool FailuresPublished { get; set; }
+
+            internal void AddFailure(string userMessage, string systemMessage)
+            {
+                var failure = Tuple.Create(userMessage, systemMessage);
+                if (!Failures.Contains(failure)) Failures.Add(failure);
+            }
         }
     }
 
@@ -125,8 +212,23 @@ namespace Landoria.CharacterVault
         typeof(string), typeof(Action<PlayFabMatchmakingServerData>))]
     internal static class PlayFabClientSocketCreatedPatch
     {
-        private static void Postfix(ZPlayFabSocket __instance) =>
+        private static void Postfix(ZPlayFabSocket __instance)
+        {
+            PlayFabVerboseDiagnostics.Enable();
             PlayFabConnectionDiagnostics.Start(__instance);
+        }
+    }
+
+    [HarmonyPatch(typeof(ZPlayFabSocket), MethodType.Constructor)]
+    internal static class PlayFabServerSocketCreatedPatch
+    {
+        private static void Postfix() => PlayFabVerboseDiagnostics.Enable();
+    }
+
+    [HarmonyPatch(typeof(ZPlayFabSocket), "ClientConnect")]
+    internal static class PlayFabClientConnectVerboseLoggingPatch
+    {
+        private static void Prefix() => PlayFabVerboseDiagnostics.Enable();
     }
 
     [HarmonyPatch(typeof(ZPlayFabSocket), "OnRemotePlayerSessionFound")]

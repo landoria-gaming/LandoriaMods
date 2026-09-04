@@ -15,9 +15,23 @@ namespace Landoria.SharedLib
             ModLog log = new ModLog(Logger);
             System.Version assemblyVersion = GetType().Assembly.GetName().Version;
             log.LogInfo($"AssemblyVersion: {assemblyVersion}.");
+            EnsureSharedPatches(log);
             _harmony = new Harmony(pluginGuid);
             PatchOwnNamespace(log);
             return log;
+        }
+
+        private static void EnsureSharedPatches(ModLog log)
+        {
+            const string key = "Landoria.SharedLib.ConnectionFailureMenuPatch.v1";
+            lock (AppDomain.CurrentDomain)
+            {
+                if (AppDomain.CurrentDomain.GetData(key) != null) return;
+                new Harmony("Landoria.SharedLib")
+                    .CreateClassProcessor(typeof(ConnectionFailureMenuPatch)).Patch();
+                AppDomain.CurrentDomain.SetData(key, true);
+                log.LogDebug("Shared connection failure menu patch was applied.");
+            }
         }
 
         protected void PatchOwnNamespace(ModLog log)

@@ -26,7 +26,7 @@
     <Reference Include="Splatform"><HintPath>$(ValheimGamePath)\valheim_Data\Managed\Splatform.dll</HintPath><Private>false</Private></Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CharacterPositionMemory.cs" /><Compile Include="ClientMessage.cs" /><Compile Include="ClientRejectionState.cs" /><Compile Include="ConnectionPatches.cs" /><Compile Include="HandshakeRegistry.cs" /><Compile Include="HandshakeState.cs" /><Compile Include="KnownCheatCatalog.cs" /><Compile Include="KnownCheatReport.cs" /><Compile Include="ManagedCheatDetector.cs" />
+    <Compile Include="CharacterPositionMemory.cs" /><Compile Include="ClientMessage.cs" /><Compile Include="ConnectionPatches.cs" /><Compile Include="HandshakeRegistry.cs" /><Compile Include="HandshakeState.cs" /><Compile Include="KnownCheatCatalog.cs" /><Compile Include="KnownCheatReport.cs" /><Compile Include="ManagedCheatDetector.cs" />
     <Compile Include="GuestAdmissions.cs" /><Compile Include="GuestPermissionPolicy.cs" /><Compile Include="IUnverifiedGuestController.cs" />
     <Compile Include="ModSentryGuestMarker.cs" /><Compile Include="ModSentryHandshake.cs" /><Compile Include="ModSentryPlugin.cs" /><Compile Include="ModSentrySettings.cs" /><Compile Include="PluginDescriptor.cs" />
     <Compile Include="PendingDisconnects.cs" />

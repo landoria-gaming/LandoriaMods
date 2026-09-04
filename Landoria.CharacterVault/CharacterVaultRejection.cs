@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Landoria.SharedLib;
 using UnityEngine;
 
 namespace Landoria.CharacterVault
@@ -15,8 +16,6 @@ namespace Landoria.CharacterVault
             new HashSet<ZRpc>();
         private static readonly HashSet<string> PermittedListRejections =
             new HashSet<string>();
-        private static readonly CharacterRejectionMessageState ClientMessage =
-            new CharacterRejectionMessageState();
 
         internal static void RegisterServer(ZRpc rpc)
         {
@@ -51,12 +50,13 @@ namespace Landoria.CharacterVault
             }
         }
 
-        internal static bool TryGetMessage(out string message)
+        internal static void SetClientMessage(string userMessage, string systemMessage = null)
         {
-            return ClientMessage.TryGet(out message);
+            ConnectionFailureMessages.Push(
+                "Landoria.CharacterVault", userMessage, systemMessage);
         }
 
-        internal static void AcknowledgeClientMessage()
+        internal static void ClearPendingClientMessage()
         {
             ClearClient();
         }
@@ -82,7 +82,7 @@ namespace Landoria.CharacterVault
 
         private static void ReceiveMessage(ZRpc rpc, string message)
         {
-            ClientMessage.Receive(message);
+            ConnectionFailureMessages.Push("Landoria.CharacterVault", message);
             CharacterVaultPlugin.Log.LogWarning($"Server rejected the character: {message}");
             rpc.Invoke(AckRpc);
             CharacterVaultPlugin.Log.LogDebug(
@@ -141,7 +141,7 @@ namespace Landoria.CharacterVault
 
         private static void ClearClient()
         {
-            ClientMessage.Clear();
+            ConnectionFailureMessages.Clear("Landoria.CharacterVault");
         }
     }
 }

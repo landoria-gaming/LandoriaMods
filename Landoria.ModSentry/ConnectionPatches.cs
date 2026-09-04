@@ -130,39 +130,4 @@ namespace Landoria.ModSentry
         }
     }
 
-    [HarmonyPatch(typeof(FejdStartup), "ShowConnectError")]
-    internal static class ShowRejectionPatch
-    {
-        private static void Postfix(TMP_Text ___m_connectionFailedError)
-        {
-            if (ClientMessage.TryGet(out string message))
-            {
-                ___m_connectionFailedError.text = message;
-            }
-        }
-    }
-
-    [HarmonyPatch(typeof(FejdStartup), "Start")]
-    internal static class ShowRejectionAfterMenuLoadPatch
-    {
-        private static void Postfix(
-            GameObject ___m_connectionFailedPanel,
-            TMP_Text ___m_connectionFailedError)
-        {
-            if (ClientMessage.TryGet(out string message))
-            {
-                ___m_connectionFailedError.text = message;
-                ___m_connectionFailedPanel.SetActive(true);
-            }
-        }
-    }
-
-    [HarmonyPatch(typeof(FejdStartup), nameof(FejdStartup.OnConnectionFailedOk))]
-    internal static class AcknowledgeRejectionPatch
-    {
-        private static void Postfix()
-        {
-            ClientMessage.Acknowledge();
-        }
-    }
 }

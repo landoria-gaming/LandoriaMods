@@ -53,6 +53,10 @@
             <HintPath>$(ValheimGamePath)\valheim_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
             <Private>false</Private>
         </Reference>
+        <Reference Include="Unity.TextMeshPro">
+            <HintPath>$(ValheimGamePath)\valheim_Data\Managed\Unity.TextMeshPro.dll</HintPath>
+            <Private>false</Private>
+        </Reference>
         <Reference Include="assembly_valheim">
             <HintPath>$(ValheimGamePath)\valheim_Data\Managed\assembly_valheim.dll</HintPath>
             <Private>false</Private>
@@ -64,6 +68,7 @@
     </ItemGroup>
     <ItemGroup>
         <Compile Include="LandoriaPlugin.cs"/>
+        <Compile Include="ConnectionFailureMessages.cs"/>
         <Compile Include="ModLog.cs"/>
         <Compile Include="PlatformPlayerIdentity.cs"/>
         <Compile Include="ServerRole.cs"/>

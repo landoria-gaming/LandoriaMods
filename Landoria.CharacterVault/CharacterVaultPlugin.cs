@@ -22,10 +22,16 @@ namespace Landoria.CharacterVault
         internal static CharacterVaultSettings Settings { get; private set; }
         internal static ProfileTransferService Transfers { get; private set; }
         internal static WindowsCloseInterceptor WindowsClose { get; private set; }
+        internal static bool PlayFabVerboseLogging { get; private set; }
 
         private void Awake()
         {
             Instance = this;
+            PlayFabVerboseLogging = Config.Bind(
+                "Diagnostics",
+                "PlayFabVerboseLogging",
+                false,
+                "Enables verbose PlayFab Party logging for local diagnostics.").Value;
             Log = InitializePlugin(PluginGuid);
             Settings = new CharacterVaultSettings();
             Transfers = new ProfileTransferService(SynchronizationContext.Current);
@@ -34,6 +40,7 @@ namespace Landoria.CharacterVault
             WindowsClose = new WindowsCloseInterceptor();
             ServerDisconnects = new ServerDisconnectSaveCoordinator();
             SaveStatus = new CharacterSaveStatusDisplay();
+            PlayFabVerboseDiagnostics.Enable();
             CharacterVaultLobbyLeftDiagnostics.Register();
             Log.LogInfo($"{PluginName} {PluginVersion} is loaded.");
         }
@@ -95,6 +102,7 @@ namespace Landoria.CharacterVault
             Transfers = null;
             SaveStatus = null;
             Settings = null;
+            PlayFabVerboseLogging = false;
             Instance = null;
             Log?.LogInfo($"{PluginName} {PluginVersion} is unloaded.");
             ShutdownPlugin();
