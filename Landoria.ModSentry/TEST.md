@@ -1,30 +1,16 @@
-# ModSentry tests
+# ModSentry manual checks
 
-Use Valheim `0.221.12` and `start_server_hammer.bat`.
-
-## Client without ModSentry
+Use Valheim `0.221.12`. Check dedicated-server and peer-hosted sessions.
 
 | Test | Action | Expected result |
 | --- | --- | --- |
-| Guest admission | Join without ModSentry. | Player enters the Guest Lobby. |
-| Banned account | Join with a banned account. | Connection is rejected. |
-| Confinement | Leave the Guest Lobby. | Player is returned to the lobby. |
-| Welcome | Leave the lobby and wait for teleportation. | Welcome message appears after every return. |
-| Signs | Edit each sign. | Original text is restored. |
-| Lighting | Use the torch and brazier. | No interaction is available; both stay lit. |
-| Protection | Damage, remove, or place pieces. | Lobby pieces are protected; new pieces are removed. |
-| Session timeout | Stay connected for 15 minutes. | Client disconnects; server closes any remaining connection. |
-| Disconnect | Disconnect, then reconnect. | Guest state is cleared and recreated. |
-
-## Client with ModSentry
-
-| Test | Action | Expected result |
-| --- | --- | --- |
-| Matching plugins | Join with matching required plugins. | Player joins normally. |
-| Guest Lobby exclusion | Enter the Guest Lobby after joining normally. | Player returns to the last position outside the lobby. |
-| Saved return position | Save outside the lobby, reconnect once as a Guest, then reconnect with ModSentry. | Player returns to the position stored in the character. |
-| Missing plugin | Remove a required plugin and join. | Connection is rejected; missing plugin is named. |
-| Outdated plugin | Use a different required-plugin version. | Connection is rejected; outdated plugin is named. |
-| Unexpected plugin | Add a plugin not listed as required or optional. | Connection is rejected; unexpected plugin is named. |
-| Optional plugin | Join with and without an optional plugin. | Both connections are accepted. |
-| Disconnect | Disconnect, then reconnect. | Inventory is validated again. |
+| Missing ModSentry | Join without ModSentry. | Connection is rejected before admission. |
+| Missing inventory | Send peer information without completing verification. | Connection is rejected. |
+| Matching plugins | Join with approved required plugins. | Player joins normally. |
+| Missing or changed plugin | Remove a required plugin or change its version or contents. | Connection is rejected. |
+| Unexpected plugin | Add a DLL outside the required and optional policies. | Connection is rejected. |
+| Optional plugin | Join with and without an approved optional plugin. | Both connections are accepted. |
+| Server access lists | Join with a banned account or an account outside an enabled permitted list. | Connection is rejected. |
+| Reconnect | Disconnect, then reconnect. | A new nonce and inventory are required. |
+| Replay | Resend an old inventory on a new connection. | Connection is rejected. |
+| Known cheat tool | Enable inspection, then load a recognized tool. | Detection is reported and the server kicks the client. |

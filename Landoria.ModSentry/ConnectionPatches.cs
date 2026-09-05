@@ -1,9 +1,6 @@
 using System;
 using HarmonyLib;
 using Landoria.SharedLib;
-using Splatform;
-using TMPro;
-using UnityEngine;
 
 namespace Landoria.ModSentry
 {
@@ -13,38 +10,6 @@ namespace Landoria.ModSentry
         private static void Postfix(ZNet __instance, ZNetPeer peer)
         {
             ModSentryHandshake.Register(__instance, peer);
-        }
-    }
-
-    [HarmonyPatch(typeof(ZNet), "IsAllowed")]
-    [HarmonyBefore("Landoria.CharacterVault")]
-    internal static class AllowGuestPastPermittedListPatch
-    {
-        private static void Postfix(string hostName, string playerName,
-            SyncedList ___m_bannedList, Platform ___m_steamPlatform, ref bool __result)
-        {
-            if (!GuestAdmissions.IsGuest(hostName))
-            {
-                return;
-            }
-
-            bool banned = IsListed(___m_bannedList, hostName, ___m_steamPlatform) ||
-                ___m_bannedList.Contains(playerName);
-            __result = !banned;
-            ModSentryPlugin.Log.LogInfo(banned
-                ? "Preserved the banned-list rejection for a guest."
-                : "Allowed a guest past the server permitted list.");
-        }
-
-        private static bool IsListed(SyncedList list, string value, Platform platform)
-        {
-            if (!PlatformUserID.TryParse(value, out PlatformUserID platformId))
-            {
-                platformId = new PlatformUserID(platform, value);
-            }
-
-            return list.Contains(platformId.ToString()) ||
-                platformId.m_platform == platform && list.Contains(platformId.m_userID.ToString());
         }
     }
 
@@ -75,18 +40,7 @@ namespace Landoria.ModSentry
     {
         private static void Postfix(ZRpc rpc)
         {
-            SetGuestMarker(rpc, GuestAdmissions.IsGuest(rpc));
             SetVerifiedMarker(rpc, HandshakeState.IsAccepted(rpc));
-        }
-
-        private static void SetGuestMarker(ZRpc rpc, bool marked)
-        {
-            if (marked)
-            {
-                ModSentryGuestMarker.Mark(rpc);
-                return;
-            }
-            ModSentryGuestMarker.Unmark(rpc);
         }
 
         private static void SetVerifiedMarker(ZRpc rpc, bool marked)
@@ -111,24 +65,13 @@ namespace Landoria.ModSentry
                 HandshakeState.Remove(peer.m_rpc);
                 VerifiedModpackMarker.Unmark(peer.m_rpc);
                 PendingDisconnects.Remove(peer.m_rpc);
-                GuestAdmissions.Remove(peer.m_rpc);
-                VerifiedCharacterPositions.Remove(peer.m_rpc);
             }
             if (ZNet.instance?.IsServer() != true)
             {
-                ClientVerificationState.Clear();
                 ManagedCheatDetector.Shutdown();
             }
         }
     }
 
-    [HarmonyPatch(typeof(Player), nameof(Player.Save))]
-    internal static class RememberVerifiedCharacterPositionPatch
-    {
-        private static void Prefix(Player __instance)
-        {
-            CharacterPositionMemory.Save(__instance);
-        }
-    }
 
 }

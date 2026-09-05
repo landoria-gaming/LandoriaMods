@@ -14,8 +14,6 @@ namespace Landoria.ModSentry
             {
                 peer.m_rpc.Register<ZPackage>(ModSentryPlugin.InventoryRpc, ReceiveInventory);
                 peer.m_rpc.Register(ModSentryPlugin.RejectionAckRpc, ReceiveRejectionAck);
-                peer.m_rpc.Register<ZPackage>(ModSentryPlugin.CharacterPositionRpc,
-                    VerifiedCharacterPositions.Receive);
                 if (ModSentrySettings.KnownCheatProtectionEnabled)
                 {
                     peer.m_rpc.Register<ZPackage>(
@@ -26,10 +24,7 @@ namespace Landoria.ModSentry
             else
             {
                 ClientMessage.Clear();
-                ClientVerificationState.Begin(peer.m_rpc);
                 peer.m_rpc.Register<string>(ModSentryPlugin.RejectionRpc, ClientMessage.Receive);
-                peer.m_rpc.Register(ModSentryPlugin.AcceptanceRpc,
-                    ClientVerificationState.Accept);
                 peer.m_rpc.Register(ModSentryPlugin.CheatDetectionEnableRpc,
                     ReceiveCheatDetectionEnable);
             }
@@ -63,24 +58,6 @@ namespace Landoria.ModSentry
             }
 
             ValidationResult rejection = HandshakeState.RejectionFor(rpc);
-            string failure = null;
-            if (rejection == null && !NonceHandshake.HasStarted(rpc) &&
-                UnverifiedGuestControllerRegistry.IsReady &&
-                GuestAdmissions.TryAdd(rpc, out failure))
-            {
-                ModSentryPlugin.Log.LogWarning(
-                    "Admitting a client without a ModSentry inventory as a guest.");
-                return true;
-            }
-            if (rejection == null && !string.IsNullOrEmpty(failure))
-            {
-                ModSentryPlugin.Log.LogError(
-                    $"The server-only guest controller rejected admission: {failure}");
-            }
-            if (rejection == null)
-            {
-                LogUnavailableGuestAdmission();
-            }
             rejection = rejection ?? ValidationResult.Reject(
                 "Mod verification did not complete. Please try again.",
                 "PeerInfo arrived before an accepted ModSentry inventory.");
@@ -88,17 +65,6 @@ namespace Landoria.ModSentry
             ModSentryPlugin.Log.LogWarning(rejection.TechnicalMessage);
             PendingDisconnects.Schedule(rpc);
             return false;
-        }
-
-        private static void LogUnavailableGuestAdmission()
-        {
-            string reason = !UnverifiedGuestControllerRegistry.IsRegistered
-                ? "the server-only guest controller is not registered"
-                : !UnverifiedGuestControllerRegistry.IsReady
-                    ? "the server-only guest controller is not ready"
-                : "the server-only guest controller rejected admission";
-            ModSentryPlugin.Log.LogWarning(
-                $"Rejecting a client without a ModSentry inventory because {reason}.");
         }
 
         internal static void RequestDisconnect(ZRpc rpc)
@@ -146,7 +112,6 @@ namespace Landoria.ModSentry
                 {
                     rpc.Invoke(ModSentryPlugin.CheatDetectionEnableRpc);
                 }
-                rpc.Invoke(ModSentryPlugin.AcceptanceRpc);
                 ModSentryPlugin.Log.LogInfo(result.TechnicalMessage);
                 return;
             }

@@ -2,10 +2,10 @@
   <PropertyGroup>
     <LangVersion>10</LangVersion>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(MSBuildProjectName)' != 'Landoria.SharedLib' and '$(MSBuildProjectName)' != 'DllMetadataVersion' and '$(MSBuildProjectName)' != 'GuestLobbyExample'">
+  <PropertyGroup Condition="'$(MSBuildProjectName)' != 'Landoria.SharedLib' and '$(MSBuildProjectName)' != 'DllMetadataVersion'">
     <ILRepackTargetsFile>$(MSBuildThisFileDirectory)Landoria.SharedLib\ILRepack.targets</ILRepackTargetsFile>
   </PropertyGroup>
-  <ItemGroup Condition="'$(MSBuildProjectName)' != 'Landoria.SharedLib' and '$(MSBuildProjectName)' != 'DllMetadataVersion' and '$(MSBuildProjectName)' != 'GuestLobbyExample'">
+  <ItemGroup Condition="'$(MSBuildProjectName)' != 'Landoria.SharedLib' and '$(MSBuildProjectName)' != 'DllMetadataVersion'">
     <ProjectReference Include="$(MSBuildThisFileDirectory)Landoria.SharedLib\Landoria.SharedLib.csproj">
       <Private>false</Private>
     </ProjectReference>
@@ -14,7 +14,7 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
   </ItemGroup>
-  <ItemGroup Condition="'$(MSBuildProjectName)' != 'DllMetadataVersion' and '$(MSBuildProjectName)' != 'GuestLobbyExample'">
+  <ItemGroup Condition="'$(MSBuildProjectName)' != 'DllMetadataVersion'">
     <Reference Include="netstandard">
       <HintPath>$(ValheimGamePath)\valheim_Data\Managed\netstandard.dll</HintPath>
       <Private>false</Private>

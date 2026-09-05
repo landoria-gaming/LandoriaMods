@@ -59,7 +59,7 @@ namespace Landoria.ModSentry
             if (challenge.Started) return;
             challenge.Started = true;
             challenge.Deadline = Time.unscaledTime + TimeoutSeconds;
-            if (protocol != ModSentryPlugin.ProtocolVersion || GuestAdmissions.IsGuest(rpc))
+            if (protocol != ModSentryPlugin.ProtocolVersion)
             {
                 Reject(rpc, "Incompatible or late ModSentry challenge request.");
                 return;
@@ -93,7 +93,7 @@ namespace Landoria.ModSentry
         internal static bool Consume(ZRpc rpc, ZPackage package)
         {
             if (!Challenges.TryGetValue(rpc, out Challenge challenge) || !challenge.Started ||
-                challenge.Consumed || GuestAdmissions.IsGuest(rpc))
+                challenge.Consumed)
             {
                 Reject(rpc, "Unexpected or replayed ModSentry inventory.");
                 return false;
@@ -112,9 +112,6 @@ namespace Landoria.ModSentry
 
         internal static bool IsFinal(ZRpc rpc) =>
             HandshakeState.IsAccepted(rpc) || HandshakeState.RejectionFor(rpc) != null;
-
-        internal static bool HasStarted(ZRpc rpc) =>
-            Challenges.TryGetValue(rpc, out Challenge challenge) && challenge.Started;
 
         private static void Reject(ZRpc rpc, string reason)
         {

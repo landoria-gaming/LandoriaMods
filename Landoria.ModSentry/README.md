@@ -23,7 +23,7 @@ conditions.
   SHA-256 hash.
 - Automatically rejects the player when a difference is detected and shows
   an error identifying any extra, missing, or outdated mod.
-- Supports an optional guest lobby for clients without ModSentry.
+- Requires an approved ModSentry inventory before admitting any client.
 - Detects known ValheimTooler, ValheimHack223, and valheim-hax managed
   assemblies and lets the server kick the reporting client.
 
@@ -43,8 +43,7 @@ Most of Landoria mods need to be installed also on the dedicated server, we show
 
 ## Server configuration
 
-ModSentry does not use command-line switches. Configure its client policy with
-these folders on the server:
+Configure the client mod policy with these folders on the server:
 
 | Folder | Purpose |
 |---|---|
@@ -66,8 +65,7 @@ server with:
 The server asks verified ModSentry clients to activate the inspection for that
 connection. Use `false` or omit the switch to keep it disabled.
 
-To accept players who do not have ModSentry, see the
-[guest lobby integration guide](https://github.com/landoria-gaming/LandoriaMods/blob/main/Landoria.ModSentry/GUEST_LOBBY.md).
+Clients without ModSentry or an approved inventory cannot join.
 
 ## Contact
 
