@@ -47,7 +47,7 @@ All commands except `moderator` require active moderator mode. The server valida
 
 Most of Landoria mods need to be installed also on the dedicated server, we show you in this video how to do it on windows:
 
-[Setup a Valheim Modded dedicated server on Windows](https://youtu.be/AxPDgOXEh8M)
+[Setup a Valheim Modded dedicated server on Windows](https://youtu.be/X5J1wSRr7Uo)
 
 | Crossplay support | Steam network support |
 |---|---

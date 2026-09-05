@@ -25,6 +25,10 @@ Equipable items follow Valheim's `ItemData.IsEquipable()` classification.
 
 ## Installation
 
+Most of Landoria mods need to be installed also on the dedicated server, we show you in this video how to do it on windows:
+
+[Setup a Valheim Modded dedicated server on Windows](https://youtu.be/X5J1wSRr7Uo)
+
 | Client required | Server required (dedicated) | Player-hosted server |
 |---|---|---|
 | Yes | No | Not Supported |
