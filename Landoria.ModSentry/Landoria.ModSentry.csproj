@@ -38,4 +38,13 @@
     <Content Include="README.md" /><Content Include="CHANGELOG.md" /><Content Include="SECURITY.md" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <ProjectReference Include="..\Landoria.CharacterVault\Landoria.CharacterVault.csproj">
+      <Project>{70BCF48B-1C23-4B2A-8A4F-F01CC21E3EC5}</Project>
+      <Name>Landoria.CharacterVault</Name>
+      <Aliases>CharacterVaultApi</Aliases>
+      <Private>false</Private>
+    </ProjectReference>
+    <Compile Include="CharacterGuestProvider.cs" />
+  </ItemGroup>
 </Project>

@@ -51,7 +51,7 @@ namespace Landoria.CharacterVault
             ZNetPeer peer, out bool allow)
         {
             allow = action == KickAction.Allow || action == KickAction.AllowWithoutSave ||
-                action == KickAction.AllowModSentryGuestWithoutSave;
+                action == KickAction.AllowGuestWithoutSave;
             if (action == KickAction.Allow && authorized)
             {
                 CharacterVaultPlugin.Log.LogInfo(
@@ -62,10 +62,10 @@ namespace Landoria.CharacterVault
                 CharacterVaultPlugin.Log.LogInfo(
                     $"Allowing kick for rejected player {peer.m_playerName} without a character save.");
             }
-            else if (action == KickAction.AllowModSentryGuestWithoutSave)
+            else if (action == KickAction.AllowGuestWithoutSave)
             {
                 CharacterVaultPlugin.Log.LogInfo(
-                    $"Allowing kick for ModSentry guest {peer.m_playerName} without a character save.");
+                    $"Allowing kick for guest {peer.m_playerName} without a character save.");
             }
             else if (action == KickAction.WaitForPendingSave)
             {

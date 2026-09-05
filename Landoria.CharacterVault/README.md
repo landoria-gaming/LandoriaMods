@@ -28,9 +28,14 @@ Characters are saved:
 - before a graceful server stop or restart (when configured on the server).
 
 Characters are not saved after a client crash or network loss because the
-connection is already unavailable. Guests are not saved (see ModSentry).
+connection is already unavailable. Temporary guests identified by a server
+integration are not saved. See the
+[guest provider integration guide](https://github.com/landoria-gaming/LandoriaMods/blob/main/Landoria.CharacterVault/CHARACTER_GUEST_PROVIDER.md).
 
 ## Installation
+
+CharacterVault requires BepInEx on both the client and the dedicated server.
+ModSentry is optional.
 
 Most of Landoria mods need to be installed also on the dedicated server, we show you in this video how to do it on windows:
 

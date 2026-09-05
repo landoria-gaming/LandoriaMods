@@ -23,6 +23,10 @@ conditions.
 
 ## Installation
 
+ModSentry requires BepInEx and CharacterVault on both the client and the dedicated
+server. It identifies temporary guests to CharacterVault so their characters are
+not imported or saved.
+
 Most of Landoria mods need to be installed also on the dedicated server, we show you in this video how to do it on windows:
 
 [Setup a Valheim Modded dedicated server on Windows](https://youtu.be/X5J1wSRr7Uo)

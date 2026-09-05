@@ -1,9 +1,13 @@
+extern alias CharacterVaultApi;
+
 using BepInEx;
+using CharacterGuestApi = CharacterVaultApi::Landoria.CharacterVault.CharacterGuestApi;
 using Landoria.SharedLib;
 
 namespace Landoria.ModSentry
 {
     [BepInPlugin(PluginGuid, PluginName, PluginVersion)]
+    [BepInDependency("Landoria.CharacterVault", BepInDependency.DependencyFlags.HardDependency)]
     public sealed class ModSentryPlugin : LandoriaPlugin
     {
         internal const string InventoryRpc = "Landoria_ModSentry_Inventory";
@@ -25,6 +29,7 @@ namespace Landoria.ModSentry
 
         internal static ModLog Log { get; private set; }
         internal static PluginPolicy Policy { get; private set; }
+        private CharacterGuestProvider _guestProvider;
 
         public static void RegisterUnverifiedGuestController(
             IUnverifiedGuestController controller)
@@ -53,6 +58,8 @@ namespace Landoria.ModSentry
         {
             Log = InitializePlugin(PluginGuid);
             ModSentrySettings.Initialize();
+            _guestProvider = new CharacterGuestProvider();
+            CharacterGuestApi.Register(_guestProvider);
             if (UnityEngine.Application.isBatchMode)
             {
                 Log.LogInfo("Known managed cheat protection is " +
@@ -83,6 +90,11 @@ namespace Landoria.ModSentry
 
         private void OnDestroy()
         {
+            if (_guestProvider != null)
+            {
+                CharacterGuestApi.Unregister(_guestProvider);
+                _guestProvider = null;
+            }
             Log?.LogInfo($"{PluginName} {PluginVersion} is unloaded.");
             HandshakeState.Clear();
             PendingDisconnects.Clear();
