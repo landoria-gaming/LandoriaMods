@@ -1,6 +1,6 @@
 {
   "name": "NoServerPassword",
-  "version_number": "1.0.8-draft",
+  "version_number": "1.0.8",
   "website_url": "https://github.com/landoria-gaming/LandoriaMods/tree/main/Landoria.NoServerPassword",
   "description": "Host a public or crossplay Valheim server without requiring a password.",
   "dependencies": [

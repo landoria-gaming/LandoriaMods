@@ -1,6 +1,6 @@
 {
   "name": "AfkDetector",
-  "version_number": "1.0.9-draft",
+  "version_number": "1.0.9",
   "website_url": "https://github.com/landoria-gaming/LandoriaMods/tree/main/Landoria.AfkDetector",
   "description": "Disconnects players who remain motionless and silent, with a clear inactivity message.",
   "dependencies": [
