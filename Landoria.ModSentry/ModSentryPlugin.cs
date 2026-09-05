@@ -4,6 +4,7 @@ using Landoria.SharedLib;
 namespace Landoria.ModSentry
 {
     [BepInPlugin(PluginGuid, PluginName, PluginVersion)]
+    [BepInDependency("Landoria.CharacterVault", BepInDependency.DependencyFlags.SoftDependency)]
     public sealed class ModSentryPlugin : LandoriaPlugin
     {
         internal const string InventoryRpc = "Landoria_ModSentry_Inventory";
@@ -53,6 +54,7 @@ namespace Landoria.ModSentry
         {
             Log = InitializePlugin(PluginGuid);
             ModSentrySettings.Initialize();
+            CharacterVaultGuestPatch.Apply(PluginGuid);
             if (UnityEngine.Application.isBatchMode)
             {
                 Log.LogInfo("Known managed cheat protection is " +

@@ -42,14 +42,6 @@
     <Reference Include="Unity.TextMeshPro"><HintPath>$(ValheimGamePath)\valheim_Data\Managed\Unity.TextMeshPro.dll</HintPath><Private>false</Private></Reference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Landoria.ModSentry\Landoria.ModSentry.csproj">
-      <Project>{27ED17A4-E7BC-4D42-9C9B-CAC4812948EF}</Project>
-      <Name>Landoria.ModSentry</Name>
-      <Aliases>ModSentryApi</Aliases>
-      <Private>false</Private>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="CharacterVaultSettings.cs" />
     <Compile Include="CharacterRestoreApi.cs" />
     <Compile Include="CharacterVaultArgumentPolicy.cs" />

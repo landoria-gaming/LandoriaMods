@@ -49,6 +49,7 @@ namespace Landoria.ModSentry
     }
 
     [HarmonyPatch(typeof(ZNet), "SendPeerInfo")]
+    [HarmonyBefore("Landoria.CharacterVault")]
     internal static class SendInventoryPatch
     {
         private static void Prefix(ZRpc rpc)
@@ -61,6 +62,7 @@ namespace Landoria.ModSentry
     }
 
     [HarmonyPatch(typeof(ZNet), "RPC_PeerInfo")]
+    [HarmonyBefore("Landoria.CharacterVault")]
     internal static class ValidatePeerPatch
     {
         private static bool Prefix(ZRpc rpc)

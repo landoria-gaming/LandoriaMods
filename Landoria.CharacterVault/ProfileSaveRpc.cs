@@ -48,7 +48,6 @@ namespace Landoria.CharacterVault
     }
 
     [HarmonyPatch(typeof(ZNet), "SendPeerInfo")]
-    [HarmonyAfter("Landoria.ModSentry")]
     internal static class CharacterVaultHelloPatch
     {
         private static void Prefix(ZRpc rpc)
@@ -61,7 +60,6 @@ namespace Landoria.CharacterVault
     }
 
     [HarmonyPatch(typeof(ZNet), "RPC_PeerInfo")]
-    [HarmonyAfter("Landoria.ModSentry")]
     internal static class CharacterVaultAdmissionBarrierPatch
     {
         private static bool Prefix(ZRpc rpc, bool __runOriginal)
@@ -71,7 +69,7 @@ namespace Landoria.CharacterVault
                 return true;
             }
 
-            return CharacterVaultPlugin.Transfers?.ApproveGuest(rpc) == true;
+            return CharacterVaultPlugin.Transfers?.ApproveCharacterStorage(rpc) == true;
         }
     }
 
