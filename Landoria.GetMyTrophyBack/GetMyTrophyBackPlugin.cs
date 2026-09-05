@@ -8,7 +8,7 @@ namespace Landoria.GetMyTrophyBack
     {
         private const string PluginGuid = "Landoria.GetMyTrophyBack";
         private const string PluginName = "Landoria.GetMyTrophyBack";
-        private const string PluginVersion = "1.0.9";
+        private const string PluginVersion = "1.0.10";
 
         internal static ModLog Log { get; private set; }
 

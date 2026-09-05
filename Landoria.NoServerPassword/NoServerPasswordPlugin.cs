@@ -8,7 +8,7 @@ namespace Landoria.NoServerPassword
     {
         private const string PluginGuid = "Landoria.NoServerPassword";
         private const string PluginName = "Landoria.NoServerPassword";
-        private const string PluginVersion = "1.0.7";
+        private const string PluginVersion = "1.0.8";
 
         internal static ModLog Log { get; private set; }
 

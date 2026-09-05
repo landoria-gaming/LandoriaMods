@@ -11,7 +11,7 @@ namespace Landoria.QuickLaunch
     {
         private const string PluginGuid = "Landoria.QuickLaunch";
         private const string PluginName = "Landoria.QuickLaunch";
-        private const string PluginVersion = "1.0.6";
+        private const string PluginVersion = "1.0.7";
         private const string LastSessionPreference = "Landoria.QuickLaunch.LastSession";
         private const string LocalSession = "local";
         private const string MultiplayerSession = "multiplayer";

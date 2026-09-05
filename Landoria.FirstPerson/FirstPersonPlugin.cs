@@ -8,7 +8,7 @@ namespace Landoria.FirstPerson
     {
         private const string PluginGuid = "Landoria.FirstPerson";
         private const string PluginName = "Landoria.FirstPerson";
-        private const string PluginVersion = "1.0.6";
+        private const string PluginVersion = "1.0.7";
 
         internal static ModLog Log { get; private set; }
 

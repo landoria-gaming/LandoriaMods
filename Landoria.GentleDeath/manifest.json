@@ -1,6 +1,6 @@
 {
   "name": "GentleDeath",
-  "version_number": "1.0.10",
+  "version_number": "1.0.11-draft",
   "website_url": "https://github.com/landoria-gaming/LandoriaMods/tree/main/Landoria.GentleDeath",
   "description": "Keep your weapons, armor, and tools after death; only treasures and gathered materials go to your tombstone.",
   "dependencies": [

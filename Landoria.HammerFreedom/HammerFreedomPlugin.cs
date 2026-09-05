@@ -9,7 +9,7 @@ namespace Landoria.HammerFreedom
     {
         internal const string PluginGuid = "Landoria.HammerFreedom";
         internal const string PluginName = "Landoria.HammerFreedom";
-        internal const string PluginVersion = "1.0.7";
+        internal const string PluginVersion = "1.0.8";
         private static readonly KeyboardShortcut ToggleShortcut =
             new KeyboardShortcut(UnityEngine.KeyCode.Z);
 
