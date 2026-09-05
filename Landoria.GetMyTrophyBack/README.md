@@ -2,6 +2,10 @@
 
 Returns a boss trophy after its Sacrificial Stone power is selected.
 
+## Video demo
+
+[Watch GetMyTrophyBack in action on YouTube](https://youtu.be/rX5TVIiGaNc).
+
 ## Valheim compatibility
 
 | Valheim channel | Version | Compatibility |

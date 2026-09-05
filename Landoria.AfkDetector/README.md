@@ -2,6 +2,10 @@
 
 Disconnects players who remain motionless and silent beyond a configurable timeout.
 
+## Video demo
+
+[Watch AfkDetector in action on YouTube](https://youtu.be/VzsUbmJs5QA).
+
 ## Valheim compatibility
 
 | Valheim channel | Version | Compatibility |

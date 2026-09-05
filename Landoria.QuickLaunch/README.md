@@ -4,7 +4,7 @@ Gets you back into Valheim faster by automatically resuming your last local or m
 
 ## Video demo
 
-[Watch QuickLaunch in action on YouTube](https://youtu.be/5MOIaP7fJps).
+[Watch QuickLaunch in action on YouTube](https://youtu.be/K0r75KNOGc0).
 
 ## Valheim compatibility
 

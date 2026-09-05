@@ -21,7 +21,7 @@ Gives trusted Valheim moderators server-authorized tools for helping players and
 
 ## Video demo
 
-[Watch Moderator mod in action on YouTube](https://youtu.be/ak86gUHFPnQ)
+[Watch Moderator mod in action on YouTube](https://youtu.be/GxZJFHgpYNY)
 
 ## Commands
 

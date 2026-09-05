@@ -9,7 +9,7 @@ Raises dedicated-server capacity to a configurable limit of up to 100 players.
 
 ## Video demo
 
-[Watch ExpandedServer mod in action on YouTube](https://youtu.be/WJ_pFQg02Qw)
+[Watch ExpandedServer mod in action on YouTube](https://youtu.be/0aLTboADrn4)
 
 ## Configuration
 

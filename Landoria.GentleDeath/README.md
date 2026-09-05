@@ -4,7 +4,7 @@ Keeps equipable items after death while moving other inventory items to the tomb
 
 ## Video demo
 
-[Watch GentleDeath in action on YouTube](https://youtu.be/OW3YsvMt_dk).
+[Watch GentleDeath in action on YouTube](https://youtu.be/O61d6w3ZpVs).
 
 ## Valheim compatibility
 

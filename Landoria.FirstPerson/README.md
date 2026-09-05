@@ -9,7 +9,7 @@ held in either hand remain visible without changing how other players see you.
 
 ## Video demo
 
-[Watch First Person in action on YouTube](https://www.youtube.com/watch?v=Tzb9Hi6qYv4).
+[Watch First Person in action on YouTube](https://youtu.be/eExAEyoNsSs).
 
 ## Highlights
 

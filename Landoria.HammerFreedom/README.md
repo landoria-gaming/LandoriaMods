@@ -5,7 +5,7 @@ fall protection, and lasting equipment—without granting administrator access.
 
 ## Video demo
 
-[Watch HammerFreedom's Fly mode in action on YouTube](https://www.youtube.com/watch?v=PnJOJYb4LwA).
+[Watch HammerFreedom's Fly mode in action on YouTube](https://youtu.be/wUBgHzN5hG8).
 
 ## Valheim compatibility
 

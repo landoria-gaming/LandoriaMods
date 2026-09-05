@@ -2,6 +2,10 @@
 
 Allows Valheim servers to run without a password, including crossplay servers.
 
+## Video demo
+
+[Watch NoServerPassword in action on YouTube](https://youtu.be/llDUK0OOsLI).
+
 ## Installation
 
 Most of Landoria mods need to be installed also on the dedicated server, we show you in this video how to do it on windows:
