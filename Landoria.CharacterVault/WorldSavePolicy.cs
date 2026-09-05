@@ -5,11 +5,10 @@ namespace Landoria.CharacterVault
     internal static class WorldSavePolicy
     {
         internal static void Handle(
-            bool isServer, Action recordOnlineActivity, Action requestCharacterCheckpoint)
+            bool isServer, Action requestCharacterCheckpoint)
         {
             if (isServer)
             {
-                recordOnlineActivity();
                 requestCharacterCheckpoint();
             }
         }

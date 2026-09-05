@@ -1,21 +1,20 @@
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Landoria.CharacterVault
+namespace Landoria.StructureProtection
 {
     internal static class CharacterActivityRegistry
     {
-        private const string RecordTypeKey = "Landoria.CharacterVault.Activity.Type";
-        private const string PlatformIdKey = "Landoria.CharacterVault.Activity.PlatformId";
-        private const string PlayerNameKey = "Landoria.CharacterVault.Activity.PlayerName";
-        private const string CharacterKeyKey = "Landoria.CharacterVault.Activity.CharacterKey";
-        private const string CharacterIdKey = "Landoria.CharacterVault.Activity.CharacterId";
-        private const string FirstConnectedKey = "Landoria.CharacterVault.Activity.FirstConnectedUtc";
+        private const string RecordTypeKey = "Landoria.StructureProtection.Activity.Type";
+        private const string PlatformIdKey = "Landoria.StructureProtection.Activity.PlatformId";
+        private const string PlayerNameKey = "Landoria.StructureProtection.Activity.PlayerName";
+        private const string CharacterKeyKey = "Landoria.StructureProtection.Activity.CharacterKey";
+        private const string CharacterIdKey = "Landoria.StructureProtection.Activity.CharacterId";
+        private const string FirstConnectedKey = "Landoria.StructureProtection.Activity.FirstConnectedUtc";
         private const string LastSeenOnlineKey =
-            "Landoria.CharacterVault.Activity.LastSeenOnlineUtc";
-        private const string LegacyLastConnectedKey =
-            "Landoria.CharacterVault.Activity.LastConnectedUtc";
+            "Landoria.StructureProtection.Activity.LastSeenOnlineUtc";
         private const int PlatformRecord = 1;
         private const int CharacterRecord = 2;
         private static readonly Vector3 StoragePosition = new Vector3(100000f, -10000f, 100000f);
@@ -58,10 +57,10 @@ namespace Landoria.CharacterVault
             scanning = false;
         }
 
-        internal static void Record(VaultSession session, DateTime seenOnlineUtc)
+        internal static void Record(string platformId, long characterId, string playerName, DateTime seenOnlineUtc)
         {
             ActivityObservation observation = new ActivityObservation(
-                session.AccountId, session.CharacterId, session.Name, seenOnlineUtc);
+                platformId, characterId, playerName, seenOnlineUtc);
             if (world == null || scanning)
             {
                 Pending.Add(observation);
@@ -95,7 +94,7 @@ namespace Landoria.CharacterVault
             world = manager;
             scanIndex = 0;
             scanning = true;
-            CharacterVaultPlugin.Log.LogInfo("Started character activity reconstruction.");
+            StructureProtectionPlugin.Log.LogInfo("Started character activity reconstruction.");
         }
 
         private static void ContinueScan()
@@ -110,7 +109,7 @@ namespace Landoria.CharacterVault
                 ReadRecord(zdo);
             }
             scanning = false;
-            CharacterVaultPlugin.Log.LogInfo(
+            StructureProtectionPlugin.Log.LogInfo(
                 $"Rebuilt character activity: {Platforms.Count} platform accounts, " +
                 $"{Characters.Count} characters.");
             FlushPending();
@@ -166,7 +165,7 @@ namespace Landoria.CharacterVault
             character.Set(PlayerNameKey, observation.PlayerName);
             character.Set(CharacterKeyKey, observation.CharacterKey);
             character.Set(LastSeenOnlineKey, ticks);
-            CharacterVaultPlugin.Log.LogInfo(
+            StructureProtectionPlugin.Log.LogInfo(
                 $"Recorded last seen online for {observation.CharacterKey} at " +
                 $"{observation.SeenOnlineUtc:O}.");
         }
@@ -220,8 +219,16 @@ namespace Landoria.CharacterVault
 
         private static bool TryReadLastSeenOnlineUtc(ZDO zdo, out DateTime value)
         {
-            return TryReadUtc(zdo, LastSeenOnlineKey, out value) ||
-                TryReadUtc(zdo, LegacyLastConnectedKey, out value);
+            return TryReadUtc(zdo, LastSeenOnlineKey, out value);
+        }
+
+        private static string SafeSegment(string value)
+        {
+            const string invalid = "<>:\"/\\|?*";
+            return new string(value
+                .Select(character => char.IsControl(character) || invalid.Contains(character)
+                    ? '_' : character)
+                .ToArray());
         }
 
         private sealed class ActivityObservation
@@ -233,8 +240,8 @@ namespace Landoria.CharacterVault
                 CharacterId = characterId;
                 PlayerName = playerName;
                 SeenOnlineUtc = seenOnlineUtc;
-                CharacterKey = $"{VaultStorage.SafeSegment(platformId)}_" +
-                    VaultStorage.SafeSegment(playerName);
+                CharacterKey = $"{SafeSegment(platformId)}_" +
+                    SafeSegment(playerName);
             }
 
             internal string PlatformId { get; }

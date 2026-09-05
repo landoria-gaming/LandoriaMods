@@ -277,7 +277,6 @@ namespace Landoria.CharacterVault
         private static void Prefix(ZNet __instance)
         {
             WorldSavePolicy.Handle(__instance.IsServer(),
-                () => CharacterVaultPlugin.Transfers?.RecordOnlineActivityAtWorldSave(),
                 () => CharacterVaultPlugin.Transfers?.RequestWorldCheckpoint());
         }
     }

@@ -72,7 +72,6 @@
         <Compile Include="ModLog.cs"/>
         <Compile Include="PlatformPlayerIdentity.cs"/>
         <Compile Include="ServerRole.cs"/>
-        <Compile Include="VerifiedModpackMarker.cs"/>
         <Compile Include="Properties\AssemblyInfo.cs"/>
     </ItemGroup>
     <ItemGroup>

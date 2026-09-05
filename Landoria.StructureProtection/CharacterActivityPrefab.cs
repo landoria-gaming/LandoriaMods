@@ -2,10 +2,11 @@ using System.Linq;
 using HarmonyLib;
 using UnityEngine;
 
-namespace Landoria.CharacterVault
+namespace Landoria.StructureProtection
 {
     internal static class CharacterActivityPrefab
     {
+        // Existing worlds already use this prefab name for persistent activity records.
         internal const string Name = "Landoria_CharacterActivity";
 
         [HarmonyPatch(typeof(ZNetScene), "Awake")]
@@ -24,7 +25,7 @@ namespace Landoria.CharacterVault
                 view.m_distant = false;
                 view.m_type = ZDO.ObjectType.Default;
                 __instance.m_prefabs.Add(prefab);
-                CharacterVaultPlugin.Log.LogInfo(
+                StructureProtectionPlugin.Log.LogInfo(
                     $"Registered the {Name} world-record prefab.");
             }
         }

@@ -12,8 +12,6 @@ with another save or a restored backup.
 - CharacterVault requires a new character when joining a server for the first time.
 - A server integration can restore the latest compatible backup when no local server profile exists.
 - CharacterVault supports crossplay servers.
-- The server records when each platform account and character was first connected and last seen online.
-- Last-seen timestamps are updated when a character is admitted and before each world save, entirely on the server.
 
 Server-side mods can provide a verified character when it is not yet present on the current world. See the
 [character restore provider integration guide](https://github.com/landoria-gaming/LandoriaMods/blob/main/Landoria.CharacterVault/CHARACTER_RESTORE_PROVIDER.md).
@@ -28,12 +26,10 @@ Characters are saved:
 - before a graceful server stop or restart (when configured on the server).
 
 Characters are not saved after a client crash or network loss because the
-connection is already unavailable. Guests are not saved (see ModSentry).
+connection is already unavailable. Other server mods can disable character
+validation and storage for specific sessions.
 
 ## Installation
-
-ModSentry is optional. Its guest integration requires versions of both mods that
-support the CharacterVault guest validation patch.
 
 Most of Landoria mods need to be installed also on the dedicated server, we show you in this video how to do it on windows:
 

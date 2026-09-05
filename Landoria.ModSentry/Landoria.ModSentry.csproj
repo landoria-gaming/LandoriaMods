@@ -31,6 +31,7 @@
     <Compile Include="ModSentryGuestMarker.cs" /><Compile Include="ModSentryHandshake.cs" /><Compile Include="ModSentryPlugin.cs" /><Compile Include="ModSentrySettings.cs" /><Compile Include="PluginDescriptor.cs" />
     <Compile Include="PendingDisconnects.cs" />
     <Compile Include="CharacterVaultGuestPatch.cs" />
+    <Compile Include="VerifiedModpackMarker.cs" />
     <Compile Include="PluginInventory.cs" /><Compile Include="PluginPolicy.cs" /><Compile Include="PluginPolicyLoader.cs" /><Compile Include="PolicyValidator.cs" />
     <Compile Include="UnverifiedGuestControllerRegistry.cs" /><Compile Include="ValidationResult.cs" /><Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

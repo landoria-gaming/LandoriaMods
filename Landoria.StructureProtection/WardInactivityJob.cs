@@ -1,9 +1,5 @@
-extern alias CharacterVaultApi;
-
 using System;
 using System.Collections.Generic;
-using CharacterActivityApi =
-    CharacterVaultApi::Landoria.CharacterVault.CharacterActivityApi;
 using UnityEngine;
 
 namespace Landoria.StructureProtection
@@ -59,7 +55,7 @@ namespace Landoria.StructureProtection
                     "Skipped a concurrent ward inactivity job launch.");
                 return;
             }
-            if (!CharacterActivityApi.IsReady || !WardQuota.TryGetWardSnapshot(out List<ZDO> wards))
+            if (!CharacterActivityRegistry.IsReady || !WardQuota.TryGetWardSnapshot(out List<ZDO> wards))
             {
                 WaitForDependencies();
                 return;
@@ -100,6 +96,12 @@ namespace Landoria.StructureProtection
         {
             try
             {
+                if (!CharacterActivityRegistry.IsReady)
+                {
+                    Finish();
+                    WaitForDependencies();
+                    return;
+                }
                 int end = Math.Min(index + BatchSize, Wards.Count);
                 while (index < end)
                 {
@@ -144,7 +146,7 @@ namespace Landoria.StructureProtection
 
         private static void EvaluateLastConnection(ZDO ward, long creator)
         {
-            if (!CharacterActivityApi.TryGetCharacterLastSeenOnlineUtc(
+            if (!CharacterActivityRegistry.TryGetCharacterLastSeenOnlineUtc(
                 creator, out DateTime lastSeenOnlineUtc))
             {
                 metrics.MissingActivity++;

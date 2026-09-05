@@ -47,9 +47,6 @@
     <Compile Include="CharacterVaultArgumentPolicy.cs" />
     <Compile Include="CharacterAdmissionPolicy.cs" />
     <Compile Include="CharacterVaultRejection.cs" />
-    <Compile Include="CharacterActivityApi.cs" />
-    <Compile Include="CharacterActivityPrefab.cs" />
-    <Compile Include="CharacterActivityRegistry.cs" />
     <Compile Include="CharacterRejectionMessageState.cs" />
     <Compile Include="CharacterSaveStatusDisplay.cs" />
     <Compile Include="ClientSaveLifecycle.cs" />

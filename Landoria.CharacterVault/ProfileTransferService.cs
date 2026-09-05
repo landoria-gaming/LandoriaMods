@@ -26,7 +26,6 @@ namespace Landoria.CharacterVault
         private readonly Dictionary<ZRpc, VaultSession> _sessions = new Dictionary<ZRpc, VaultSession>();
         private readonly Dictionary<ZRpc, IncomingTransfer> _uploads = new Dictionary<ZRpc, IncomingTransfer>();
         private readonly Dictionary<string, ZRpc> _enrollments = new Dictionary<string, ZRpc>(StringComparer.Ordinal);
-        private readonly HashSet<VaultSession> _activityRecorded = new HashSet<VaultSession>();
         private readonly ClientSaveLifecycle _clientLifecycle = new ClientSaveLifecycle();
         private readonly VaultStorage _storage = new VaultStorage();
         private readonly CharacterAdmissionEvaluator _admission;
@@ -159,7 +158,6 @@ namespace Landoria.CharacterVault
             if (_sessions.TryGetValue(peer.m_rpc, out VaultSession session))
             {
                 _finalSaveMonitor.RecordRemoved(peer.m_rpc, session.Name);
-                _activityRecorded.Remove(session);
             }
             _sessions.Remove(peer.m_rpc);
             _uploads.Remove(peer.m_rpc);
@@ -168,24 +166,6 @@ namespace Landoria.CharacterVault
             if (ZNet.instance?.IsServer() == false)
             {
                 ResetClientState();
-            }
-        }
-
-        internal void RecordReadyActivity()
-        {
-            if (ZNet.instance?.IsServer() != true)
-            {
-                return;
-            }
-            foreach (ZNetPeer peer in ZNet.instance.GetPeers())
-            {
-                if (peer?.m_rpc == null || !peer.IsReady() ||
-                    !_sessions.TryGetValue(peer.m_rpc, out VaultSession session) ||
-                    !session.State.CanSave || !_activityRecorded.Add(session))
-                {
-                    continue;
-                }
-                CharacterActivityRegistry.Record(session, DateTime.UtcNow);
             }
         }
 
@@ -246,29 +226,6 @@ namespace Landoria.CharacterVault
                 }
             }
             _finalSaveMonitor.Update();
-        }
-
-        internal void RecordOnlineActivityAtWorldSave()
-        {
-            if (ZNet.instance?.IsServer() != true)
-            {
-                return;
-            }
-            DateTime seenOnlineUtc = DateTime.UtcNow;
-            int recorded = 0;
-            foreach (ZNetPeer peer in ZNet.instance.GetPeers())
-            {
-                if (peer?.m_rpc == null || !peer.IsReady() ||
-                    !_sessions.TryGetValue(peer.m_rpc, out VaultSession session) ||
-                    !session.State.CanSave)
-                {
-                    continue;
-                }
-                CharacterActivityRegistry.Record(session, seenOnlineUtc);
-                recorded++;
-            }
-            CharacterVaultPlugin.Log.LogInfo(
-                $"Updated last seen online for {recorded} characters before world save.");
         }
 
         internal void RequestWorldCheckpoint()
@@ -437,7 +394,6 @@ namespace Landoria.CharacterVault
             _sessions.Clear();
             _uploads.Clear();
             _enrollments.Clear();
-            _activityRecorded.Clear();
             _finalSaveMonitor.Clear();
             _download = null;
         }

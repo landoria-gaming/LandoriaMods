@@ -57,8 +57,6 @@ namespace Landoria.CharacterVault
         private void Update()
         {
             CharacterVaultRejection.Tick();
-            CharacterActivityRegistry.Update();
-            Transfers.RecordReadyActivity();
             Transfers.MonitorFinalSaves();
             MonitorWindowsClose();
         }
@@ -92,7 +90,6 @@ namespace Landoria.CharacterVault
             Coordinator?.Dispose();
             Transfers?.Dispose();
             SaveStatus?.Dispose();
-            CharacterActivityRegistry.Reset();
             CharacterVaultRejection.Clear();
             DisconnectCoordinator = null;
             WindowsClose = null;

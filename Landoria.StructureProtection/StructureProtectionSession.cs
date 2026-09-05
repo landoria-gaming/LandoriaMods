@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using HarmonyLib;
 
@@ -84,6 +85,30 @@ namespace Landoria.StructureProtection
             OnlinePlayers.Add(playerId);
             BroadcastSnapshot();
             WardQuota.RegisterIdentity(sender, playerId);
+            RecordActivity(ZNet.instance.GetPeer(sender), playerId, DateTime.UtcNow);
+        }
+
+        private static void RecordActivity(ZNetPeer peer, long playerId, DateTime seenOnlineUtc)
+        {
+            if (peer?.IsReady() != true) return;
+            string platformId = peer.m_socket?.GetHostName();
+            if (string.IsNullOrWhiteSpace(platformId)) return;
+            CharacterActivityRegistry.Record(platformId, playerId,
+                peer.m_playerName ?? string.Empty, seenOnlineUtc);
+        }
+
+        [HarmonyPatch(typeof(ZNet), "Save")]
+        private static class WorldSaveActivityPatch
+        {
+            private static void Prefix(ZNet __instance)
+            {
+                if (!__instance.IsServer()) return;
+                DateTime seenOnlineUtc = DateTime.UtcNow;
+                foreach (KeyValuePair<long, long> mapping in PeerPlayers)
+                {
+                    RecordActivity(__instance.GetPeer(mapping.Key), mapping.Value, seenOnlineUtc);
+                }
+            }
         }
 
         private static bool RemoveDisconnectedPeers()

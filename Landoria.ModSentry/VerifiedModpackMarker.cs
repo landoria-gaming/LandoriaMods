@@ -1,10 +1,10 @@
 using System.Linq;
 
-namespace Landoria.SharedLib
+namespace Landoria.ModSentry
 {
     public static class VerifiedModpackMarker
     {
-        private const string Key = "landoria.verified_modpack";
+        private const string Key = "landoria.modsentry_verified_modpack";
         private const string Value = "1";
 
         public static void Mark(ZRpc rpc)
