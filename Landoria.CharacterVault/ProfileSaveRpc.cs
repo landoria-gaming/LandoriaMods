@@ -50,9 +50,9 @@ namespace Landoria.CharacterVault
     [HarmonyPatch(typeof(ZNet), "SendPeerInfo")]
     internal static class CharacterVaultHelloPatch
     {
-        private static void Prefix(ZRpc rpc)
+        private static void Prefix(ZRpc rpc, bool __runOriginal)
         {
-            if (ZNet.instance?.IsServer() == false)
+            if (__runOriginal && ZNet.instance?.IsServer() == false)
             {
                 CharacterVaultPlugin.Transfers?.SendHello(rpc);
             }

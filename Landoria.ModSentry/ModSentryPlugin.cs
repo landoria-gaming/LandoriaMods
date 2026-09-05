@@ -17,7 +17,7 @@ namespace Landoria.ModSentry
             "Landoria_ModSentry_CheatDetection";
         internal const string CheatDetectionEnableRpc =
             "Landoria_ModSentry_CheatDetectionEnable";
-        internal const int ProtocolVersion = 1;
+        internal const int ProtocolVersion = 2;
         public const int GuestControllerProtocolVersion =
             UnverifiedGuestControllerRegistry.ProtocolVersion;
         private const string PluginGuid = "Landoria.ModSentry";
@@ -78,6 +78,7 @@ namespace Landoria.ModSentry
 
         private void Update()
         {
+            NonceHandshake.Tick();
             PendingDisconnects.Tick();
             ClientVerificationState.Update();
             ManagedCheatDetector.Update();
@@ -86,6 +87,7 @@ namespace Landoria.ModSentry
         private void OnDestroy()
         {
             Log?.LogInfo($"{PluginName} {PluginVersion} is unloaded.");
+            NonceHandshake.Clear();
             HandshakeState.Clear();
             PendingDisconnects.Clear();
             GuestAdmissions.Clear();

@@ -4,8 +4,14 @@ ModSentry verifies that the mods installed on each client match the mods expecte
 by the server. This lets every player use the same mods and play under the same
 conditions.
 
+> **ModSentry is not an anti-cheat system.** It helps honest players use the correct
+> mods and versions. Its checks rely on client-side code and information reported
+> by the client, which a determined cheater can alter. It cannot prevent deliberate cheating.
+> If anti-cheat measures are important for your server, a complementary server-side mod must be used.
+
 ## Features
 
+- Binds each client inventory to a one-time server challenge to reject replayed submissions.
 - Uses the server's `BepInEx/config/ModSentry_Required` folder to define the mods
   and library DLLs required on every client.
 - Uses the server's `BepInEx/config/ModSentry_Optional` folder to define mods and

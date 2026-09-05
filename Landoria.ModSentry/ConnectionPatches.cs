@@ -52,13 +52,11 @@ namespace Landoria.ModSentry
     [HarmonyBefore("Landoria.CharacterVault")]
     internal static class SendInventoryPatch
     {
-        private static void Prefix(ZRpc rpc)
+        private static bool Prefix(ZNet __instance, ZRpc rpc, string __1)
         {
-            if (ZNet.instance != null && !ZNet.instance.IsServer())
-            {
-                ModSentryHandshake.SendInventory(rpc);
-            }
+            return __instance.IsServer() || NonceHandshake.AllowPeerInfo(__instance, rpc, __1);
         }
+
     }
 
     [HarmonyPatch(typeof(ZNet), "RPC_PeerInfo")]
@@ -109,6 +107,7 @@ namespace Landoria.ModSentry
         {
             if (peer?.m_rpc != null)
             {
+                NonceHandshake.Remove(peer.m_rpc);
                 HandshakeState.Remove(peer.m_rpc);
                 VerifiedModpackMarker.Unmark(peer.m_rpc);
                 PendingDisconnects.Remove(peer.m_rpc);

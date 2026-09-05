@@ -9,6 +9,7 @@ namespace Landoria.ModSentry
     {
         internal static void Register(ZNet network, ZNetPeer peer)
         {
+            NonceHandshake.Register(network, peer.m_rpc);
             if (network.IsServer())
             {
                 peer.m_rpc.Register<ZPackage>(ModSentryPlugin.InventoryRpc, ReceiveInventory);
@@ -34,15 +35,12 @@ namespace Landoria.ModSentry
             }
         }
 
-        internal static void SendInventory(ZRpc serverRpc)
-        {
-            serverRpc.Invoke(ModSentryPlugin.InventoryRpc, PluginInventory.Serialize());
-        }
-
         internal static void ReceiveInventory(ZRpc rpc, ZPackage package)
         {
+            if (NonceHandshake.IsFinal(rpc)) return;
             try
             {
+                if (!NonceHandshake.Consume(rpc, package)) return;
                 IReadOnlyList<PluginDescriptor> inventory = PluginInventory.Deserialize(package);
                 ValidationResult result = PolicyValidator.Validate(
                     ModSentryPlugin.EnsurePolicy(), inventory);
@@ -66,7 +64,8 @@ namespace Landoria.ModSentry
 
             ValidationResult rejection = HandshakeState.RejectionFor(rpc);
             string failure = null;
-            if (rejection == null && UnverifiedGuestControllerRegistry.IsReady &&
+            if (rejection == null && !NonceHandshake.HasStarted(rpc) &&
+                UnverifiedGuestControllerRegistry.IsReady &&
                 GuestAdmissions.TryAdd(rpc, out failure))
             {
                 ModSentryPlugin.Log.LogWarning(
@@ -137,7 +136,7 @@ namespace Landoria.ModSentry
             ManagedCheatDetector.Enable(rpc);
         }
 
-        private static void Record(ZRpc rpc, ValidationResult result)
+        internal static void Record(ZRpc rpc, ValidationResult result)
         {
             if (result.Accepted)
             {
@@ -153,6 +152,8 @@ namespace Landoria.ModSentry
             }
 
             HandshakeState.Reject(rpc, result);
+            rpc.Invoke(ModSentryPlugin.RejectionRpc, result.PlayerMessage);
+            PendingDisconnects.Schedule(rpc);
             ModSentryPlugin.Log.LogWarning(result.TechnicalMessage);
         }
     }

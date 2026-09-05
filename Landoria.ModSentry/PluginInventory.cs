@@ -31,11 +31,12 @@ namespace Landoria.ModSentry
                 .ToList();
         }
 
-        internal static ZPackage Serialize()
+        internal static ZPackage Serialize(string nonce)
         {
             IReadOnlyList<PluginDescriptor> plugins = Capture();
             ZPackage package = new ZPackage();
             package.Write(ModSentryPlugin.ProtocolVersion);
+            package.Write(nonce);
             package.Write(plugins.Count);
             foreach (PluginDescriptor plugin in plugins)
             {
@@ -47,12 +48,6 @@ namespace Landoria.ModSentry
 
         internal static List<PluginDescriptor> Deserialize(ZPackage package)
         {
-            int protocol = package.ReadInt();
-            if (protocol != ModSentryPlugin.ProtocolVersion)
-            {
-                throw new InvalidDataException($"Unsupported ModSentry protocol {protocol}.");
-            }
-
             int count = package.ReadInt();
             if (count < 0 || count > 1024)
             {
