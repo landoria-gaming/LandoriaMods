@@ -1,6 +1,6 @@
 {
   "name": "StructureProtection",
-  "version_number": "1.0.4",
+  "version_number": "1.0.5-draft",
   "website_url": "https://github.com/landoria-gaming/LandoriaMods/tree/main/Landoria.StructureProtection",
   "description": "Prevents creatures from deliberately targeting structures whose creator is offline and blocks player damage to structures inside active wards.",
   "dependencies": [

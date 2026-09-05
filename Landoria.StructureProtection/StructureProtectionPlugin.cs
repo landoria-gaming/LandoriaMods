@@ -8,7 +8,7 @@ namespace Landoria.StructureProtection
     {
         private const string PluginGuid = "Landoria.StructureProtection";
         private const string PluginName = "Landoria.StructureProtection";
-        private const string PluginVersion = "1.0.4";
+        private const string PluginVersion = "1.0.5";
 
         internal static ModLog Log { get; private set; }
         internal static StructureProtectionSettings Settings { get; private set; }

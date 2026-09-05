@@ -11,7 +11,7 @@ namespace Landoria.CharacterVault
     {
         private const string PluginGuid = "Landoria.CharacterVault";
         private const string PluginName = "Landoria.CharacterVault";
-        private const string PluginVersion = "1.0.26";
+        private const string PluginVersion = "1.0.27";
         internal static ModLog Log { get; private set; }
         internal static GracefulShutdownCoordinator Coordinator { get; private set; }
         internal static VoluntaryDisconnectCoordinator DisconnectCoordinator { get; private set; }
