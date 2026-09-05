@@ -7,6 +7,7 @@ using UnityEngine;
 namespace Landoria.CharacterVault
 {
     [BepInPlugin(PluginGuid, PluginName, PluginVersion)]
+    [BepInDependency("Landoria.ModSentry", BepInDependency.DependencyFlags.HardDependency)]
     public sealed class CharacterVaultPlugin : LandoriaPlugin
     {
         private const string PluginGuid = "Landoria.CharacterVault";

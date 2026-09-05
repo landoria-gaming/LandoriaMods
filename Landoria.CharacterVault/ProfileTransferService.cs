@@ -1,3 +1,5 @@
+extern alias ModSentryApi;
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -5,6 +7,8 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using Landoria.SharedLib;
+using ModSentryGuestMarker =
+    ModSentryApi::Landoria.ModSentry.ModSentryGuestMarker;
 using UnityEngine;
 
 namespace Landoria.CharacterVault
@@ -120,13 +124,13 @@ namespace Landoria.CharacterVault
 
         internal bool ApproveGuest(ZRpc rpc)
         {
-            if (!CharacterGuestApi.IsGuest(rpc))
+            if (!ModSentryGuestMarker.IsMarked(rpc))
             {
                 return Approve(rpc);
             }
 
             CharacterVaultPlugin.Log.LogInfo(
-                "Recognized a guest session; skipping character validation, " +
+                "Recognized a ModSentry guest session; skipping character validation, " +
                 "vault session creation, profile import, and persistence.");
             return true;
         }
@@ -292,9 +296,9 @@ namespace Landoria.CharacterVault
 
         internal KickSaveEligibility GetKickSaveEligibility(ZNetPeer peer)
         {
-            if (peer?.m_rpc != null && CharacterGuestApi.IsGuest(peer.m_rpc))
+            if (peer?.m_rpc != null && ModSentryGuestMarker.IsMarked(peer.m_rpc))
             {
-                return KickSaveEligibility.Guest;
+                return KickSaveEligibility.ModSentryGuest;
             }
             if (peer?.m_rpc != null && !peer.IsReady())
             {

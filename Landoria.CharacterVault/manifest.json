@@ -4,7 +4,8 @@
   "website_url": "https://github.com/landoria-gaming/LandoriaMods/tree/main/Landoria.CharacterVault",
   "description": "CharacterVault saves character profiles on the server to prevent item duplication.",
   "dependencies": [
-    "denikson-BepInExPack_Valheim-5.4.2333"
+    "denikson-BepInExPack_Valheim-5.4.2333",
+    "Landoria-ModSentry-1.0.11"
   ],
   "categories": [
     "ai-generated",

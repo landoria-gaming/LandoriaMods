@@ -1,9 +1,5 @@
 # Changelog
 
-## Unreleased
-
-- CharacterVault now works without ModSentry. Temporary ModSentry guests remain excluded from character saves.
-
 ## 1.0.26
 
 - Fixed intermittent PlayFab invalid handle connection failures.

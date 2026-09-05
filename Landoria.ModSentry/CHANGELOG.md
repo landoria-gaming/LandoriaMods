@@ -1,9 +1,5 @@
 # Changelog
 
-## Unreleased
-
-- ModSentry now requires CharacterVault and identifies temporary guests through its guest provider integration.
-
 ## 1.0.14
 
 - Add security checks
