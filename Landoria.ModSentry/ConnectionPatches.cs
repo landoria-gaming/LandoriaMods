@@ -30,7 +30,7 @@ namespace Landoria.ModSentry
 
             bool banned = IsListed(___m_bannedList, hostName, ___m_steamPlatform) ||
                 ___m_bannedList.Contains(playerName);
-            __result = GuestPermissionPolicy.Resolve(__result, true, banned);
+            __result = !banned;
             ModSentryPlugin.Log.LogInfo(banned
                 ? "Preserved the banned-list rejection for a guest."
                 : "Allowed a guest past the server permitted list.");
