@@ -4,7 +4,7 @@ Keeps your recent tombstone safe from other players while letting you approve so
 
 ## Video demo
 
-[Watch SealedTombstone in action on YouTube](https://youtu.be/xWD9o9Mworg).
+[Watch SealedTombstone in action on YouTube](https://youtu.be/WzRf7-7_DGg).
 
 ## Valheim compatibility
 
