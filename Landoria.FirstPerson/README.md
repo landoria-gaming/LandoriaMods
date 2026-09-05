@@ -35,12 +35,6 @@ an effective FOV of 100.
 Compatible with Valheim `0.221.12` and Public Test `0.221.13`.
 
 
-## Installation
-
-Most of Landoria mods need to be installed also on the dedicated server, we show you in this video how to do it on windows:
-
-[Setup a Valheim Modded dedicated server on Windows](https://youtu.be/X5J1wSRr7Uo)
-
 ## Contact
 
 Report bugs through [GitHub Issues](https://github.com/landoria-gaming/LandoriaMods/issues).
