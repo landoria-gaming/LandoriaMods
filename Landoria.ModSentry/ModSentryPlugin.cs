@@ -30,6 +30,7 @@ namespace Landoria.ModSentry
                 Log.LogInfo("Known managed cheat protection is " +
                     (ModSentrySettings.KnownCheatProtectionEnabled
                         ? "enabled." : "disabled."));
+                Log.LogInfo($"Known managed cheat action: {ModSentrySettings.KnownCheatAction}.");
             }
             Log.LogInfo($"{PluginName} {PluginVersion} is loaded.");
         }

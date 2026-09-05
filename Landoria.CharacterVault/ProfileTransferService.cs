@@ -117,27 +117,6 @@ namespace Landoria.CharacterVault
             return session.State.Admitted;
         }
 
-        // Other mods can patch this method to return false for guests or spectators,
-        // allowing them to join without CharacterVault validating or saving their character on the server.
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
-        private static bool ShouldStoreCharacterOnServer(ZRpc rpc)
-        {
-            return true;
-        }
-
-        internal bool ApproveCharacterStorage(ZRpc rpc)
-        {
-            if (ShouldStoreCharacterOnServer(rpc))
-            {
-                return Approve(rpc);
-            }
-
-            CharacterVaultPlugin.Log.LogInfo(
-                "Character storage is disabled for this session; skipping character validation, " +
-                "vault session creation, profile import, and persistence.");
-            return true;
-        }
-
         internal void RecordPermission(string hostName, bool permitted)
         {
             foreach (VaultSession session in _sessions.Values.Where(candidate =>
@@ -257,10 +236,6 @@ namespace Landoria.CharacterVault
 
         internal KickSaveEligibility GetKickSaveEligibility(ZNetPeer peer)
         {
-            if (peer?.m_rpc != null && !ShouldStoreCharacterOnServer(peer.m_rpc))
-            {
-                return KickSaveEligibility.CharacterStorageDisabled;
-            }
             if (peer?.m_rpc != null && !peer.IsReady())
             {
                 return KickSaveEligibility.Rejected;

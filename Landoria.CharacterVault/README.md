@@ -26,8 +26,7 @@ Characters are saved:
 - before a graceful server stop or restart (when configured on the server).
 
 Characters are not saved after a client crash or network loss because the
-connection is already unavailable. Other server mods can disable character
-validation and storage for specific sessions.
+connection is already unavailable.
 
 ## Installation
 

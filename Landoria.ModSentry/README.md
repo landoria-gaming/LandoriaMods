@@ -4,28 +4,17 @@ ModSentry verifies that the mods installed on each client match the mods expecte
 by the server. This lets every player use the same mods and play under the same
 conditions.
 
-> **ModSentry is not an anti-cheat system.** It helps honest players use the correct
-> mods and versions. Its checks rely on client-side code and information reported
-> by the client, which a determined cheater can alter. It cannot prevent deliberate cheating.
-> If anti-cheat measures are important for your server, a complementary server-side mod must be used.
-
 ## Features
 
-- Binds each client inventory to a one-time server challenge to reject replayed submissions.
-- Uses the server's `BepInEx/config/ModSentry_Required` folder to define the mods
-  and library DLLs required on every client.
-- Uses the server's `BepInEx/config/ModSentry_Optional` folder to define mods and
-  library DLLs that are allowed but not required on clients.
-- Rejects client mods and library DLLs that are listed in neither folder.
-- Keeps server-only mods in the server's `BepInEx/plugins` folder; they do not
-  need to be listed in `ModSentry_Required` or `ModSentry_Optional`.
-- Requires every file approved by the server to have the expected version and
-  SHA-256 hash.
-- Automatically rejects the player when a difference is detected and shows
-  an error identifying any extra, missing, or outdated mod.
-- Requires an approved ModSentry inventory before admitting any client.
-- Detects known ValheimTooler, ValheimHack223, and valheim-hax managed
-  assemblies and lets the server kick the reporting client.
+- Checks that players have the required mods and only use approved files and versions.
+- Rejects connections with extra, missing, or outdated mods and explains what needs fixing.
+- Detects known cheat tools and lets the server kick or ban the player (kick by default).
+- Prevents players from reusing an old mod check response when connecting again. (Nonce-based server challenge.)
+
+> **ModSentry is not a complete anti-cheat solution.** It helps players use
+> the correct mods and versions and includes client-side checks for known cheat tools.
+> These checks can be bypassed by a determined cheater.
+> If stronger anti-cheat protection is important for your server, use a complementary server-side mod.
 
 ## Installation
 
@@ -57,15 +46,12 @@ Any client DLL listed in neither folder is rejected.
 Server-only mods stay in `BepInEx/plugins` and are not copied into either policy
 folder.
 
-Known managed cheat detection is disabled by default. Enable it on the dedicated
-server with:
+Configure known cheat detection with these dedicated server arguments:
 
-`--modsentry-known-cheat-protection true`
-
-The server asks verified ModSentry clients to activate the inspection for that
-connection. Use `false` or omit the switch to keep it disabled.
-
-Clients without ModSentry or an approved inventory cannot join.
+| Server argument | Action |
+|---|---|
+| `--modsentry-known-cheat-protection` | `true` or `false` (default: `true`). |
+| `--modsentry-known-cheat-action` | `kick` or `ban` (default: `kick`). |
 
 ## Contact
 

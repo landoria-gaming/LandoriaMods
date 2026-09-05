@@ -20,7 +20,6 @@ namespace Landoria.CharacterVault
     internal enum KickSaveEligibility
     {
         Unmanaged,
-        CharacterStorageDisabled,
         Rejected,
         SaveRequired
     }
@@ -29,7 +28,6 @@ namespace Landoria.CharacterVault
     {
         Allow,
         AllowWithoutSave,
-        AllowWithoutCharacterStorage,
         WaitForPendingSave,
         RequestSave,
         Block
@@ -47,10 +45,6 @@ namespace Landoria.CharacterVault
             if (eligibility == KickSaveEligibility.Rejected)
             {
                 return KickAction.AllowWithoutSave;
-            }
-            if (eligibility == KickSaveEligibility.CharacterStorageDisabled)
-            {
-                return KickAction.AllowWithoutCharacterStorage;
             }
             if (savePending)
             {

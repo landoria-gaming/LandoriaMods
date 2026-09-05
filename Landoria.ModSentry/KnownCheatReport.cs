@@ -32,11 +32,11 @@ namespace Landoria.ModSentry
             if (!TryRead(package, out string tool, out string vector,
                 out string indicator, out string failure))
             {
-                LogAndKick(peer, "invalid_cheat_report", "unknown", "unknown",
-                    failure);
+                LogAndApplyAction(peer, "invalid_cheat_report", "unknown", "unknown",
+                    failure, false);
                 return;
             }
-            LogAndKick(peer, "known_cheat_tool", vector, indicator,
+            LogAndApplyAction(peer, "known_cheat_tool", vector, indicator,
                 $"tool='{tool}'");
         }
 
@@ -84,12 +84,14 @@ namespace Landoria.ModSentry
             return failure == null;
         }
 
-        private static void LogAndKick(ZNetPeer peer, string securityEvent,
-            string vector, string indicator, string details)
+        private static void LogAndApplyAction(ZNetPeer peer, string securityEvent,
+            string vector, string indicator, string details, bool detected = true)
         {
             string account = peer.m_socket?.GetHostName();
+            string action = detected && !string.IsNullOrWhiteSpace(account)
+                ? ModSentrySettings.KnownCheatAction : "kick";
             ModSentryPlugin.Log.LogError(
-                $"security_event={securityEvent} action=kick " +
+                $"security_event={securityEvent} action={action} " +
                 $"player='{Clean(peer.m_playerName)}' account='{Clean(account)}' " +
                 $"endpoint='{Clean(peer.m_socket?.GetEndPointString())}' " +
                 $"peer_uid={peer.m_uid} character_zdo={peer.m_characterID} " +
@@ -99,6 +101,10 @@ namespace Landoria.ModSentry
             {
                 ZNet.instance?.Disconnect(peer);
                 return;
+            }
+            if (action == "ban")
+            {
+                ZNet.instance?.Ban(account);
             }
             ZNet.instance?.Kick(account);
         }

@@ -50,8 +50,7 @@ namespace Landoria.CharacterVault
         private static bool TryResolveWithoutSave(KickAction action, bool authorized,
             ZNetPeer peer, out bool allow)
         {
-            allow = action == KickAction.Allow || action == KickAction.AllowWithoutSave ||
-                action == KickAction.AllowWithoutCharacterStorage;
+            allow = action == KickAction.Allow || action == KickAction.AllowWithoutSave;
             if (action == KickAction.Allow && authorized)
             {
                 CharacterVaultPlugin.Log.LogInfo(
@@ -61,11 +60,6 @@ namespace Landoria.CharacterVault
             {
                 CharacterVaultPlugin.Log.LogInfo(
                     $"Allowing kick for rejected player {peer.m_playerName} without a character save.");
-            }
-            else if (action == KickAction.AllowWithoutCharacterStorage)
-            {
-                CharacterVaultPlugin.Log.LogInfo(
-                    $"Allowing kick for {peer.m_playerName} without a save because character storage is disabled.");
             }
             else if (action == KickAction.WaitForPendingSave)
             {

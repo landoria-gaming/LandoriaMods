@@ -1,10 +1,9 @@
-- Require successful mod verification for every connection; remove guest admission.
-
 # Changelog
 
 ## 1.0.14
 
-- Add security checks
+- Detect known cheat tools, with server-configurable kick or ban (kick by default).
+- Prevent reuse of an old mod check response when connecting again.
 
 ## 1.0.13
 
