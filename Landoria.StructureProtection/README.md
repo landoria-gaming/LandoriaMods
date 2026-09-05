@@ -17,7 +17,6 @@ Prevents creatures from deliberately targeting structures whose creator is offli
 - Protection against damage from unauthorized players remains active while the ward creator or a permitted player is online.
 - Each character can have up to five wards in the world by default.
 - Active wards are disabled after 30 real calendar days since their creator was last seen online.
-- The server records character activity when players identify themselves after spawning and before each world save. Activity is stored with the world and restored after a restart.
 
 Dedicated-server administrators can configure the protections with these command-line switches:
 
