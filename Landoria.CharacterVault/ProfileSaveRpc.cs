@@ -198,19 +198,6 @@ namespace Landoria.CharacterVault
         }
     }
 
-    [HarmonyPatch(typeof(Game), "Shutdown")]
-    internal static class CharacterVaultDirectShutdownPatch
-    {
-        private static bool Prefix(Game __instance, bool saveWorld)
-        {
-            CharacterVaultPlugin.Log.LogDebug(
-                $"Game.Shutdown invoked: saveWorld={saveWorld}, " +
-                $"pendingCharacterSave={CharacterVaultPlugin.DisconnectCoordinator?.HasPendingSave == true}.");
-            return CharacterVaultPlugin.DisconnectCoordinator?.AllowShutdown(
-                __instance, saveWorld) ?? true;
-        }
-    }
-
     [HarmonyPatch(typeof(Game), "ContinueLogout")]
     internal static class CharacterVaultContinueLogoutDiagnosticsPatch
     {
