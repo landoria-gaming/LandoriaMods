@@ -1,9 +1,9 @@
 # ModSentry security design
 
-## Known cheat detection
+## Known managed cheat detection
 
-ModSentry inspects managed assembly metadata and selected process names on the
-client for precise known cheat tool markers. It reports a match to
+ModSentry inspects managed assembly metadata on the client for precise
+known cheat tool markers. It reports a match to
 the connected server, which associates the evidence with its source connection
 and applies the configured kick or ban.
 
@@ -14,7 +14,6 @@ the server has accepted the client's ModSentry inventory.
 - Existing assemblies are inspected incrementally to avoid frame stalls.
 - Assemblies loaded later are queued through the application-domain load event.
 - A match requires the standard assembly marker or type namespace.
-- Selected injector and cheat-loader process names are checked every 10 seconds.
 - Only the tool, detection vector, and matched marker are sent to the server.
 - Process lists, window titles, and unrelated assembly metadata are never sent.
 - Detection results cause a kick by default; `--modsentry-known-cheat-action ban`

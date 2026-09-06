@@ -71,8 +71,7 @@ namespace Landoria.ModSentry
             string indicator, out string failure)
         {
             failure = protocol != ProtocolVersion ? "protocol_invalid" :
-                vector != "assembly_name" && vector != "type_namespace" &&
-                    vector != "process_name"
+                vector != "assembly_name" && vector != "type_namespace"
                     ? "vector_invalid" :
                 string.IsNullOrWhiteSpace(indicator) ||
                     indicator.Length > MaximumIndicatorLength
