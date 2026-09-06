@@ -58,20 +58,26 @@ namespace Landoria.ModSentry
             }
 
             ValidationResult rejection = HandshakeState.RejectionFor(rpc);
-            rejection = rejection ?? ValidationResult.Reject(
-                "Mod verification did not complete. Please try again.",
-                "PeerInfo arrived before an accepted ModSentry inventory.");
-            rpc.Invoke(ModSentryPlugin.RejectionRpc, rejection.PlayerMessage);
-            ModSentryPlugin.Log.LogWarning(rejection.TechnicalMessage);
-            PendingDisconnects.Schedule(rpc);
+            if (rejection == null)
+            {
+                Record(rpc, ValidationResult.Reject(
+                    "Mod verification did not complete. Please try again.",
+                    "PeerInfo arrived before an accepted ModSentry inventory."));
+            }
             return false;
         }
 
         internal static void RequestDisconnect(ZRpc rpc)
         {
             ModSentryPlugin.Log.LogDebug(
-                "Requesting rejected pre-spawn client disconnection.");
+                "Requesting rejected client disconnection.");
             rpc?.Invoke("Disconnect");
+        }
+
+        internal static void RejectConnectedClient(ZRpc rpc, string message)
+        {
+            rpc?.Invoke(ModSentryPlugin.RejectionRpc, message);
+            PendingDisconnects.Schedule(rpc);
         }
 
         internal static void ForceDisconnect(ZRpc rpc)

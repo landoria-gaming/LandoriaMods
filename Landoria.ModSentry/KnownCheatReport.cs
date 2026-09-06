@@ -106,7 +106,8 @@ namespace Landoria.ModSentry
             {
                 ZNet.instance?.Ban(account);
             }
-            ZNet.instance?.Kick(account);
+            ModSentryHandshake.RejectConnectedClient(peer.m_rpc,
+                "A prohibited cheat tool was detected. You have been disconnected.");
         }
 
         private static string Clean(string value)
