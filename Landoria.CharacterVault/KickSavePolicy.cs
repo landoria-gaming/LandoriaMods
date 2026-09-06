@@ -29,8 +29,7 @@ namespace Landoria.CharacterVault
         Allow,
         AllowWithoutSave,
         WaitForPendingSave,
-        RequestSave,
-        Block
+        RequestSave
     }
 
     internal static class KickSavePolicy
@@ -51,7 +50,7 @@ namespace Landoria.CharacterVault
                 return KickAction.WaitForPendingSave;
             }
             return eligibility == KickSaveEligibility.SaveRequired
-                ? KickAction.RequestSave : KickAction.Block;
+                ? KickAction.RequestSave : KickAction.AllowWithoutSave;
         }
     }
 

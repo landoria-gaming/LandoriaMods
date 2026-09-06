@@ -37,9 +37,9 @@ namespace Landoria.CharacterVault
             KickSaveRequestResult result = KickSaveRequestExecutor.Execute(action, request);
             if (!result.Started)
             {
-                CharacterVaultPlugin.Log.LogError(
-                    $"Canceled kick for {peer.m_playerName}: a final save could not be requested.");
-                return false;
+                CharacterVaultPlugin.Log.LogWarning(
+                    $"A final save could not be requested for {peer.m_playerName}; allowing the kick without it.");
+                return true;
             }
 
             CharacterVaultPlugin.Log.LogMessage(
@@ -59,17 +59,12 @@ namespace Landoria.CharacterVault
             else if (action == KickAction.AllowWithoutSave)
             {
                 CharacterVaultPlugin.Log.LogInfo(
-                    $"Allowing kick for rejected player {peer.m_playerName} without a character save.");
+                    $"Allowing kick for {peer.m_playerName} without a character save.");
             }
             else if (action == KickAction.WaitForPendingSave)
             {
                 CharacterVaultPlugin.Log.LogWarning(
                     $"Ignored another kick for {peer.m_playerName} while its final save is pending.");
-            }
-            else if (action == KickAction.Block)
-            {
-                CharacterVaultPlugin.Log.LogError(
-                    $"Canceled kick for {peer.m_playerName}: no save-eligible session exists.");
             }
             return action != KickAction.RequestSave;
         }
@@ -137,14 +132,25 @@ namespace Landoria.CharacterVault
         {
             if (!saved)
             {
-                CharacterVaultPlugin.Log.LogError(
-                    $"Kick for {peer.m_playerName} canceled because save {requestId} was not confirmed.");
-                return;
+                CharacterVaultPlugin.Log.LogWarning(
+                    $"Final save {requestId} for {peer.m_playerName} was not confirmed; proceeding with the kick.");
             }
-
-            CharacterVaultPlugin.Log.LogMessage(
-                $"Replaying kick for {peer.m_playerName} after save {requestId}.");
-            network.Kick(peer.m_socket.GetHostName());
+            else
+            {
+                CharacterVaultPlugin.Log.LogMessage(
+                    $"Replaying kick for {peer.m_playerName} after save {requestId}.");
+            }
+            ZRpc rpc = peer?.m_rpc;
+            if (rpc == null || peer.m_socket == null) return;
+            _authorizedDisconnects.Add(rpc);
+            try
+            {
+                network.Kick(peer.m_socket.GetHostName());
+            }
+            finally
+            {
+                _authorizedDisconnects.Remove(rpc);
+            }
         }
 
         private bool HasPendingRequest(ZRpc rpc)
@@ -183,8 +189,8 @@ namespace Landoria.CharacterVault
             }
 
             _pending.Remove(requestId);
-            CharacterVaultPlugin.Log.LogError(
-                $"Final save {requestId} for {save.PlayerName} failed: {reason}; {save.Reason} is canceled.");
+            CharacterVaultPlugin.Log.LogWarning(
+                $"Final save {requestId} for {save.PlayerName} was abandoned: {reason}; {save.Reason} will continue.");
             save.Completed(requestId, false);
         }
 

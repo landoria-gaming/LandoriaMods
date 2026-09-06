@@ -236,7 +236,8 @@ namespace Landoria.CharacterVault
 
         internal KickSaveEligibility GetKickSaveEligibility(ZNetPeer peer)
         {
-            if (peer?.m_rpc != null && !peer.IsReady())
+            if (peer?.m_rpc != null &&
+                (!peer.IsReady() || peer.m_characterID.IsNone()))
             {
                 return KickSaveEligibility.Rejected;
             }
