@@ -25,6 +25,7 @@ namespace Landoria.ModSentry
         {
             Log = InitializePlugin(PluginGuid);
             ModSentrySettings.Initialize();
+            ManagedCheatDetector.Initialize();
             if (UnityEngine.Application.isBatchMode)
             {
                 Log.LogInfo("Known managed cheat protection is " +

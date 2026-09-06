@@ -68,7 +68,7 @@ namespace Landoria.ModSentry
             }
             if (ZNet.instance?.IsServer() != true)
             {
-                ManagedCheatDetector.Shutdown();
+                ManagedCheatDetector.Disconnect();
             }
         }
     }

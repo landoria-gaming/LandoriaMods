@@ -16,14 +16,12 @@ namespace Landoria.ModSentry
         private static bool _reported;
         private static bool _initialized;
 
-        internal static void Enable(ZRpc serverRpc)
+        internal static void Initialize()
         {
             if (Application.isBatchMode)
             {
                 return;
             }
-            Connect(serverRpc);
-            _serverReady = true;
             if (!_initialized)
             {
                 _initialized = true;
@@ -33,9 +31,22 @@ namespace Landoria.ModSentry
                 {
                     Pending.Enqueue(assembly);
                 }
+                ModSentryPlugin.Log.LogDebug(
+                    "Started managed cheat assembly inspection.");
             }
+        }
+
+        internal static void Enable(ZRpc serverRpc)
+        {
+            if (Application.isBatchMode)
+            {
+                return;
+            }
+            Initialize();
+            Connect(serverRpc);
+            _serverReady = true;
             ModSentryPlugin.Log.LogDebug(
-                "Enabled managed cheat assembly inspection for this server.");
+                "Enabled managed cheat reporting for this server.");
         }
 
         private static void Connect(ZRpc serverRpc)
