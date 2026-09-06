@@ -35,6 +35,11 @@
     <ItemGroup>
         <Reference Include="System"/>
         <Reference Include="System.Core"/>
+        <Reference Include="System.Security"/>
+        <Reference Include="gui_framework">
+            <HintPath>$(ValheimGamePath)\valheim_Data\Managed\gui_framework.dll</HintPath>
+            <Private>false</Private>
+        </Reference>
         <Reference Include="System.Data"/>
         <Reference Include="System.Xml"/>
         <Reference Include="BepInEx">
@@ -61,9 +66,23 @@
             <HintPath>$(ValheimGamePath)\valheim_Data\Managed\UnityEngine.dll</HintPath>
             <Private>false</Private>
         </Reference>
+        <Reference Include="Unity.TextMeshPro">
+            <HintPath>$(ValheimGamePath)\valheim_Data\Managed\Unity.TextMeshPro.dll</HintPath>
+            <Private>false</Private>
+        </Reference>
+        <Reference Include="UnityEngine.UI">
+            <HintPath>$(ValheimGamePath)\valheim_Data\Managed\UnityEngine.UI.dll</HintPath>
+            <Private>false</Private>
+        </Reference>
+        <Reference Include="UnityEngine.UIModule">
+            <HintPath>$(ValheimGamePath)\valheim_Data\Managed\UnityEngine.UIModule.dll</HintPath>
+            <Private>false</Private>
+        </Reference>
     </ItemGroup>
     <ItemGroup>
         <Compile Include="QuickLaunchPlugin.cs"/>
+        <Compile Include="LoadingWorldLabel.cs"/>
+        <Compile Include="RememberedPassword.cs"/>
         <Compile Include="Properties\AssemblyInfo.cs"/>
     </ItemGroup>
     <ItemGroup>

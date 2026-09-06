@@ -1,5 +1,11 @@
 # Changelog
 
+- Use Valheim's normal server discovery when automatically joining dedicated servers.
+- Remember successful server passwords securely on Windows for automatic reconnects.
+- Briefly show the server or world name and character during automatic loading.
+- Remember the last successful multiplayer connection backend for automatic reconnects.
+- Hold ESC to skip automatic loading without changing the saved session; remove the command-line switch.
+
 ## 1.0.6
 
 - Updated README.

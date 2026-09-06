@@ -6,32 +6,21 @@ Gets you back into Valheim faster by automatically resuming your last local or m
 
 [Watch QuickLaunch in action on YouTube](https://youtu.be/K0r75KNOGc0).
 
-## Valheim compatibility
-
-| Valheim channel | Version | Compatibility |
-|---|---:|---|
-| Current release | `0.221.12` | Compatible |
-| Public Test | `0.221.13` | Compatible |
-
 ## Features
 
-- Selects the remembered character.
-- Reopens the last local world.
-- Reconnects to a valid recent multiplayer server.
-- Safely returns to the menu when remembered data is unavailable.
-- Never stores or enters passwords.
-
-## Valheim.exe Command Switches
-
-| Switch | Default | Purpose |
-|---|---:|---|
-| `--quicklaunch <true or false>` | `true` | Controls automatic session resume. |
+- Automatically selects your last character.
+- Reopens your last local world or reconnects to your most recent server, including crossplay servers.
+- Supports Steam and Xbox clients, local worlds, Steam network servers, and crossplay servers (PlayFab).
+- Briefly shows the world or server name and your character during automatic loading.
+- Stays in the menu if the saved character, world, or server entry is missing.
+- Hold ESC at startup to skip QuickLaunch without changing your saved session.
+- On Windows, saves the password after a successful connection and enters it when automatically rejoining the same server. The saved password is encrypted for your Windows account.
 
 ## Installation
 
-| Client required | Server required (dedicated) | Player-hosted server |
-|---|---|---|
-| Yes | No | Not Supported |
+| Client required | Server required |
+|---|---|
+| true | false |
 
 
 ## Contact
