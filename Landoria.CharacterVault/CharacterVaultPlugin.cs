@@ -20,7 +20,6 @@ namespace Landoria.CharacterVault
         internal static CharacterVaultPlugin Instance { get; private set; }
         internal static CharacterVaultSettings Settings { get; private set; }
         internal static ProfileTransferService Transfers { get; private set; }
-        internal static WindowsCloseInterceptor WindowsClose { get; private set; }
         internal static bool PlayFabVerboseLogging { get; private set; }
 
         private void Awake()
@@ -36,7 +35,6 @@ namespace Landoria.CharacterVault
             Transfers = new ProfileTransferService(SynchronizationContext.Current);
             Coordinator = new GracefulShutdownCoordinator(SynchronizationContext.Current);
             DisconnectCoordinator = new VoluntaryDisconnectCoordinator();
-            WindowsClose = new WindowsCloseInterceptor();
             ServerDisconnects = new ServerDisconnectSaveCoordinator();
             SaveStatus = new CharacterSaveStatusDisplay();
             PlayFabVerboseDiagnostics.Enable();
@@ -58,21 +56,6 @@ namespace Landoria.CharacterVault
         {
             CharacterVaultRejection.Tick();
             Transfers.MonitorFinalSaves();
-            MonitorWindowsClose();
-        }
-
-        private static void MonitorWindowsClose()
-        {
-            if (ZNet.instance == null || ZNet.instance.IsDedicated())
-            {
-                return;
-            }
-
-            WindowsClose.EnsureInstalled();
-            if (WindowsClose.ConsumeCloseRequest())
-            {
-                DisconnectCoordinator.HandleNativeCloseRequest();
-            }
         }
 
         private static IEnumerator QuitAfterCurrentFrame()
@@ -85,14 +68,12 @@ namespace Landoria.CharacterVault
         {
             CharacterVaultLobbyLeftDiagnostics.Unregister();
             DisconnectCoordinator?.Dispose();
-            WindowsClose?.Dispose();
             ServerDisconnects?.Dispose();
             Coordinator?.Dispose();
             Transfers?.Dispose();
             SaveStatus?.Dispose();
             CharacterVaultRejection.Clear();
             DisconnectCoordinator = null;
-            WindowsClose = null;
             ServerDisconnects = null;
             Coordinator = null;
             Transfers = null;
