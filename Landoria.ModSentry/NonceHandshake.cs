@@ -142,7 +142,8 @@ namespace Landoria.ModSentry
             requested = false;
             var rpc = serverRpc;
             serverRpc = null;
-            Landoria.SharedLib.ConnectionFailureMessages.Push("Landoria.ModSentry", message, true);
+            Landoria.SharedLib.ConnectionFailureMessages.Push(
+                "Landoria.ModSentry", message);
             if (rpc != null) ModSentryHandshake.ForceDisconnect(rpc);
         }
 

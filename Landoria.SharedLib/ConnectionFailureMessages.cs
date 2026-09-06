@@ -13,25 +13,23 @@ namespace Landoria.SharedLib
         private static readonly ManualLogSource Log =
             BepInEx.Logging.Logger.CreateLogSource("Landoria.ConnectionFailureMessages");
 
-        public static void Push(string source, string message, bool showImmediately = false)
+        public static void Push(string source, string message)
         {
-            Push(source, message, (string)null, showImmediately);
+            Push(source, message, (string)null);
+        }
+
+        public static void Push(string source, string userMessage, string systemMessage)
+        {
+            Push(source, userMessage, systemMessage, null);
+        }
+
+        public static void Push(string source, string userMessage, Exception exception)
+        {
+            Push(source, userMessage, exception?.Message, exception);
         }
 
         public static void Push(string source, string userMessage, string systemMessage,
-            bool showImmediately = false)
-        {
-            Push(source, userMessage, systemMessage, null, showImmediately);
-        }
-
-        public static void Push(string source, string userMessage, Exception exception,
-            bool showImmediately = false)
-        {
-            Push(source, userMessage, exception?.Message, exception, showImmediately);
-        }
-
-        public static void Push(string source, string userMessage, string systemMessage,
-            Exception exception, bool showImmediately = false)
+            Exception exception)
         {
             string displayMessage = DisplayMessage(
                 userMessage, systemMessage ?? exception?.Message);
@@ -49,10 +47,6 @@ namespace Landoria.SharedLib
             }
             if (added)
                 LogQueued(source, displayMessage, systemMessage, exception);
-            if (showImmediately && MessageHud.instance != null)
-            {
-                MessageHud.instance.ShowMessage(MessageHud.MessageType.Center, displayMessage);
-            }
         }
 
         public static void Clear(string source)
