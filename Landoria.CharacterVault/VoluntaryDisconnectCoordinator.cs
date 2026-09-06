@@ -17,11 +17,6 @@ namespace Landoria.CharacterVault
         private VoluntaryExitKind _exitKind;
         private bool _playerEnteredWorld;
 
-        internal VoluntaryDisconnectCoordinator()
-        {
-            Application.wantsToQuit += AllowApplicationQuit;
-        }
-
         internal bool HasPendingSave => _requestId != null;
 
         internal bool AllowLogout(Game game, bool save, bool changeToStartScene)
@@ -112,19 +107,7 @@ namespace Landoria.CharacterVault
 
         public void Dispose()
         {
-            Application.wantsToQuit -= AllowApplicationQuit;
             ClearPendingRequest();
-        }
-
-        private bool AllowApplicationQuit()
-        {
-            if (_allowApplicationQuit)
-            {
-                CharacterVaultPlugin.Log.LogInfo("Application quit authorization consumed.");
-                return true;
-            }
-
-            return !Start(VoluntaryExitKind.ApplicationQuit, Game.instance, true, false);
         }
 
         private bool Start(VoluntaryExitKind kind, Game game, bool save, bool startScene)
