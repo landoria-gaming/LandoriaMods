@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Reflection;
 using UnityEngine;
 
@@ -8,6 +9,7 @@ namespace Landoria.ModSentry
     internal static class ManagedCheatDetector
     {
         private const int AssembliesPerFrame = 2;
+        private const float ProcessScanIntervalSeconds = 10f;
         private static readonly ConcurrentQueue<Assembly> Pending =
             new ConcurrentQueue<Assembly>();
         private static ZRpc _serverRpc;
@@ -15,6 +17,7 @@ namespace Landoria.ModSentry
         private static bool _serverReady;
         private static bool _reported;
         private static bool _initialized;
+        private static float _nextProcessScan;
 
         internal static void Initialize()
         {
@@ -33,6 +36,7 @@ namespace Landoria.ModSentry
                 }
                 ModSentryPlugin.Log.LogDebug(
                     "Started managed cheat assembly inspection.");
+                _nextProcessScan = Time.unscaledTime;
             }
         }
 
@@ -74,6 +78,7 @@ namespace Landoria.ModSentry
             {
                 Inspect(assembly);
             }
+            InspectProcessesWhenDue();
             ReportIfNeeded();
         }
 
@@ -89,6 +94,7 @@ namespace Landoria.ModSentry
             Disconnect();
             _detection = null;
             _initialized = false;
+            _nextProcessScan = 0f;
         }
 
         private static void OnAssemblyLoad(object sender,
@@ -134,6 +140,50 @@ namespace Landoria.ModSentry
                     Record(tool, "type_namespace", value);
                     return;
                 }
+            }
+        }
+
+        private static void InspectProcessesWhenDue()
+        {
+            if (_detection != null || Time.unscaledTime < _nextProcessScan) return;
+            _nextProcessScan = Time.unscaledTime + ProcessScanIntervalSeconds;
+            Process[] processes = null;
+            try
+            {
+                processes = Process.GetProcesses();
+                foreach (Process process in processes)
+                {
+                    string name = ProcessName(process);
+                    if (KnownCheatCatalog.TryMatchProcess(name, out string tool))
+                    {
+                        Record(tool, "process_name", name);
+                        return;
+                    }
+                }
+            }
+            catch (Exception exception)
+            {
+                ModSentryPlugin.Log.LogDebug(
+                    "Cheat process inspection failed: " + exception);
+            }
+            finally
+            {
+                if (processes != null)
+                    foreach (Process process in processes) process.Dispose();
+            }
+        }
+
+        private static string ProcessName(Process process)
+        {
+            try
+            {
+                return process?.ProcessName ?? string.Empty;
+            }
+            catch (Exception exception)
+            {
+                ModSentryPlugin.Log.LogDebug(
+                    "A process name could not be inspected: " + exception);
+                return string.Empty;
             }
         }
 
