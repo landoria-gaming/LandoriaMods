@@ -58,7 +58,7 @@ namespace Landoria.RavenWatch.Server.CheatDetection
             return new CheatDetectionFinding(new[] { source }, GetDetectionId(flight.playerNetworkId),
                 DetectionCode, ServerAnomalyConfidence, ServerAttributionConfidence,
                 flight.evidence, flight.playerName, flight.playerSessionId,
-                "used debug fly mode", "The server received DebugFly=true in the player's own " +
+                "used fly mode", "The server received DebugFly=true in the player's own " +
                 "network data. Vanilla reserves this mode for developer cheat controls.");
         }
 
@@ -68,7 +68,7 @@ namespace Landoria.RavenWatch.Server.CheatDetection
             return new CheatDetectionFinding(new[] { source }, GetDetectionId(flight.playerNetworkId),
                 DetectionCode, ObserverAnomalyConfidence, ObserverAttributionConfidence,
                 flight.evidence, flight.playerName, flight.ownerSessionId,
-                "used debug fly mode", "Another client read DebugFly=true from the remote " +
+                "used fly mode", "Another client read DebugFly=true from the remote " +
                 "player's synchronized network state. Vanilla reserves this mode for developer cheat controls.");
         }
 

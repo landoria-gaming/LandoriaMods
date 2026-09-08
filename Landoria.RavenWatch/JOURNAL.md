@@ -43,7 +43,9 @@ Source folder: `Client/EventCollection/Observer/`.
 ## Journal operation
 
 Server journal files use the `.json` extension and contain a JSON array of objects.
-`character-history.json` records when each character ID was first seen by this server.
+`worlds_local/<world>-RavenWatch.json` stores the server's trusted knowledge about
+players in that world. It currently records when each authenticated platform ID and
+player-name pair was first seen by the server.
 Every cheat detection finding includes two required confidence values from `1` to `3`:
 one for the anomaly and one for the attribution to the suspected player. Both final
 confidence values are rounded to scores out of `10` using the same weighting. Server
@@ -70,8 +72,8 @@ receipt time and `source: "observer"`.
   client that implements flight without this flag requires a separate movement detection.
 - Removing an item ZDO near its owner is consistent with a pickup but does not expose the
   player's private inventory contents.
-- The character history records first contact with this server, not the character profile's
-  creation date.
+- The character history records first contact with this server. Its key combines the
+  authenticated platform ID and player name; it is not the profile creation date.
 - Session and network IDs are not Steam or Xbox account IDs.
 - Client buffers are bounded. Offline observations, oversized events and queue overflow
   can be lost; there is no disk replay.

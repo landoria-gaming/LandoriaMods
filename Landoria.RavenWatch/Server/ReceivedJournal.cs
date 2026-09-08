@@ -28,7 +28,7 @@ namespace Landoria.RavenWatch.Server
                 string directory = Path.Combine(
                     Utils.GetSaveDataPath(FileHelpers.FileSource.Local), "RavenWatch");
                 Directory.CreateDirectory(directory);
-                ServerCharacterHistory.Open(directory);
+                ServerCharacterHistory.Open(GetCharacterHistoryPath());
                 string name = "received-" + DateTime.UtcNow.ToString("yyyyMMdd-HHmmss")
                     + "-" + Guid.NewGuid().ToString("N");
                 string path = Path.Combine(directory, name + ".json");
@@ -60,6 +60,16 @@ namespace Landoria.RavenWatch.Server
         }
 
         internal static IReadOnlyList<Event> GetBufferedEvents() => pendingView;
+
+        private static string GetCharacterHistoryPath()
+        {
+            World world = ZNet.World;
+            if (world == null) throw new InvalidOperationException("The world is not loaded.");
+            string databasePath = world.GetDBPath();
+            string directory = Path.GetDirectoryName(databasePath);
+            string worldFileName = Path.GetFileNameWithoutExtension(databasePath);
+            return Path.Combine(directory, worldFileName + "-RavenWatch.json");
+        }
 
         internal static void ArchiveOverflow()
         {

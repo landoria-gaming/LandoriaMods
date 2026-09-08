@@ -43,7 +43,8 @@ namespace Landoria.RavenWatch
             };
         }
 
-        internal static InventoryItemSnapshot Capture(ItemDrop.ItemData template, ZDO zdo)
+        internal static InventoryItemSnapshot Capture(ItemDrop.ItemData template, ZDO zdo,
+            string prefabName)
         {
             ItemDrop.ItemData item = template.Clone();
             item.m_durability = zdo.GetFloat(ZDOVars.s_durability, item.m_durability);
@@ -59,7 +60,9 @@ namespace Landoria.RavenWatch
             for (int index = 0; index < customDataCount; index++)
                 item.m_customData[zdo.GetString("data_" + index)] =
                     zdo.GetString("data__" + index);
-            return Capture(item);
+            InventoryItemSnapshot snapshot = Capture(item);
+            snapshot.prefab = prefabName;
+            return snapshot;
         }
     }
 

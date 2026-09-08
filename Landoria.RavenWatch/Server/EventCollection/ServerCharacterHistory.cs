@@ -10,33 +10,37 @@ namespace Landoria.RavenWatch.Server.EventCollection
 {
     internal static class ServerCharacterHistory
     {
-        private static readonly Dictionary<long, DateTime> firstSeenUtc = new();
+        private static readonly Dictionary<string, DateTime> firstSeenUtc =
+            new(StringComparer.Ordinal);
         private static string path;
 
-        internal static void Open(string directory)
+        internal static void Open(string historyPath)
         {
-            path = Path.Combine(directory, "character-history.json");
+            path = historyPath;
             firstSeenUtc.Clear();
             try
             {
-                if (!File.Exists(path)) return;
-                JObject stored = JObject.Parse(File.ReadAllText(path));
-                foreach (JProperty property in stored.Properties())
-                    if (long.TryParse(property.Name, out long id) &&
-                        DateTime.TryParse((string)property.Value, out DateTime seen))
-                        firstSeenUtc[id] = seen.ToUniversalTime();
+                if (File.Exists(path))
+                {
+                    JObject stored = JObject.Parse(File.ReadAllText(path));
+                    foreach (JProperty property in stored.Properties())
+                        if (property.Name.Contains("_") &&
+                            DateTime.TryParse((string)property.Value, out DateTime seen))
+                            firstSeenUtc[property.Name] = seen.ToUniversalTime();
+                }
+                RavenWatchPlugin.Log?.LogInfo("Character history: " + path);
             }
             catch (Exception exception) { RavenWatchPlugin.Log?.LogError(exception); }
         }
 
         internal static float? Observe(ZNetPeer peer)
         {
-            long? characterId = GetCharacterId(peer);
-            if (!characterId.HasValue) return null;
-            if (!firstSeenUtc.TryGetValue(characterId.Value, out DateTime firstSeen))
+            string identity = GetIdentity(peer);
+            if (identity == null) return null;
+            if (!firstSeenUtc.TryGetValue(identity, out DateTime firstSeen))
             {
                 firstSeen = DateTime.UtcNow;
-                firstSeenUtc.Add(characterId.Value, firstSeen);
+                firstSeenUtc.Add(identity, firstSeen);
                 Save();
             }
             return (float)Math.Max(0d, (DateTime.UtcNow - firstSeen).TotalSeconds);
@@ -44,17 +48,20 @@ namespace Landoria.RavenWatch.Server.EventCollection
 
         internal static string FirstSeenUtc(ZNetPeer peer)
         {
-            long? characterId = GetCharacterId(peer);
-            return characterId.HasValue && firstSeenUtc.TryGetValue(characterId.Value,
+            string identity = GetIdentity(peer);
+            return identity != null && firstSeenUtc.TryGetValue(identity,
                 out DateTime firstSeen) ? firstSeen.ToString("O") : null;
         }
 
-        private static long? GetCharacterId(ZNetPeer peer)
+        internal static string GetIdentity(ZNetPeer peer)
         {
-            if (peer == null || peer.m_characterID.IsNone() || ZDOMan.instance == null) return null;
-            ZDO character = ZDOMan.instance.GetZDO(peer.m_characterID);
-            long id = character?.GetLong(ZDOVars.s_playerID, 0L) ?? 0L;
-            return id == 0L ? (long?)null : id;
+            string account = peer?.m_socket?.GetHostName();
+            if (string.IsNullOrWhiteSpace(account) ||
+                string.IsNullOrWhiteSpace(peer.m_playerName)) return null;
+            if (ZNet.m_onlineBackend == OnlineBackendType.Steamworks &&
+                !account.StartsWith("Steam_", StringComparison.OrdinalIgnoreCase))
+                account = "Steam_" + account;
+            return account + "_" + peer.m_playerName;
         }
 
         private static void Save()

@@ -49,7 +49,7 @@ namespace Landoria.RavenWatch.Server.EventCollection
             if (distance > MaximumPickupDistance) return;
             ServerEventPublisher.Publish(new GroundItemRemovedNearPlayerServer
             {
-                item = InventoryItemSnapshot.Capture(drop.m_itemData, zdo),
+                item = InventoryItemSnapshot.Capture(drop.m_itemData, zdo, prefab.name),
                 itemNetworkId = id.ToString(),
                 playerName = sender.m_playerName, playerSessionId = sender.m_uid.ToString(),
                 itemPosition = itemPosition, playerPosition = playerPosition,

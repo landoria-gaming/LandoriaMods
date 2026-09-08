@@ -15,6 +15,7 @@ namespace Landoria.RavenWatch.Server.EventCollection
         public string itemOwnerSessionId;
         public string networkSenderSessionId;
         public string networkSenderName;
+        public string characterHistoryId;
         public string characterFirstSeenUtc;
         public float? characterFirstSeenSecondsAgo;
         public PlayerEquipmentSnapshot playerEquipment;
@@ -39,12 +40,12 @@ namespace Landoria.RavenWatch.Server.EventCollection
             Vector3? playerForward = player != null
                 ? (Vector3?)(player.GetRotation() * Vector3.forward) : null;
             Vector3 position = zdo.GetPosition();
-            return Create(zdo, sender, drop.m_itemData, player, position, playerPosition,
-                playerForward);
+            return Create(zdo, sender, drop.m_itemData, prefab.name, player, position,
+                playerPosition, playerForward);
         }
 
         private static GroundItemSpawnedServer Create(ZDO zdo, ZNetPeer sender,
-            ItemDrop.ItemData itemTemplate, ZDO player, Vector3 position,
+            ItemDrop.ItemData itemTemplate, string prefabName, ZDO player, Vector3 position,
             Vector3? playerPosition, Vector3? playerForward)
         {
             bool hasPickedUp = zdo.GetBool(ZDOVars.s_pickedUp, out bool pickedUp);
@@ -54,11 +55,12 @@ namespace Landoria.RavenWatch.Server.EventCollection
             PlayerEquipmentSnapshot equipment = PlayerEquipmentSnapshot.Capture(player);
             return new GroundItemSpawnedServer
             {
-                item = InventoryItemSnapshot.Capture(itemTemplate, zdo),
+                item = InventoryItemSnapshot.Capture(itemTemplate, zdo, prefabName),
                 itemNetworkId = zdo.m_uid.ToString(),
                 itemOwnerSessionId = zdo.GetOwner().ToString(),
                 networkSenderSessionId = sender.m_uid.ToString(),
                 networkSenderName = sender.m_playerName,
+                characterHistoryId = ServerCharacterHistory.GetIdentity(sender),
                 characterFirstSeenUtc = ServerCharacterHistory.FirstSeenUtc(sender),
                 characterFirstSeenSecondsAgo = characterAge,
                 playerEquipment = equipment,
