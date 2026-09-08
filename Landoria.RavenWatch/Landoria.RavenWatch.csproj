@@ -31,6 +31,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="RavenWatchPlugin.cs" />
+    <Compile Include="RavenWatchApi.cs" />
+    <Compile Include="CheatDetectionReport.cs" />
     <Compile Include="Client/ClientRuntime.cs" />
     <Compile Include="Client/Network/EventTransport.cs" />
     <Compile Include="RavenWatchProtocol.cs" />

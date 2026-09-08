@@ -6,12 +6,20 @@ A server anti-cheat that uses observations from other clients and the server to 
 
 - Clients send only observations of other players and network objects.
 - The server records its own events and cross-checks them with events received from other clients to detect impossible actions performed by a client.
-- For now, all connected players receive a chat message when cheating is suspected, and the suspected player is not kicked.
+- RavenWatch only reports suspected cheating in the chat for all connected clients. Another server mod can use the cheat report hook to implement a response such as an automatic kick.
 - Server journals are stored in the Valheim data directory under `RavenWatch`.
 
 ## Cheat detection
 
 - Suspicious creature spawns are reported when no vanilla spawn, raid or nearby spawner can explain them.
+
+## Integration
+
+Server mods can subscribe to `RavenWatchApi.CheatReported`. The report provides the
+suspected session, final confidence score, explanation and complete detailed JSON, so
+the subscriber can apply its own action such as an automatic kick. Setting
+`report.SuppressChat = true` prevents the player chat alert while retaining the server
+log and cheat detection journal.
 
 ## Installation
 

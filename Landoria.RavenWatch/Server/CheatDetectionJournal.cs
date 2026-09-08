@@ -22,12 +22,12 @@ namespace Landoria.RavenWatch.Server
             }
         }
 
-        internal static void Append(CheatDetectionFinding[] findings, int confidence)
+        internal static void Append(JObject record)
         {
-            if (writer == null || findings == null || findings.Length == 0) return;
+            if (writer == null || record == null) return;
             try
             {
-                writer.Append(CreateRecord(findings, confidence));
+                writer.Append(record);
             }
             catch (Exception exception)
             {
@@ -35,7 +35,7 @@ namespace Landoria.RavenWatch.Server
             }
         }
 
-        private static JObject CreateRecord(CheatDetectionFinding[] findings, int confidence)
+        internal static JObject CreateRecord(CheatDetectionFinding[] findings, int confidence)
         {
             CheatDetectionFinding primary = findings[0];
             return new JObject

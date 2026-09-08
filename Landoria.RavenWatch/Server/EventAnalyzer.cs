@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Landoria.RavenWatch.Server.CheatDetection;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Landoria.RavenWatch.Server
 {
@@ -164,12 +166,28 @@ namespace Landoria.RavenWatch.Server
                 reportedDetectionIds.ContainsOrAdd(primary.detectionId)) return;
             string identity = string.IsNullOrWhiteSpace(primary.suspectedPlayerName)
                 ? "unknown player" : primary.suspectedPlayerName;
-            CheatDetectionJournal.Append(findings, confidence);
-            foreach (ZNetPeer peer in ZNet.instance.GetPeers().Where(candidate => candidate.IsReady()))
-                peer.m_rpc.Invoke(RavenWatchProtocol.AnomalyRpc, identity, primary.anomaly);
+            string explanation = DetailedExplanation(findings);
+            JObject record = CheatDetectionJournal.CreateRecord(findings, confidence);
+            CheatDetectionJournal.Append(record);
+            CheatDetectionReport report = CreatePublicReport(primary, confidence,
+                explanation, record);
+            RavenWatchApi.Publish(report);
+            if (!report.SuppressChat)
+                foreach (ZNetPeer peer in ZNet.instance.GetPeers()
+                    .Where(candidate => candidate.IsReady()))
+                    peer.m_rpc.Invoke(RavenWatchProtocol.AnomalyRpc, identity, primary.anomaly);
             RavenWatchPlugin.Log.LogWarning("Suspected cheating: " + identity + " " +
                 primary.anomaly + ". Confidence: " + confidence + "/10. " +
-                DetailedExplanation(findings));
+                explanation);
+        }
+
+        private static CheatDetectionReport CreatePublicReport(CheatDetectionFinding primary,
+            int confidence, string explanation, JObject record)
+        {
+            return new CheatDetectionReport((string)record["detectedUtc"],
+                primary.detectionId, primary.detectionCode, confidence,
+                primary.suspectedPlayerName, primary.suspectedSessionId,
+                primary.anomaly, explanation, record.ToString(Formatting.None));
         }
 
         private static string DetailedExplanation(CheatDetectionFinding[] findings)
