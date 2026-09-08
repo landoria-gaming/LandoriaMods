@@ -38,6 +38,10 @@ Source folder: `Client/EventCollection/Observer/`.
 ## Journal operation
 
 Server journal files use the `.json` extension and contain a JSON array of objects.
+Every cheat detection finding includes a required confidence from `1` to `3`.
+The final detection confidence is rounded to a score out of `10`. Server evidence has
+a weight equal to the number of observer findings, with a minimum weight of one.
+A single observer has a weight of `0.5`; two or more observers each have a weight of `1`.
 
 | Code | Event | Main details |
 |---|---|---|

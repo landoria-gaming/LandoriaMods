@@ -22,12 +22,12 @@ namespace Landoria.RavenWatch.Server
             }
         }
 
-        internal static void Append(CheatDetectionFinding[] findings)
+        internal static void Append(CheatDetectionFinding[] findings, int confidence)
         {
             if (writer == null || findings == null || findings.Length == 0) return;
             try
             {
-                writer.Append(CreateRecord(findings));
+                writer.Append(CreateRecord(findings, confidence));
             }
             catch (Exception exception)
             {
@@ -35,7 +35,7 @@ namespace Landoria.RavenWatch.Server
             }
         }
 
-        private static JObject CreateRecord(CheatDetectionFinding[] findings)
+        private static JObject CreateRecord(CheatDetectionFinding[] findings, int confidence)
         {
             CheatDetectionFinding primary = findings[0];
             return new JObject
@@ -46,6 +46,7 @@ namespace Landoria.RavenWatch.Server
                 ["detectedUtc"] = DateTime.UtcNow.ToString("O"),
                 ["detectionId"] = primary.detectionId,
                 ["detectionCode"] = primary.detectionCode,
+                ["confidence"] = confidence,
                 ["findings"] = CreateFindings(findings)
             };
         }
@@ -59,6 +60,7 @@ namespace Landoria.RavenWatch.Server
                 {
                     ["detectionId"] = finding.detectionId,
                     ["detectionCode"] = finding.detectionCode,
+                    ["confidence"] = finding.confidence,
                     ["evidence"] = finding.evidence,
                     ["playerName"] = string.IsNullOrWhiteSpace(finding.suspectedPlayerName)
                         ? "unknown player" : finding.suspectedPlayerName,

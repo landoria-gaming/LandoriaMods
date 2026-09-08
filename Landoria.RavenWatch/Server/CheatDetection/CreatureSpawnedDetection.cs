@@ -22,7 +22,7 @@ namespace Landoria.RavenWatch.Server.CheatDetection
                 if (creature == null) continue;
                 string detectionId = GetDetectionId(creature);
                 findings.Add(new CheatDetectionFinding(new[] { eventToAnalyze }, detectionId,
-                    DetectionCode, "without_compatible_vanilla_spawn_source",
+                    DetectionCode, 3, "without_compatible_vanilla_spawn_source",
                     creature.networkSenderName, creature.networkSenderSessionId,
                     "spawned a " + creature.creatureName, Explain(creature)));
             }

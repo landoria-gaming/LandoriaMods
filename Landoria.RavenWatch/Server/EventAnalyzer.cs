@@ -35,7 +35,7 @@ namespace Landoria.RavenWatch.Server
                     out CheatDetectionFinding[] serverFindings)) succeeded = false;
                 if (!RunObserverBasedDetection(detection, events,
                     out CheatDetectionFinding[] observerFindings)) succeeded = false;
-                ReportFindings(serverFindings.Concat(observerFindings));
+                ReportFindings(serverFindings, observerFindings);
             }
             if (succeeded) ReceivedJournal.ArchiveOverflow();
         }
@@ -74,26 +74,102 @@ namespace Landoria.RavenWatch.Server
             }
         }
 
-        private static void ReportFindings(IEnumerable<CheatDetectionFinding> findings)
+        private static void ReportFindings(CheatDetectionFinding[] serverFindings,
+            CheatDetectionFinding[] observerFindings)
         {
-            if (findings == null) return;
-            foreach (IGrouping<string, CheatDetectionFinding> group in findings
-                .Where(IsValid).GroupBy(finding => finding.detectionId, StringComparer.Ordinal))
-                ReportDetection(group.ToArray());
+            CheatDetectionFinding[] validServer = serverFindings.Where(IsValid).ToArray();
+            CheatDetectionFinding[] validObservers = observerFindings
+                .Where(IsValidObserverFinding).ToArray();
+            var serverSet = new HashSet<CheatDetectionFinding>(validServer);
+            foreach (IGrouping<string, CheatDetectionFinding> group in validServer
+                .Concat(validObservers).GroupBy(finding => finding.detectionId,
+                    StringComparer.Ordinal))
+            {
+                CheatDetectionFinding[] groupedFindings = group.ToArray();
+                int confidence = CalculateConfidence(groupedFindings, serverSet);
+                ReportDetection(groupedFindings, confidence);
+            }
         }
 
-        private static void ReportDetection(CheatDetectionFinding[] findings)
+        private static int CalculateConfidence(CheatDetectionFinding[] findings,
+            HashSet<CheatDetectionFinding> serverFindings)
+        {
+            int serverCount = 0;
+            int serverTotal = 0;
+            foreach (CheatDetectionFinding finding in findings)
+            {
+                if (serverFindings.Contains(finding))
+                {
+                    serverCount++;
+                    serverTotal += finding.confidence;
+                }
+            }
+            double[] observerConfidences = GetObserverConfidences(findings, serverFindings);
+            if (serverCount == 0)
+                return ScaleConfidence(observerConfidences.Average());
+            int observerCount = observerConfidences.Length;
+            int serverWeight = Math.Max(1, observerCount);
+            double observerWeight = observerCount == 1 ? 0.5d : 1d;
+            double serverAverage = (double)serverTotal / serverCount;
+            double weightedObserverTotal = observerConfidences.Sum() * observerWeight;
+            double totalWeight = serverWeight + observerCount * observerWeight;
+            return ScaleConfidence((serverAverage * serverWeight + weightedObserverTotal) /
+                totalWeight);
+        }
+
+        private static double[] GetObserverConfidences(CheatDetectionFinding[] findings,
+            HashSet<CheatDetectionFinding> serverFindings)
+        {
+            var totals = new Dictionary<string, int>(StringComparer.Ordinal);
+            var counts = new Dictionary<string, int>(StringComparer.Ordinal);
+            var findingObservers = new HashSet<string>(StringComparer.Ordinal);
+            foreach (CheatDetectionFinding finding in findings)
+            {
+                if (serverFindings.Contains(finding)) continue;
+                findingObservers.Clear();
+                foreach (Event source in finding.source)
+                {
+                    string observerId = GetObserverId(source);
+                    if (observerId == null || !findingObservers.Add(observerId)) continue;
+                    totals[observerId] = totals.TryGetValue(observerId, out int total)
+                        ? total + finding.confidence : finding.confidence;
+                    counts[observerId] = counts.TryGetValue(observerId, out int count)
+                        ? count + 1 : 1;
+                }
+            }
+            return totals.Select(pair => (double)pair.Value / counts[pair.Key]).ToArray();
+        }
+
+        private static bool IsValidObserverFinding(CheatDetectionFinding finding)
+        {
+            return IsValid(finding) && finding.source.Any(source => GetObserverId(source) != null);
+        }
+
+        private static string GetObserverId(Event source)
+        {
+            if ((string)source?.context?["source"] != "observer") return null;
+            string observerId = (string)source.context["senderSessionId"];
+            return string.IsNullOrWhiteSpace(observerId) ? null : observerId;
+        }
+
+        private static int ScaleConfidence(double confidence)
+        {
+            return (int)Math.Round(confidence * 10d / 3d, MidpointRounding.AwayFromZero);
+        }
+
+        private static void ReportDetection(CheatDetectionFinding[] findings, int confidence)
         {
             CheatDetectionFinding primary = findings[0];
             if (ZNet.instance == null ||
                 reportedDetectionIds.ContainsOrAdd(primary.detectionId)) return;
             string identity = string.IsNullOrWhiteSpace(primary.suspectedPlayerName)
                 ? "unknown player" : primary.suspectedPlayerName;
-            CheatDetectionJournal.Append(findings);
+            CheatDetectionJournal.Append(findings, confidence);
             foreach (ZNetPeer peer in ZNet.instance.GetPeers().Where(candidate => candidate.IsReady()))
                 peer.m_rpc.Invoke(RavenWatchProtocol.AnomalyRpc, identity, primary.anomaly);
             RavenWatchPlugin.Log.LogWarning("Suspected cheating: " + identity + " " +
-                primary.anomaly + ". " + DetailedExplanation(findings));
+                primary.anomaly + ". Confidence: " + confidence + "/10. " +
+                DetailedExplanation(findings));
         }
 
         private static string DetailedExplanation(CheatDetectionFinding[] findings)
@@ -109,6 +185,7 @@ namespace Landoria.RavenWatch.Server
                 finding.source.All(source => source?.context != null && source.entry != null) &&
                 !string.IsNullOrWhiteSpace(finding.detectionId) &&
                 !string.IsNullOrWhiteSpace(finding.detectionCode) &&
+                finding.confidence >= 1 && finding.confidence <= 3 &&
                 !string.IsNullOrWhiteSpace(finding.anomaly) &&
                 !string.IsNullOrWhiteSpace(finding.explanation);
         }
