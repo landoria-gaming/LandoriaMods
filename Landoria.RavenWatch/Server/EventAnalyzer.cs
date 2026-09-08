@@ -12,7 +12,10 @@ namespace Landoria.RavenWatch.Server
     {
         private static readonly ICheatDetection[] detections =
         {
-            new CreatureSpawnedDetection()
+            new CreatureSpawnedDetection(),
+            new PlayerDebugFlyDetection(),
+            new PlayerInvulnerableAtOneHealthDetection(),
+            new GroundItemSpawnedDetection()
         };
         private static readonly BoundedOrderedSet<string> reportedDetectionIds =
             new BoundedOrderedSet<string>(ReceivedJournal.MaximumBufferedEvents,

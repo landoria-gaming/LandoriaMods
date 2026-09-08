@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Landoria.RavenWatch.Server.CheatDetection;
+using Landoria.RavenWatch.Server.EventCollection;
 using Newtonsoft.Json.Linq;
 
 namespace Landoria.RavenWatch.Server
@@ -27,6 +28,7 @@ namespace Landoria.RavenWatch.Server
                 string directory = Path.Combine(
                     Utils.GetSaveDataPath(FileHelpers.FileSource.Local), "RavenWatch");
                 Directory.CreateDirectory(directory);
+                ServerCharacterHistory.Open(directory);
                 string name = "received-" + DateTime.UtcNow.ToString("yyyyMMdd-HHmmss")
                     + "-" + Guid.NewGuid().ToString("N");
                 string path = Path.Combine(directory, name + ".json");
@@ -111,6 +113,7 @@ namespace Landoria.RavenWatch.Server
                 writer = null;
                 AnalysisJournal.Close();
                 CheatDetectionJournal.Close();
+                ServerCharacterHistory.Close();
                 try { closing?.Dispose(); }
                 catch (Exception exception) { RavenWatchPlugin.Log?.LogError(exception); }
             }

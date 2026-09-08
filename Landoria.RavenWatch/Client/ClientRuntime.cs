@@ -9,11 +9,13 @@ namespace Landoria.RavenWatch.Client
         internal static void Open()
         {
             ActivityJournal.Open();
+            PlayerDebugFlyObserver.Open();
             nextFlush = Time.realtimeSinceStartup + 5f;
         }
 
         internal static void Tick()
         {
+            PlayerDebugFlyObserver.Tick();
             EventTransport.Send();
             if (RavenWatchPlugin.Log == null || Time.realtimeSinceStartup < nextFlush) return;
             nextFlush = Time.realtimeSinceStartup + 5f;

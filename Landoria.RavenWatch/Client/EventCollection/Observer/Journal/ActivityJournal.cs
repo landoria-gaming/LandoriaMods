@@ -35,6 +35,11 @@ namespace Landoria.RavenWatch
             Enqueue(number => { entry.sequence = number; return entry; });
         }
 
+        internal static void Record(PlayerDebugFlyObserved entry)
+        {
+            Enqueue(number => { entry.sequence = number; return entry; });
+        }
+
         internal static void Record(CreatureAppearanceObserved entry)
         {
             Enqueue(number => { entry.sequence = number; return entry; });

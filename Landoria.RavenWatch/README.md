@@ -12,6 +12,9 @@ A server anti-cheat that uses observations from other clients and the server to 
 ## Cheat detection
 
 - Suspicious creature spawns are reported when no vanilla spawn, raid or nearby spawner can explain them.
+- Players using synchronized debug fly mode are reported.
+- Players who remain alive at 1 health after reporting positive damage are reported.
+- Items created outside the inventory drop flow are reported; ordinary resources also require nearby collection by the same player.
 
 ## Integration
 

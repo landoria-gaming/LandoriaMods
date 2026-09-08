@@ -11,6 +11,7 @@ namespace Landoria.RavenWatch.Server
             new Dictionary<string, Type>(StringComparer.Ordinal)
             {
                 ["PLAYER_APPEARANCE_OBSERVED"] = typeof(PlayerAppearanceObserved),
+                ["PLAYER_DEBUG_FLY_OBSERVED"] = typeof(PlayerDebugFlyObserved),
                 ["CREATURE_APPEARANCE_OBSERVED"] = typeof(CreatureAppearanceObserved),
                 ["CONTAINER_OPEN_OBSERVED"] = typeof(ContainerObservation),
                 ["GROUND_ITEM_OBSERVED"] = typeof(ItemObservation),

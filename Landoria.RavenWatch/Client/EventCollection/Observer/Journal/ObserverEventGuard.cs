@@ -10,6 +10,9 @@ namespace Landoria.RavenWatch
             if (entry is PlayerAppearanceObserved player)
                 return DifferentPlayers(player.observerCharacterId, player.characterId) &&
                     RemoteOwner(player.observerSessionId, player.ownerSessionId);
+            if (entry is PlayerDebugFlyObserved flight)
+                return DifferentPlayers(flight.observerCharacterId, flight.characterId) &&
+                    RemoteOwner(flight.observerSessionId, flight.ownerSessionId);
             if (entry is CreatureAppearanceObserved creature)
                 return RemoteOwner(creature.observerSessionId, creature.ownerSessionId) &&
                     HasOtherPlayer(creature.nearbyPlayers);

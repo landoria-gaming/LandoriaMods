@@ -95,6 +95,7 @@ namespace Landoria.RavenWatch.Server.EventCollection
                 if (zdo == null) continue;
                 GameObject prefab = ZNetScene.instance.GetPrefab(zdo.GetPrefab());
                 if (!prefab) continue;
+                ServerGroundItemCollector.Observe(zdo, prefab, sender);
                 Character creature = prefab.GetComponent<Character>();
                 if (!creature || creature is Player) continue;
                 ServerEventPublisher.Publish(CreatureSpawned.Capture(zdo, prefab, sender));

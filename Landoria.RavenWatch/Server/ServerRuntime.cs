@@ -11,7 +11,9 @@ namespace Landoria.RavenWatch.Server
             typeof(EventRegistrationPatch), typeof(EventReadyPatch),
             typeof(ServerCreatureNetworkViewPatch), typeof(ServerCreatureStartedPatch),
             typeof(ServerHumanoidCreatureStartedPatch), typeof(ServerZdoPacketPatch),
-            typeof(ServerNewZdoPatch)
+            typeof(ServerNewZdoPatch), typeof(ServerPlayerDebugFlyPacketPatch),
+            typeof(ServerPlayerDebugFlyZdoPatch), typeof(ServerPlayerDamageRoutedRpcPatch),
+            typeof(ServerGroundItemPickupRoutedRpcPatch), typeof(ServerCharacterSeenPatch)
         };
 
         private static float nextAnalysis;
@@ -20,6 +22,7 @@ namespace Landoria.RavenWatch.Server
         {
             ReceivedJournal.Open();
             ServerEventPublisher.Open();
+            ServerPlayerDebugFlyCollector.Open();
             nextAnalysis = Time.realtimeSinceStartup + 10f;
         }
 
@@ -32,6 +35,7 @@ namespace Landoria.RavenWatch.Server
 
         internal static void Close()
         {
+            ServerPlayerDebugFlyCollector.Close();
             ServerEventPublisher.Close();
             ReceivedJournal.Close();
         }
