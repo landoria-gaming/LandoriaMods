@@ -14,22 +14,25 @@ namespace Landoria.RavenWatch.Server.CheatDetection
                 ? null : DetectionCode + ":" + creature.creatureNetworkId;
         }
 
-        public void ServerBasedDetection(IReadOnlyList<Event> events)
+        public CheatDetectionFinding[] ServerBasedDetection(IReadOnlyList<Event> events)
         {
+            var findings = new List<CheatDetectionFinding>();
             foreach (Event eventToAnalyze in events)
             {
                 CreatureSpawned creature = GetSuspiciousCreature(eventToAnalyze);
                 if (creature == null) continue;
                 string detectionId = GetDetectionId(eventToAnalyze);
-                CheatDetectionReporter.Report(eventToAnalyze, detectionId, DetectionCode,
-                    "without_compatible_vanilla_spawn_source",
+                findings.Add(new CheatDetectionFinding(new[] { eventToAnalyze }, detectionId,
+                    DetectionCode, "without_compatible_vanilla_spawn_source",
                     creature.networkSenderName, creature.networkSenderSessionId,
-                    "spawned a " + creature.creatureName, Explain(creature));
+                    "spawned a " + creature.creatureName, Explain(creature)));
             }
+            return findings.ToArray();
         }
 
-        public void ObserverBasedDetection(IReadOnlyList<Event> events)
+        public CheatDetectionFinding[] ObserverBasedDetection(IReadOnlyList<Event> events)
         {
+            return Array.Empty<CheatDetectionFinding>();
         }
 
         private static CreatureSpawned GetSuspiciousCreature(Event eventToAnalyze)

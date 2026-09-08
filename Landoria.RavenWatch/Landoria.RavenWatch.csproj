@@ -47,8 +47,8 @@
     <Compile Include="Server/EventCollection/CreatureSpawnedCollector.cs" />
     <Compile Include="Server/EventAnalyzer.cs" />
     <Compile Include="Server/CheatDetection/ICheatDetection.cs" />
+    <Compile Include="Server/CheatDetection/CheatDetectionFinding.cs" />
     <Compile Include="Server/BoundedOrderedSet.cs" />
-    <Compile Include="Server/CheatDetectionReporter.cs" />
     <Compile Include="Server/CheatDetectionJournal.cs" />
     <Compile Include="Server/CheatDetection/CreatureSpawnedDetection.cs" />
     <Compile Include="Client/EventCollection/Observer/CombatAndDeath/CreatureAppearanceObserved.cs" />
