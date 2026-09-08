@@ -6,7 +6,7 @@ namespace Landoria.RavenWatch.Server.EventCollection
     internal sealed class CreatureSpawned
     {
         public int schemaVersion = 1;
-        public string kind = "creature_spawned";
+        public string kind = "creature_spawned_server";
         public string utc = DateTime.UtcNow.ToString("O");
         public float elapsedSeconds = Time.realtimeSinceStartup;
         public string observation;

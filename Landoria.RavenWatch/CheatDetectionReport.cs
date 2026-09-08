@@ -5,7 +5,8 @@ namespace Landoria.RavenWatch
         public string DetectedUtc { get; }
         public string DetectionId { get; }
         public string DetectionCode { get; }
-        public int Confidence { get; }
+        public int AnomalyConfidence { get; }
+        public int AttributionConfidence { get; }
         public string SuspectedPlayerName { get; }
         public string SuspectedSessionId { get; }
         public string Anomaly { get; }
@@ -14,13 +15,15 @@ namespace Landoria.RavenWatch
         public bool SuppressChat { get; set; }
 
         internal CheatDetectionReport(string detectedUtc, string detectionId,
-            string detectionCode, int confidence, string suspectedPlayerName,
+            string detectionCode, int anomalyConfidence, int attributionConfidence,
+            string suspectedPlayerName,
             string suspectedSessionId, string anomaly, string explanation, string json)
         {
             DetectedUtc = detectedUtc;
             DetectionId = detectionId;
             DetectionCode = detectionCode;
-            Confidence = confidence;
+            AnomalyConfidence = anomalyConfidence;
+            AttributionConfidence = attributionConfidence;
             SuspectedPlayerName = suspectedPlayerName;
             SuspectedSessionId = suspectedSessionId;
             Anomaly = anomaly;

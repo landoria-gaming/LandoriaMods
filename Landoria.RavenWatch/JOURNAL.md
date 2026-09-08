@@ -22,7 +22,7 @@ Source folder: `Server/EventCollection/`.
 
 | Code | Event | Main details |
 |---|---|---|
-| `CREATURE_SPAWNED` | The server first sees a newly created creature ZDO | Prefab, network ID, sender, position, biome, nearby spawners, natural spawn rules, active raid details and the vanilla `EventCreature` marker. |
+| `CREATURE_SPAWNED_SERVER` | The server first sees a newly created creature ZDO | Prefab, network ID, sender, position, biome, nearby spawners, natural spawn rules, active raid details and the vanilla `EventCreature` marker. |
 
 ## Observer events
 
@@ -38,10 +38,12 @@ Source folder: `Client/EventCollection/Observer/`.
 ## Journal operation
 
 Server journal files use the `.json` extension and contain a JSON array of objects.
-Every cheat detection finding includes a required confidence from `1` to `3`.
-The final detection confidence is rounded to a score out of `10`. Server evidence has
-a weight equal to the number of observer findings, with a minimum weight of one.
-A single observer has a weight of `0.5`; two or more observers each have a weight of `1`.
+Every cheat detection finding includes two required confidence values from `1` to `3`:
+one for the anomaly and one for the attribution to the suspected player. Both final
+confidence values are rounded to scores out of `10` using the same weighting. Server
+evidence has a weight equal to the number of observer findings, with a minimum weight
+of one. A single observer has a weight of `0.5`; two or more observers each have a
+weight of `1`.
 
 | Code | Event | Main details |
 |---|---|---|

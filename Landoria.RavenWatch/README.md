@@ -16,7 +16,7 @@ A server anti-cheat that uses observations from other clients and the server to 
 ## Integration
 
 Server mods can subscribe to `RavenWatchApi.CheatReported`. The report provides the
-suspected session, final confidence score, explanation and complete detailed JSON, so
+suspected session, final anomaly and attribution confidence scores, explanation and complete detailed JSON, so
 the subscriber can apply its own action such as an automatic kick. Setting
 `report.SuppressChat = true` prevents the player chat alert while retaining the server
 log and cheat detection journal.

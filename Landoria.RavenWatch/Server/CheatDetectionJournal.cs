@@ -35,18 +35,20 @@ namespace Landoria.RavenWatch.Server
             }
         }
 
-        internal static JObject CreateRecord(CheatDetectionFinding[] findings, int confidence)
+        internal static JObject CreateRecord(CheatDetectionFinding[] findings,
+            int anomalyConfidence, int attributionConfidence)
         {
             CheatDetectionFinding primary = findings[0];
             return new JObject
             {
-                ["schemaVersion"] = 1,
+                ["schemaVersion"] = 2,
                 ["code"] = "CHEAT_DETECTED",
                 ["kind"] = "cheat_detected",
                 ["detectedUtc"] = DateTime.UtcNow.ToString("O"),
                 ["detectionId"] = primary.detectionId,
                 ["detectionCode"] = primary.detectionCode,
-                ["confidence"] = confidence,
+                ["anomalyConfidence"] = anomalyConfidence,
+                ["attributionConfidence"] = attributionConfidence,
                 ["findings"] = CreateFindings(findings)
             };
         }
@@ -60,7 +62,8 @@ namespace Landoria.RavenWatch.Server
                 {
                     ["detectionId"] = finding.detectionId,
                     ["detectionCode"] = finding.detectionCode,
-                    ["confidence"] = finding.confidence,
+                    ["anomalyConfidence"] = finding.anomalyConfidence,
+                    ["attributionConfidence"] = finding.attributionConfidence,
                     ["evidence"] = finding.evidence,
                     ["playerName"] = string.IsNullOrWhiteSpace(finding.suspectedPlayerName)
                         ? "unknown player" : finding.suspectedPlayerName,

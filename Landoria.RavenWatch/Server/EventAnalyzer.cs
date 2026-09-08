@@ -88,13 +88,17 @@ namespace Landoria.RavenWatch.Server
                     StringComparer.Ordinal))
             {
                 CheatDetectionFinding[] groupedFindings = group.ToArray();
-                int confidence = CalculateConfidence(groupedFindings, serverSet);
-                ReportDetection(groupedFindings, confidence);
+                int anomalyConfidence = CalculateConfidence(groupedFindings, serverSet,
+                    finding => finding.anomalyConfidence);
+                int attributionConfidence = CalculateConfidence(groupedFindings, serverSet,
+                    finding => finding.attributionConfidence);
+                ReportDetection(groupedFindings, anomalyConfidence, attributionConfidence);
             }
         }
 
         private static int CalculateConfidence(CheatDetectionFinding[] findings,
-            HashSet<CheatDetectionFinding> serverFindings)
+            HashSet<CheatDetectionFinding> serverFindings,
+            Func<CheatDetectionFinding, int> confidenceSelector)
         {
             int serverCount = 0;
             int serverTotal = 0;
@@ -103,10 +107,11 @@ namespace Landoria.RavenWatch.Server
                 if (serverFindings.Contains(finding))
                 {
                     serverCount++;
-                    serverTotal += finding.confidence;
+                    serverTotal += confidenceSelector(finding);
                 }
             }
-            double[] observerConfidences = GetObserverConfidences(findings, serverFindings);
+            double[] observerConfidences = GetObserverConfidences(findings, serverFindings,
+                confidenceSelector);
             if (serverCount == 0)
                 return ScaleConfidence(observerConfidences.Average());
             int observerCount = observerConfidences.Length;
@@ -120,7 +125,8 @@ namespace Landoria.RavenWatch.Server
         }
 
         private static double[] GetObserverConfidences(CheatDetectionFinding[] findings,
-            HashSet<CheatDetectionFinding> serverFindings)
+            HashSet<CheatDetectionFinding> serverFindings,
+            Func<CheatDetectionFinding, int> confidenceSelector)
         {
             var totals = new Dictionary<string, int>(StringComparer.Ordinal);
             var counts = new Dictionary<string, int>(StringComparer.Ordinal);
@@ -134,7 +140,7 @@ namespace Landoria.RavenWatch.Server
                     string observerId = GetObserverId(source);
                     if (observerId == null || !findingObservers.Add(observerId)) continue;
                     totals[observerId] = totals.TryGetValue(observerId, out int total)
-                        ? total + finding.confidence : finding.confidence;
+                        ? total + confidenceSelector(finding) : confidenceSelector(finding);
                     counts[observerId] = counts.TryGetValue(observerId, out int count)
                         ? count + 1 : 1;
                 }
@@ -159,7 +165,8 @@ namespace Landoria.RavenWatch.Server
             return (int)Math.Round(confidence * 10d / 3d, MidpointRounding.AwayFromZero);
         }
 
-        private static void ReportDetection(CheatDetectionFinding[] findings, int confidence)
+        private static void ReportDetection(CheatDetectionFinding[] findings,
+            int anomalyConfidence, int attributionConfidence)
         {
             CheatDetectionFinding primary = findings[0];
             if (ZNet.instance == null ||
@@ -167,25 +174,28 @@ namespace Landoria.RavenWatch.Server
             string identity = string.IsNullOrWhiteSpace(primary.suspectedPlayerName)
                 ? "unknown player" : primary.suspectedPlayerName;
             string explanation = DetailedExplanation(findings);
-            JObject record = CheatDetectionJournal.CreateRecord(findings, confidence);
+            JObject record = CheatDetectionJournal.CreateRecord(findings,
+                anomalyConfidence, attributionConfidence);
             CheatDetectionJournal.Append(record);
-            CheatDetectionReport report = CreatePublicReport(primary, confidence,
-                explanation, record);
+            CheatDetectionReport report = CreatePublicReport(primary, anomalyConfidence,
+                attributionConfidence, explanation, record);
             RavenWatchApi.Publish(report);
             if (!report.SuppressChat)
                 foreach (ZNetPeer peer in ZNet.instance.GetPeers()
                     .Where(candidate => candidate.IsReady()))
                     peer.m_rpc.Invoke(RavenWatchProtocol.AnomalyRpc, identity, primary.anomaly);
             RavenWatchPlugin.Log.LogWarning("Suspected cheating: " + identity + " " +
-                primary.anomaly + ". Confidence: " + confidence + "/10. " +
-                explanation);
+                primary.anomaly + ". Anomaly confidence: " + anomalyConfidence +
+                "/10. Attribution confidence: " + attributionConfidence + "/10. " + explanation);
         }
 
         private static CheatDetectionReport CreatePublicReport(CheatDetectionFinding primary,
-            int confidence, string explanation, JObject record)
+            int anomalyConfidence, int attributionConfidence, string explanation,
+            JObject record)
         {
             return new CheatDetectionReport((string)record["detectedUtc"],
-                primary.detectionId, primary.detectionCode, confidence,
+                primary.detectionId, primary.detectionCode, anomalyConfidence,
+                attributionConfidence,
                 primary.suspectedPlayerName, primary.suspectedSessionId,
                 primary.anomaly, explanation, record.ToString(Formatting.None));
         }
@@ -203,7 +213,8 @@ namespace Landoria.RavenWatch.Server
                 finding.source.All(source => source?.context != null && source.entry != null) &&
                 !string.IsNullOrWhiteSpace(finding.detectionId) &&
                 !string.IsNullOrWhiteSpace(finding.detectionCode) &&
-                finding.confidence >= 1 && finding.confidence <= 3 &&
+                finding.anomalyConfidence >= 1 && finding.anomalyConfidence <= 3 &&
+                finding.attributionConfidence >= 1 && finding.attributionConfidence <= 3 &&
                 !string.IsNullOrWhiteSpace(finding.anomaly) &&
                 !string.IsNullOrWhiteSpace(finding.explanation);
         }
