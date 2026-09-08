@@ -37,6 +37,8 @@ Source folder: `Client/EventCollection/Observer/`.
 
 ## Journal operation
 
+Server journal files use the `.json` extension and contain a JSON array of objects.
+
 | Code | Event | Main details |
 |---|---|---|
 | `JOURNAL_OVERFLOW` | Observer buffer overflow | Number of observations omitted because the bounded memory buffer was full. |

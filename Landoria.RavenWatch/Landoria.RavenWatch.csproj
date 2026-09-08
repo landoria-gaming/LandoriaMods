@@ -40,6 +40,7 @@
     <Compile Include="Server/EventReceiver.cs" />
     <Compile Include="Server/EventDeserializer.cs" />
     <Compile Include="Server/ReceivedJournal.cs" />
+    <Compile Include="Server/JsonArrayJournal.cs" />
     <Compile Include="Server/AnalysisJournal.cs" />
     <Compile Include="Server/EventCollection/ServerEventPublisher.cs" />
     <Compile Include="Server/EventCollection/CreatureSpawned.cs" />

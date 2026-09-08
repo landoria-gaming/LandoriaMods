@@ -15,7 +15,12 @@ namespace Landoria.RavenWatch.Server
         {
             try
             {
-                using (new FileStream(journalPath, FileMode.CreateNew, FileAccess.Write, FileShare.Read)) { }
+                using (var stream = new FileStream(journalPath, FileMode.CreateNew,
+                    FileAccess.Write, FileShare.Read))
+                {
+                    byte[] emptyArray = new UTF8Encoding(false).GetBytes("[]");
+                    stream.Write(emptyArray, 0, emptyArray.Length);
+                }
                 path = journalPath;
                 RavenWatchPlugin.Log.LogInfo("Analysis memory journal: " + path);
             }
@@ -31,9 +36,11 @@ namespace Landoria.RavenWatch.Server
             if (path == null) return;
             try
             {
-                using (var writer = new StreamWriter(path, false, new UTF8Encoding(false)))
-                    foreach (Event eventToWrite in events)
-                        writer.WriteLine(CreateRecord(eventToWrite).ToString(Formatting.None));
+                var records = new JArray();
+                foreach (Event eventToWrite in events)
+                    records.Add(CreateRecord(eventToWrite));
+                File.WriteAllText(path, records.ToString(Formatting.None),
+                    new UTF8Encoding(false));
             }
             catch (Exception exception)
             {

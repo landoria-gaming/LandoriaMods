@@ -1,7 +1,4 @@
 using System;
-using System.IO;
-using System.Text;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Landoria.RavenWatch.Server.CheatDetection;
 
@@ -9,14 +6,13 @@ namespace Landoria.RavenWatch.Server
 {
     internal static class CheatDetectionJournal
     {
-        private static StreamWriter writer;
+        private static JsonArrayJournal writer;
 
         internal static void Open(string path)
         {
             try
             {
-                writer = new StreamWriter(new FileStream(path, FileMode.CreateNew, FileAccess.Write,
-                    FileShare.Read), new UTF8Encoding(false));
+                writer = new JsonArrayJournal(path);
                 RavenWatchPlugin.Log.LogInfo("Cheat detection journal: " + path);
             }
             catch (Exception exception)
@@ -31,8 +27,7 @@ namespace Landoria.RavenWatch.Server
             if (writer == null || findings == null || findings.Length == 0) return;
             try
             {
-                writer.WriteLine(CreateRecord(findings).ToString(Formatting.None));
-                writer.Flush();
+                writer.Append(CreateRecord(findings));
             }
             catch (Exception exception)
             {
@@ -92,7 +87,7 @@ namespace Landoria.RavenWatch.Server
 
         internal static void Close()
         {
-            StreamWriter closing = writer;
+            JsonArrayJournal closing = writer;
             writer = null;
             try { closing?.Dispose(); }
             catch (Exception exception) { RavenWatchPlugin.Log?.LogError(exception); }

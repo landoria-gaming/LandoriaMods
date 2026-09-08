@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using Landoria.RavenWatch.Server.CheatDetection;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace Landoria.RavenWatch.Server
@@ -20,7 +18,7 @@ namespace Landoria.RavenWatch.Server
         private const int ArchiveBatchSize = 100;
         private static readonly List<Event> pending = new List<Event>();
         private static readonly IReadOnlyList<Event> pendingView = pending.AsReadOnly();
-        private static StreamWriter writer;
+        private static JsonArrayJournal writer;
 
         internal static void Open()
         {
@@ -31,11 +29,10 @@ namespace Landoria.RavenWatch.Server
                 Directory.CreateDirectory(directory);
                 string name = "received-" + DateTime.UtcNow.ToString("yyyyMMdd-HHmmss")
                     + "-" + Guid.NewGuid().ToString("N");
-                string path = Path.Combine(directory, name + ".txt");
-                writer = new StreamWriter(new FileStream(path, FileMode.CreateNew, FileAccess.Write,
-                    FileShare.Read), new UTF8Encoding(false));
-                AnalysisJournal.Open(Path.Combine(directory, name + "-memory.txt"));
-                CheatDetectionJournal.Open(Path.Combine(directory, name + "-cheat-detections.txt"));
+                string path = Path.Combine(directory, name + ".json");
+                writer = new JsonArrayJournal(path);
+                AnalysisJournal.Open(Path.Combine(directory, name + "-memory.json"));
+                CheatDetectionJournal.Open(Path.Combine(directory, name + "-cheat-detections.json"));
                 pending.Clear();
                 RavenWatchPlugin.Log.LogInfo("Received event journal: " + path);
             }
@@ -94,8 +91,7 @@ namespace Landoria.RavenWatch.Server
                 }
                 JObject record = (JObject)context.DeepClone();
                 record["events"] = events;
-                writer.WriteLine(record.ToString(Formatting.None));
-                writer.Flush();
+                writer.Append(record);
                 pending.RemoveRange(0, events.Count);
                 count -= events.Count;
             }
@@ -103,7 +99,7 @@ namespace Landoria.RavenWatch.Server
 
         internal static void Close()
         {
-            StreamWriter closing = writer;
+            JsonArrayJournal closing = writer;
             try
             {
                 if (closing != null) WriteOldest(pending.Count);
