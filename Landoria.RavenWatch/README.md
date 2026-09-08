@@ -8,7 +8,7 @@ A server anti-cheat that uses observations from other clients and the server to 
 - The server records its own events and cross-checks them with events received from other clients to detect impossible actions performed by a client.
 - RavenWatch only reports suspected cheating in the chat for all connected clients. Another server mod can use the cheat report hook to implement a response such as an automatic kick.
 - Server journals are stored in the Valheim data directory under `RavenWatch`.
-- `<world>-RavenWatch.json` stores the server's trusted knowledge about players in that world. It currently records when each authenticated platform ID and player-name pair was first seen by the server.
+- `<world>-RavenWatch.json` stores the server's trusted knowledge about players in that world to improve cheat detection based on each player's history.
 
 ## Cheat detection
 
