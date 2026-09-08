@@ -50,7 +50,10 @@ namespace Landoria.RavenWatch
                     dropped++;
                     return;
                 }
-                pending.Add(JournalJson.SerializeEvent(capture(++sequence)));
+                object entry = capture(sequence + 1);
+                if (!ObserverEventGuard.IsObservationOfOtherPlayer(entry)) return;
+                sequence++;
+                pending.Add(JournalJson.SerializeEvent(entry));
             }
             catch (Exception exception)
             {

@@ -57,6 +57,7 @@
     <Compile Include="Client/EventCollection/Observer/ContainersAndInventory/ContainerObservation.cs" />
     <Compile Include="Client/EventCollection/Observer/ContainersAndInventory/ContainerObservationPatch.cs" />
     <Compile Include="Client/EventCollection/Observer/Journal/ActivityJournal.cs" />
+    <Compile Include="Client/EventCollection/Observer/Journal/ObserverEventGuard.cs" />
     <Compile Include="Client/EventCollection/Observer/Journal/JournalOverflow.cs" />
     <Compile Include="Client/EventCollection/Observer/Gathering/ItemObservation.cs" />
     <Compile Include="Client/EventCollection/Observer/Gathering/GroundItemJournal.cs" />
