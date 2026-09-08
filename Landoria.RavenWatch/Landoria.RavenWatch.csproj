@@ -82,7 +82,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Content Include="README.md" /><Content Include="manifest.json" />
     <Content Include="icon.png" /><Content Include="LICENSE" />
-    <None Include="JOURNAL.md" />
+    <None Include="EVENTS.md" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
