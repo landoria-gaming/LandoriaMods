@@ -5,7 +5,6 @@ namespace Landoria.RavenWatch.Server.CheatDetection
 {
     internal interface ICheatDetection
     {
-        string GetDetectionId(Event eventToAnalyze);
         CheatDetectionFinding[] ServerBasedDetection(IReadOnlyList<Event> events);
         CheatDetectionFinding[] ObserverBasedDetection(IReadOnlyList<Event> events);
     }

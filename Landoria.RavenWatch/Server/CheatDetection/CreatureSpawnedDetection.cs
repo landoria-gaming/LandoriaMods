@@ -7,9 +7,8 @@ namespace Landoria.RavenWatch.Server.CheatDetection
     internal sealed class CreatureSpawnedDetection : ICheatDetection
     {
         private const string DetectionCode = "CREATURE_SPAWNED_WITHOUT_VANILLA_SOURCE";
-        public string GetDetectionId(Event eventToAnalyze)
+        private static string GetDetectionId(CreatureSpawned creature)
         {
-            CreatureSpawned creature = eventToAnalyze?.entry as CreatureSpawned;
             return string.IsNullOrWhiteSpace(creature?.creatureNetworkId)
                 ? null : DetectionCode + ":" + creature.creatureNetworkId;
         }
@@ -21,7 +20,7 @@ namespace Landoria.RavenWatch.Server.CheatDetection
             {
                 CreatureSpawned creature = GetSuspiciousCreature(eventToAnalyze);
                 if (creature == null) continue;
-                string detectionId = GetDetectionId(eventToAnalyze);
+                string detectionId = GetDetectionId(creature);
                 findings.Add(new CheatDetectionFinding(new[] { eventToAnalyze }, detectionId,
                     DetectionCode, "without_compatible_vanilla_spawn_source",
                     creature.networkSenderName, creature.networkSenderSessionId,
