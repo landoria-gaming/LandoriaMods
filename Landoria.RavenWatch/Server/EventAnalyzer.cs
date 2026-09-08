@@ -26,15 +26,34 @@ namespace Landoria.RavenWatch.Server
             AnalysisJournal.Overwrite(events);
             bool succeeded = true;
             foreach (ICheatDetection detection in detections)
-                if (!RunDetection(detection, events)) succeeded = false;
+            {
+                if (!RunServerBasedDetection(detection, events)) succeeded = false;
+                if (!RunObserverBasedDetection(detection, events)) succeeded = false;
+            }
             if (succeeded) ReceivedJournal.ArchiveOverflow();
         }
 
-        private static bool RunDetection(ICheatDetection detection, IReadOnlyList<Event> events)
+        private static bool RunServerBasedDetection(
+            ICheatDetection detection, IReadOnlyList<Event> events)
         {
             try
             {
-                detection.Detect(events);
+                detection.ServerBasedDetection(events);
+                return true;
+            }
+            catch (Exception exception)
+            {
+                RavenWatchPlugin.Log.LogError(exception);
+                return false;
+            }
+        }
+
+        private static bool RunObserverBasedDetection(
+            ICheatDetection detection, IReadOnlyList<Event> events)
+        {
+            try
+            {
+                detection.ObserverBasedDetection(events);
                 return true;
             }
             catch (Exception exception)

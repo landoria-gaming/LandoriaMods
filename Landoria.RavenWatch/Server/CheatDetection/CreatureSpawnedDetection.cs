@@ -14,7 +14,7 @@ namespace Landoria.RavenWatch.Server.CheatDetection
                 ? null : DetectionCode + ":" + creature.creatureNetworkId;
         }
 
-        public void Detect(IReadOnlyList<Event> events)
+        public void ServerBasedDetection(IReadOnlyList<Event> events)
         {
             foreach (Event eventToAnalyze in events)
             {
@@ -26,6 +26,10 @@ namespace Landoria.RavenWatch.Server.CheatDetection
                     creature.networkSenderName, creature.networkSenderSessionId,
                     "spawned a " + creature.creatureName, Explain(creature));
             }
+        }
+
+        public void ObserverBasedDetection(IReadOnlyList<Event> events)
+        {
         }
 
         private static CreatureSpawned GetSuspiciousCreature(Event eventToAnalyze)
