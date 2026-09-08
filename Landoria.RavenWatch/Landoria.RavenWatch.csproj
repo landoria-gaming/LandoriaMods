@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
+    <Platform Condition="'$(Platform)' == ''">AnyCPU</Platform>
+    <ProjectGuid>{935AA598-1D36-4AD9-B14C-86761E8323E3}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>Landoria.RavenWatch</RootNamespace>
+    <AssemblyName>Landoria.RavenWatch</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols><DebugType>full</DebugType><Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath><DefineConstants>DEBUG;TRACE</DefineConstants><WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
+    <DebugType>pdbonly</DebugType><Optimize>true</Optimize><OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants><WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="0Harmony"><HintPath>$(BepInExPath)\core\0Harmony.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="assembly_valheim"><HintPath>$(ValheimGamePath)\valheim_Data\Managed\assembly_valheim.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="assembly_utils"><HintPath>$(ValheimGamePath)\valheim_Data\Managed\assembly_utils.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="BepInEx"><HintPath>$(BepInExPath)\core\BepInEx.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="UnityEngine"><HintPath>$(ValheimGamePath)\valheim_Data\Managed\UnityEngine.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="UnityEngine.CoreModule"><HintPath>$(ValheimGamePath)\valheim_Data\Managed\UnityEngine.CoreModule.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="UnityEngine.PhysicsModule"><HintPath>$(ValheimGamePath)\valheim_Data\Managed\UnityEngine.PhysicsModule.dll</HintPath><Private>false</Private></Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="RavenWatchPlugin.cs" />
+    <Compile Include="Client/ClientRuntime.cs" />
+    <Compile Include="Client/Network/EventTransport.cs" />
+    <Compile Include="RavenWatchProtocol.cs" />
+    <Compile Include="Client/Network/EventConnectionPatches.cs" />
+    <Compile Include="Client/UI/AnomalyChatDisplay.cs" />
+    <Compile Include="Server/ServerRuntime.cs" />
+    <Compile Include="Server/EventReceiver.cs" />
+    <Compile Include="Server/EventDeserializer.cs" />
+    <Compile Include="Server/ReceivedJournal.cs" />
+    <Compile Include="Server/AnalysisJournal.cs" />
+    <Compile Include="Server/EventCollection/ServerEventPublisher.cs" />
+    <Compile Include="Server/EventCollection/CreatureSpawned.cs" />
+    <Compile Include="Server/EventCollection/CreatureSpawnEvidence.cs" />
+    <Compile Include="Server/EventCollection/CreatureSpawnedCollector.cs" />
+    <Compile Include="Server/EventAnalyzer.cs" />
+    <Compile Include="Server/CheatDetection/ICheatDetection.cs" />
+    <Compile Include="Server/BoundedOrderedSet.cs" />
+    <Compile Include="Server/CheatDetectionReporter.cs" />
+    <Compile Include="Server/CheatDetectionJournal.cs" />
+    <Compile Include="Server/CheatDetection/CreatureSpawnedDetection.cs" />
+    <Compile Include="Client/EventCollection/Observer/CombatAndDeath/CreatureAppearanceObserved.cs" />
+    <Compile Include="Client/EventCollection/Observer/PlayerAndTravel/PlayerAppearanceObserved.cs" />
+    <Compile Include="Client/EventCollection/Observer/Gathering/GroundItemEvidence.cs" />
+    <Compile Include="Client/EventCollection/Observer/ContainersAndInventory/ContainerObservation.cs" />
+    <Compile Include="Client/EventCollection/Observer/ContainersAndInventory/ContainerObservationPatch.cs" />
+    <Compile Include="Client/EventCollection/Observer/Journal/ActivityJournal.cs" />
+    <Compile Include="Client/EventCollection/Observer/Journal/JournalOverflow.cs" />
+    <Compile Include="Client/EventCollection/Observer/Gathering/ItemObservation.cs" />
+    <Compile Include="Client/EventCollection/Observer/Gathering/GroundItemJournal.cs" />
+    <Compile Include="JournalJson.cs" />
+    <Compile Include="Client/EventCollection/Observer/Gathering/InventoryItemSnapshot.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Content Include="README.md" /><Content Include="manifest.json" />
+    <Content Include="icon.png" /><Content Include="LICENSE" />
+    <None Include="JOURNAL.md" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" GeneratePathProperty="true" />
+  </ItemGroup>
+  <Target Name="IncludeJournalSerializer" BeforeTargets="MergeLandoriaSharedLib">
+    <ItemGroup>
+      <LandoriaAdditionalAssembliesToMerge Include="$(PkgNewtonsoft_Json)\lib\net45\Newtonsoft.Json.dll" />
+    </ItemGroup>
+  </Target>
+</Project>

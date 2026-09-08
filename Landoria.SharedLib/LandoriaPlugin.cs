@@ -21,6 +21,22 @@ namespace Landoria.SharedLib
             return log;
         }
 
+        protected ModLog InitializePlugin(string pluginGuid, Type[] patchTypes)
+        {
+            ModLog log = new ModLog(Logger);
+            System.Version assemblyVersion = GetType().Assembly.GetName().Version;
+            log.LogInfo($"AssemblyVersion: {assemblyVersion}.");
+            EnsureSharedPatches(log);
+            _harmony = new Harmony(pluginGuid);
+            foreach (Type patchType in patchTypes)
+            {
+                _harmony.CreateClassProcessor(patchType).Patch();
+                log.LogInfo($"Server patch: {patchType.Name}");
+            }
+            _patchesApplied = true;
+            return log;
+        }
+
         private static void EnsureSharedPatches(ModLog log)
         {
             const string key = "Landoria.SharedLib.ConnectionFailureMenuPatch.v1";
