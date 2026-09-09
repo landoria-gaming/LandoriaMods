@@ -31,7 +31,7 @@ namespace Landoria.RavenWatch.Server
                 var item = decoder.DecodeItemData(bytes);
                 int quantity = (int)item["stack"];
                 if (quantity > 0)
-                    journal.Append(packet["utc"], peer, item, "pickup", quantity, prefab.name);
+                    journal.Append(packet["utc"], peer, item, "pickup", quantity, prefab.name, zdo.GetPosition());
             }
         }
     }

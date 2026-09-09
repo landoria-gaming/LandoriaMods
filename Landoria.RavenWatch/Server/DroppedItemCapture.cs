@@ -24,7 +24,8 @@ namespace Landoria.RavenWatch.Server
                 if (prefab == null || prefab.GetComponent<ItemDrop>() == null) continue;
                 JObject item = Item(zdo);
                 if ((bool?)item?["pickedUp"] != true || ((int?)item?["stack"] ?? 0) < 1) continue;
-                journal.Append(packet["utc"], peer, item, "drop", -(int)item["stack"], prefab.name);
+                journal.Append(packet["utc"], peer, item, "drop", -(int)item["stack"], prefab.name,
+                    EventLocation.Read(zdo["position"]));
             }
         }
 

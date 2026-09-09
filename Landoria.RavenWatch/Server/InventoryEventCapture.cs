@@ -7,7 +7,6 @@ namespace Landoria.RavenWatch.Server
     internal sealed class InventoryEventCapture : IDisposable
     {
         private readonly InventoryJournal journal;
-        private readonly FirstConnectionCapture firstConnections = new FirstConnectionCapture();
         internal InventoryEventCapture(string directory) { journal = new InventoryJournal(directory); }
 
         internal void Capture(JObject call, RpcJsonDecoder decoder, ZNetPeer peer)
@@ -16,8 +15,8 @@ namespace Landoria.RavenWatch.Server
             switch ((string)data?["name"])
             {
                 case "ZDOData":
+                    CharacterJournalCapture.Capture(journal, call, peer);
                     DroppedItemCapture.Capture(journal, call, peer);
-                    firstConnections.Capture(journal, call, peer);
                     break;
                 case "RoutedRPC":
                     if ((string)data["arguments"]?["pkg"]?["parameters"]?["name"] == "DestroyZDO")
