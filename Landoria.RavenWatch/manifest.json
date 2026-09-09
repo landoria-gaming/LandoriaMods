@@ -1,8 +1,8 @@
 {
   "name": "RavenWatch",
   "version_number": "1.0.0-draft",
-  "website_url": "https://github.com/landoria-gaming/LandoriaMods/tree/main/Landoria.RavenWatch",
-  "description": "A server anti-cheat that uses observations from other clients and the server to detect unauthorized actions performed by a modified client.",
+  "website_url": "https://github.com/landoria-gaming/LandoriaMods/tree/poc/Landoria.RavenWatch",
+  "description": "Minimal RavenWatch proof of concept plugin.",
   "dependencies": [
     "denikson-BepInExPack_Valheim-5.4.2333"
   ],

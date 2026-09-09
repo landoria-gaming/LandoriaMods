@@ -2,7 +2,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 
 [assembly: AssemblyTitle("Landoria.RavenWatch")]
-[assembly: AssemblyDescription("Anti-cheat based on observer and server events.")]
+[assembly: AssemblyDescription("Minimal RavenWatch proof of concept plugin.")]
 [assembly: AssemblyCompany("Landoria")]
 [assembly: AssemblyProduct("Landoria.RavenWatch")]
 [assembly: AssemblyCopyright("Copyright © 2026 End3rbyte")]
