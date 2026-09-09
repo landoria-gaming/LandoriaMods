@@ -5,7 +5,7 @@ namespace Landoria.RavenWatch.Server
 {
     internal static class DroppedItemCapture
     {
-        internal static void Capture(RpcJournal journal, JObject call, ZNetPeer peer)
+        internal static void Capture(InventoryJournal journal, JObject call, ZNetPeer peer)
         {
             var packet = call["request"];
             if (peer == null || !peer.IsReady() || ZDOMan.instance == null) return;
@@ -24,7 +24,7 @@ namespace Landoria.RavenWatch.Server
                 if (prefab == null || prefab.GetComponent<ItemDrop>() == null) continue;
                 JObject item = Item(zdo);
                 if ((bool?)item?["pickedUp"] != true || ((int?)item?["stack"] ?? 0) < 1) continue;
-                journal.Append(Event(call, packet, peer, zdo, item, prefab.name));
+                journal.Append(packet["utc"], peer, item, "drop", -(int)item["stack"], prefab.name);
             }
         }
 
@@ -37,22 +37,5 @@ namespace Landoria.RavenWatch.Server
             return null;
         }
 
-        private static JObject Event(JObject call, JToken packet, ZNetPeer peer, JObject zdo, JObject item, string prefabName)
-        {
-            var snapshot = (JObject)zdo.DeepClone();
-            snapshot["prefabName"] = prefabName;
-            return CharacterIdentity.Add(new JObject
-            {
-                ["event"] = "item_dropped", ["callId"] = call["callId"].DeepClone(),
-                ["utc"] = packet["utc"].DeepClone(), ["direction"] = "client_to_server",
-                ["peer"] = packet["peer"].DeepClone(),
-                ["rpc"] = "ZDOData", ["targetZdo"] = zdo["id"].DeepClone(),
-                ["prefabName"] = prefabName, ["quantity"] = item["stack"].DeepClone(),
-                ["item"] = item.DeepClone(), ["zdo"] = snapshot,
-                ["snapshotTiming"] = "incoming_zdo_before_server_processing",
-                ["classification"] = "inferred_vanilla_drop",
-                ["reason"] = "A previously picked-up item first appeared from its creating and owning client."
-            }, peer);
-        }
     }
 }

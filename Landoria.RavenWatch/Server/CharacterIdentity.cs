@@ -13,13 +13,6 @@ namespace Landoria.RavenWatch.Server
             // PlayerProfile saves this ID; network session IDs and character ZDOIDs can change.
             entry["characterId"] = id == 0L ? null : id.ToString(CultureInfo.InvariantCulture);
             entry["playerName"] = peer?.m_playerName;
-            entry["characterIdentityStatus"] = id == 0L ? "not_available" : "resolved";
-            entry["playerSessionId"] = peer?.m_uid.ToString(CultureInfo.InvariantCulture);
-            entry["characterZdo"] = peer == null ? null : new JObject
-            {
-                ["userId"] = peer.m_characterID.UserID.ToString(CultureInfo.InvariantCulture),
-                ["id"] = peer.m_characterID.ID
-            };
             return entry;
         }
     }

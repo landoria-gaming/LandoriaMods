@@ -13,7 +13,7 @@ namespace Landoria.RavenWatch.Server
         internal static ModLog Log;
         private static RpcJournal journal;
         private static RpcJournal errorJournal;
-        private static PickupJournal pickupJournal;
+        private static InventoryEventCapture inventoryEvents;
         private static RpcJsonDecoder decoder;
         [ThreadStatic] private static JObject active;
 
@@ -25,7 +25,7 @@ namespace Landoria.RavenWatch.Server
             var entry = Entry();
             entry["request"] = Packet(rpc, package, true, debug);
             entry["parentCallId"] = previous?["callId"]?.DeepClone();
-            CapturePickup(entry, rpc);
+            CaptureInventory(entry, rpc);
             active = entry;
             return previous;
         }
@@ -111,20 +111,18 @@ namespace Landoria.RavenWatch.Server
             string directory = Path.Combine(Utils.GetSaveDataPath(FileHelpers.FileSource.Local), "RavenWatch");
             if (errorJournal == null) errorJournal = new RpcJournal(directory, "rpc-errors");
             if (journal == null) journal = new RpcJournal(directory);
-            if (pickupJournal == null) pickupJournal = new PickupJournal(directory);
+            if (inventoryEvents == null) inventoryEvents = new InventoryEventCapture(directory);
         }
 
-        private static void CapturePickup(JObject entry, ZRpc rpc)
+        private static void CaptureInventory(JObject entry, ZRpc rpc)
         {
             try
             {
-                if (pickupJournal == null) Start();
+                if (inventoryEvents == null) Start();
                 string method = (string)entry["request"]?["data"]?["name"];
                 if (method != "ZDOData" && method != "RoutedRPC") return;
                 var peer = ZNet.instance.GetPeers().FirstOrDefault(candidate => candidate.m_rpc == rpc);
-                pickupJournal.Capture(entry, decoder, Components, peer);
-                pickupJournal.CaptureDrops(entry, peer);
-                pickupJournal.CaptureFirstConnections(entry, peer);
+                inventoryEvents.Capture(entry, decoder, peer);
             }
             catch (Exception error) { Log.LogError(error); }
         }
@@ -147,10 +145,10 @@ namespace Landoria.RavenWatch.Server
         {
             CloseJournal(journal);
             CloseJournal(errorJournal);
-            CloseJournal(pickupJournal);
+            CloseJournal(inventoryEvents);
             journal = null;
             errorJournal = null;
-            pickupJournal = null;
+            inventoryEvents = null;
             decoder = null;
             active = null;
         }

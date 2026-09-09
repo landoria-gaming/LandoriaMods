@@ -10,14 +10,14 @@ namespace Landoria.RavenWatch.Server.Decoding
         private readonly RpcDefinitions definitions = new RpcDefinitions();
         public string GameVersion => definitions.GameVersion;
 
-        internal JObject DecodeZdoState(byte[] bytes, Func<int, string[]> prefabComponents)
+        internal JObject DecodeItemData(byte[] bytes)
         {
-            var context = new DecodeContext("server_snapshot", prefabComponents, null);
+            var context = new DecodeContext("server_snapshot", null, null);
             using (var input = new WireInput(bytes))
             {
-                var state = (JObject)new SchemaReader(definitions, context).Read(input, definitions.Types["ZDOState"]);
+                var state = (JObject)new SchemaReader(definitions, context).Read(input, definitions.BinaryValues[ZDOVars.s_itemData.ToString(System.Globalization.CultureInfo.InvariantCulture)]);
                 input.RequireEnd();
-                return state;
+                return (JObject)state["item"];
             }
         }
 
