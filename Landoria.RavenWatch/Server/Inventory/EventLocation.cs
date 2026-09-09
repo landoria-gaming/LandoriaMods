@@ -1,13 +1,10 @@
 using Newtonsoft.Json.Linq;
 using UnityEngine;
 
-namespace Landoria.RavenWatch.Server
+namespace Landoria.RavenWatch.Server.Inventory
 {
     internal static class EventLocation
     {
-        internal static Vector3 Read(JToken position) => new Vector3(
-            (float)position["x"], (float)position["y"], (float)position["z"]);
-
         internal static void Add(JObject entry, Vector3? position)
         {
             entry["x"] = position?.x;

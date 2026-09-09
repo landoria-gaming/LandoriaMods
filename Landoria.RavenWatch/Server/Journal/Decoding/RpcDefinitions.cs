@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using Newtonsoft.Json.Linq;
 
-namespace Landoria.RavenWatch.Server.Decoding
+namespace Landoria.RavenWatch.Server.Journal.Decoding
 {
     internal sealed class RpcDefinitions
     {

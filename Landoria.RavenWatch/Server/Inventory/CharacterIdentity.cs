@@ -1,7 +1,7 @@
 using System.Globalization;
 using Newtonsoft.Json.Linq;
 
-namespace Landoria.RavenWatch.Server
+namespace Landoria.RavenWatch.Server.Inventory
 {
     internal static class CharacterIdentity
     {

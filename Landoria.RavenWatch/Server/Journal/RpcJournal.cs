@@ -4,7 +4,7 @@ using System.Text;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace Landoria.RavenWatch.Server
+namespace Landoria.RavenWatch.Server.Journal
 {
     internal sealed class RpcJournal : IDisposable
     {

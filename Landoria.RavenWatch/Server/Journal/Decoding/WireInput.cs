@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using System.Text;
 
-namespace Landoria.RavenWatch.Server.Decoding
+namespace Landoria.RavenWatch.Server.Journal.Decoding
 {
     internal sealed class WireInput : IDisposable
     {

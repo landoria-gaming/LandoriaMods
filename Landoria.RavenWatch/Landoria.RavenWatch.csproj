@@ -26,7 +26,7 @@
     <Reference Include="UnityEngine.CoreModule"><HintPath>$(ValheimGamePath)\valheim_Data\Managed\UnityEngine.CoreModule.dll</HintPath><Private>false</Private></Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="RavenWatchPlugin.cs" /><Compile Include="Server\Decoding\*.cs" /><Compile Include="Server\*.cs" />
+    <Compile Include="RavenWatchPlugin.cs" /><Compile Include="Server\Journal\Decoding\*.cs" /><Compile Include="Server\Inventory\*.cs" /><Compile Include="Server\Journal\*.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Content Include="README.md" /><Content Include="manifest.json" />
     <Content Include="icon.png" /><Content Include="LICENSE" />

@@ -1,7 +1,7 @@
 using BepInEx;
 using Landoria.SharedLib;
 using HarmonyLib;
-using Landoria.RavenWatch.Server;
+using Landoria.RavenWatch.Server.Journal;
 
 namespace Landoria.RavenWatch
 {

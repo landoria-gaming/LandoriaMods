@@ -3,23 +3,12 @@ using System.IO;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace Landoria.RavenWatch.Server.Decoding
+namespace Landoria.RavenWatch.Server.Journal.Decoding
 {
     public sealed class RpcJsonDecoder
     {
         private readonly RpcDefinitions definitions = new RpcDefinitions();
         public string GameVersion => definitions.GameVersion;
-
-        internal JObject DecodeItemData(byte[] bytes)
-        {
-            var context = new DecodeContext("server_snapshot", null, null);
-            using (var input = new WireInput(bytes))
-            {
-                var state = (JObject)new SchemaReader(definitions, context).Read(input, definitions.BinaryValues[ZDOVars.s_itemData.ToString(System.Globalization.CultureInfo.InvariantCulture)]);
-                input.RequireEnd();
-                return (JObject)state["item"];
-            }
-        }
 
         public string Decode(byte[] packet, bool receivedByServer, string gameVersion, bool debugRpc = false,
             Func<int, string[]> prefabComponents = null, Func<long, uint, string[]> objectComponents = null)

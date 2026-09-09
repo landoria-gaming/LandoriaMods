@@ -2,18 +2,18 @@ using System;
 using System.IO;
 using System.Linq;
 using Landoria.SharedLib;
-using Landoria.RavenWatch.Server.Decoding;
+using Landoria.RavenWatch.Server.Journal.Decoding;
+using Landoria.RavenWatch.Server.Inventory;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
 
-namespace Landoria.RavenWatch.Server
+namespace Landoria.RavenWatch.Server.Journal
 {
     internal static class RpcCapture
     {
         internal static ModLog Log;
         private static RpcJournal journal;
         private static RpcJournal errorJournal;
-        private static InventoryEventCapture inventoryEvents;
         private static RpcJsonDecoder decoder;
         [ThreadStatic] private static JObject active;
 
@@ -25,7 +25,6 @@ namespace Landoria.RavenWatch.Server
             var entry = Entry();
             entry["request"] = Packet(rpc, package, true, debug);
             entry["parentCallId"] = previous?["callId"]?.DeepClone();
-            CaptureInventory(entry, rpc);
             active = entry;
             return previous;
         }
@@ -111,20 +110,6 @@ namespace Landoria.RavenWatch.Server
             string directory = Path.Combine(Utils.GetSaveDataPath(FileHelpers.FileSource.Local), "RavenWatch");
             if (errorJournal == null) errorJournal = new RpcJournal(directory, "rpc-errors");
             if (journal == null) journal = new RpcJournal(directory);
-            if (inventoryEvents == null) inventoryEvents = new InventoryEventCapture(directory);
-        }
-
-        private static void CaptureInventory(JObject entry, ZRpc rpc)
-        {
-            try
-            {
-                if (inventoryEvents == null) Start();
-                string method = (string)entry["request"]?["data"]?["name"];
-                if (method != "ZDOData" && method != "RoutedRPC") return;
-                var peer = ZNet.instance.GetPeers().FirstOrDefault(candidate => candidate.m_rpc == rpc);
-                inventoryEvents.Capture(entry, decoder, peer);
-            }
-            catch (Exception error) { Log.LogError(error); }
         }
 
         private static void SaveDecodeError(JObject entry, JObject packet, string role)
@@ -145,10 +130,9 @@ namespace Landoria.RavenWatch.Server
         {
             CloseJournal(journal);
             CloseJournal(errorJournal);
-            CloseJournal(inventoryEvents);
+            InventoryCapture.Close();
             journal = null;
             errorJournal = null;
-            inventoryEvents = null;
             decoder = null;
             active = null;
         }

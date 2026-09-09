@@ -2,7 +2,7 @@ using System;
 using HarmonyLib;
 using Newtonsoft.Json.Linq;
 
-namespace Landoria.RavenWatch.Server
+namespace Landoria.RavenWatch.Server.Journal
 {
     [HarmonyPatch(typeof(ZNet), "Awake")]
     internal static class RpcStartupPatch
