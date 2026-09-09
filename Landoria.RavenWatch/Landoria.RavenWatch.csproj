@@ -20,17 +20,30 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
-    <Reference Include="System.Core" />
+    <Reference Include="System.Core" /><Reference Include="0Harmony"><HintPath>$(BepInExPath)\core\0Harmony.dll</HintPath><Private>false</Private></Reference><Reference Include="assembly_valheim"><HintPath>$(ValheimGamePath)\valheim_Data\Managed\assembly_valheim.dll</HintPath><Private>false</Private></Reference><Reference Include="assembly_utils"><HintPath>$(ValheimGamePath)\valheim_Data\Managed\assembly_utils.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="BepInEx"><HintPath>$(BepInExPath)\core\BepInEx.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="UnityEngine"><HintPath>$(ValheimGamePath)\valheim_Data\Managed\UnityEngine.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="UnityEngine.CoreModule"><HintPath>$(ValheimGamePath)\valheim_Data\Managed\UnityEngine.CoreModule.dll</HintPath><Private>false</Private></Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="RavenWatchPlugin.cs" />
+    <Compile Include="RavenWatchPlugin.cs" /><Compile Include="Server\Decoding\*.cs" /><Compile Include="Server\*.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Content Include="README.md" /><Content Include="manifest.json" />
     <Content Include="icon.png" /><Content Include="LICENSE" />
+    <EmbeddedResource Include="Resources\valheim-1.0.7-rpc.json"><LogicalName>Landoria.RavenWatch.Resources.valheim-1.0.7-rpc.json</LogicalName></EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 
+  <ItemGroup>
+    <PackageReference Include="LiteDB" Version="5.0.21" GeneratePathProperty="true" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" GeneratePathProperty="true" />
+    <Reference Include="LiteDB"><HintPath>$(PkgLiteDB)\lib\net45\LiteDB.dll</HintPath></Reference>
+    <Reference Include="Newtonsoft.Json"><HintPath>$(PkgNewtonsoft_Json)\lib\net45\Newtonsoft.Json.dll</HintPath></Reference>
+  </ItemGroup>
+  <Target Name="IncludeRpcDependencies" BeforeTargets="MergeLandoriaSharedLib">
+    <ItemGroup>
+      <LandoriaAdditionalAssembliesToMerge Include="$(PkgLiteDB)\lib\net45\LiteDB.dll" />
+      <LandoriaAdditionalAssembliesToMerge Include="$(PkgNewtonsoft_Json)\lib\net45\Newtonsoft.Json.dll" />
+    </ItemGroup>
+  </Target>
 </Project>

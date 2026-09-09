@@ -1,5 +1,7 @@
 using BepInEx;
 using Landoria.SharedLib;
+using HarmonyLib;
+using Landoria.RavenWatch.Server;
 
 namespace Landoria.RavenWatch
 {
@@ -13,6 +15,8 @@ namespace Landoria.RavenWatch
         private void Awake()
         {
             var log = new ModLog(Logger);
+            RpcCapture.Log = log;
+            new Harmony(PluginGuid).PatchAll();
             log.LogInfo("RavenWatch proof of concept loaded.");
         }
     }
