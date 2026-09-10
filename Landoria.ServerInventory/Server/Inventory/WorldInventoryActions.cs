@@ -15,30 +15,49 @@ namespace Landoria.ServerInventory.Server
         {
             var id = new ZDOID(long.Parse((string)request["user"]), (uint)request["object"]);
             var view = ZNetScene.instance.FindInstance(id)?.GetComponent<ZNetView>();
-            if (view == null || !view.IsValid() || Vector3.Distance(action.Player.transform.position, view.transform.position) > 4f)
-                throw new InvalidOperationException("Object unavailable or too far away.");
+            if (view == null || !view.IsValid())
+            {
+                bool exists = ZDOMan.instance.GetZDO(id) != null;
+                throw new InvalidOperationException($"Object {id} is {(exists ? "not loaded on the server" : "absent from the server")}.");
+            }
+            float distance = Vector3.Distance(action.Player.transform.position, view.transform.position);
+            if (distance > 4f)
+                throw new InvalidOperationException($"Object {id} ({view.gameObject.name}) is {distance:F2} m away on the server " +
+                    $"(limit 4 m; player {action.Player.transform.position:F2}, object {view.transform.position:F2}).");
             if (!PrivateArea.CheckAccess(view.transform.position, 0, false)) throw new InvalidOperationException("No access.");
             view.GetZDO().SetOwner(ZNet.GetUID());
             action.Touch(view);
             return view;
         }
 
-        internal static void Pickup(WorldActionTransaction action, JObject request)
+        internal static bool Pickup(WorldActionTransaction action, JObject request)
         {
             var view = Target(action, request);
             var drop = view.GetComponent<ItemDrop>();
             if (drop == null) throw new InvalidDataException("Target is not an item.");
             drop.Load();
-            if (!drop.CanPickup() || drop.IsPiece() || drop.InTar() || drop.m_itemData.m_shared.m_questItem)
-                throw new InvalidOperationException("Item cannot be picked up.");
-            if ((bool?)request["automatic"] == true && (!drop.m_autoPickup ||
-                Vector3.Distance(action.Player.transform.position + Vector3.up, drop.transform.position) > action.Player.m_autoPickupRange ||
-                action.Inventory.GetTotalWeight() + drop.m_itemData.GetWeight() > action.Player.GetMaxCarryWeight()))
-                throw new InvalidOperationException("Automatic pickup requirements not met.");
+            ValidatePickup(drop);
+            if ((bool?)request["automatic"] == true && !AutomaticPickup.Check(action, drop)) return false;
             var item = drop.m_itemData.Clone();
             if (!action.Inventory.CanAddItem(item, item.m_stack) || !action.Inventory.AddItem(item))
                 throw new InvalidOperationException("Inventory full.");
             action.Delete(view);
+            return true;
+        }
+
+        private static void ValidatePickup(ItemDrop drop)
+        {
+            string item = drop.gameObject.name;
+            if (!drop.CanPickup(false))
+                throw new InvalidOperationException($"Cannot pick up {item}: server does not own the item.");
+            if (!drop.CanPickup())
+                throw new InvalidOperationException($"Cannot pick up {item}: native spawn delay is still active.");
+            if (drop.IsPiece())
+                throw new InvalidOperationException($"Cannot pick up {item}: item is placed as a building piece.");
+            if (drop.InTar())
+                throw new InvalidOperationException($"Cannot pick up {item}: item is stuck in tar.");
+            if (drop.m_itemData.m_shared.m_questItem)
+                throw new InvalidOperationException($"Cannot pick up {item}: quest item pickup is not supported yet.");
         }
 
         internal static void Container(WorldActionTransaction action, JObject request)

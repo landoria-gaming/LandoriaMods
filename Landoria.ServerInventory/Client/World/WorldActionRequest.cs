@@ -13,19 +13,23 @@ namespace Landoria.ServerInventory.Client
     {
         private static ZRpc connection;
         private static readonly Dictionary<string, string> pending = new Dictionary<string, string>();
+        private static readonly Dictionary<string, Action> completions = new Dictionary<string, Action>();
 
-        internal static void Send(JObject request)
+        internal static void Send(JObject request, Action onSuccess = null)
         {
             try
             {
                 var rpc = ZNet.instance.GetServerRPC();
                 if (rpc == null || !rpc.IsConnected()) return;
-                if (connection != rpc) { connection = rpc; pending.Clear(); }
-                string key = request.ToString(Formatting.None);
+                if (connection != rpc) { connection = rpc; pending.Clear(); completions.Clear(); }
+                string key = (string)request["kind"] == "pickup"
+                    ? "pickup/" + (string)request["user"] + "/" + (uint)request["object"]
+                    : request.ToString(Formatting.None);
                 if (pending.Values.Contains(key)) return;
                 string id = Guid.NewGuid().ToString("D");
                 request["id"] = id;
                 pending.Add(id, key);
+                if (onSuccess != null) completions.Add(id, onSuccess);
                 rpc.Invoke(CharacterRpc.WorldAction, request.ToString(Formatting.None));
             }
             catch (Exception error) { CharacterRpc.Log.LogError(error); }
@@ -34,8 +38,14 @@ namespace Landoria.ServerInventory.Client
         internal static void Receive(ZRpc rpc, string id, bool success, string reason, ZPackage inventory)
         {
             if (ZNet.instance == null || rpc != ZNet.instance.GetServerRPC() || rpc != connection || !pending.Remove(id)) return;
-            if (success) CombatResult.ReceiveInventory(rpc, inventory);
-            else Player.m_localPlayer?.Message(MessageHud.MessageType.Center, reason);
+            completions.TryGetValue(id, out var complete);
+            completions.Remove(id);
+            if (success)
+            {
+                CombatResult.ReceiveInventory(rpc, inventory);
+                complete?.Invoke();
+            }
+            else if (!string.IsNullOrEmpty(reason)) Player.m_localPlayer?.Message(MessageHud.MessageType.Center, reason);
         }
 
         internal static void Build(Piece piece, Vector3 position, Quaternion rotation)
@@ -55,7 +65,8 @@ namespace Landoria.ServerInventory.Client
             { __instance.Message(MessageHud.MessageType.Center, "Move the item into your inventory before dropping it."); return false; }
             WorldActionRequest.Send(new JObject { ["kind"] = "drop", ["prefab"] = item.m_dropPrefab.name.GetStableHashCode(),
                 ["amount"] = amount, ["quality"] = item.m_quality, ["variant"] = item.m_variant,
-                ["x"] = item.m_gridPos.x, ["y"] = item.m_gridPos.y });
+                ["x"] = item.m_gridPos.x, ["y"] = item.m_gridPos.y },
+                DropCursor.Completion(item, inventory ?? __instance.GetInventory(), amount));
             return false;
         }
     }

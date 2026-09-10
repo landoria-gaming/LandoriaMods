@@ -84,6 +84,7 @@ namespace Landoria.ServerInventory.Server
         {
             if (id.IsNone()) return true;
             if (!reservations.TryGetValue(rpc, out var slot) || id != slot.Id) return false;
+            if (!slot.Used) ServerRespawn.Queue(rpc, id);
             slot.Used = true;
             return true;
         }

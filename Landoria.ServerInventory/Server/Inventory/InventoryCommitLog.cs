@@ -28,7 +28,7 @@ namespace Landoria.ServerInventory.Server
             Healthy = true;
         }
 
-        internal static string Prepare(string characterPath, JObject character, JArray objects)
+        internal static string WriteIntent(string characterPath, JObject character, JArray objects)
         {
             if (!Healthy || folder == null) throw new InvalidOperationException("Inventory recovery is required.");
             string id = (++sequence).ToString("D19") + "-" + Guid.NewGuid().ToString("N");

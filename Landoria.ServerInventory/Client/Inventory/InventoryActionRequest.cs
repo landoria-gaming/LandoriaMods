@@ -24,6 +24,7 @@ namespace Landoria.ServerInventory.Client
         internal static void Pickup(ItemDrop drop, bool automatic = false)
         {
             if (automatic && (!drop.m_autoPickup || drop.IsPiece() || drop.InTar() ||
+                Vector3.Distance(Player.m_localPlayer.transform.position + Vector3.up, drop.transform.position) > Player.m_localPlayer.m_autoPickupRange ||
                 !Player.m_localPlayer.GetInventory().CanAddItem(drop.m_itemData) ||
                 drop.m_itemData.GetWeight() + Player.m_localPlayer.GetInventory().GetTotalWeight() > Player.m_localPlayer.GetMaxCarryWeight())) return;
             var request = Request(drop, "pickup");

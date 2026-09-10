@@ -10,9 +10,9 @@ namespace Landoria.ServerInventory.Network
     {
         internal static void Apply(Player player, ZPackage package)
         {
-            var snapshot = new Inventory(true);
-            snapshot.Load(package);
             var inventory = player.GetInventory();
+            var snapshot = new Inventory("Server snapshot", null, inventory.GetWidth(), inventory.GetHeight());
+            snapshot.Load(package);
             var available = inventory.GetAllItems().ToList();
             var incoming = snapshot.GetAllItems();
             var matches = new Dictionary<ItemDrop.ItemData, ItemDrop.ItemData>();

@@ -41,6 +41,7 @@ namespace Landoria.ServerInventory.Client
                     Hit = hit;
                     target.SetMaxHealth(maximum);
                     target.SetHealth(health);
+                    ServerDeathConfirmation.Record(target, health);
                 }
                 if (damage > 0) DamageText.instance?.ShowText(HitData.DamageModifier.Normal, target.GetCenterPoint(), damage, target.IsPlayer());
             }

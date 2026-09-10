@@ -26,8 +26,10 @@ namespace Landoria.ServerInventory
 
         private void Update()
         {
+            Server.ServerRespawn.Tick();
             Server.ServerAttacks.Tick();
             Server.NativeDamage.Tick();
+            Server.PendingPickups.Tick();
         }
 
         private void OnDestroy()

@@ -11,7 +11,11 @@ namespace Landoria.ServerInventory.Server
 {
     internal static class ServerWorldActions
     {
-        private sealed class Session { internal readonly HashSet<Guid> Seen = new HashSet<Guid>(); }
+        private sealed class Session
+        {
+            internal readonly HashSet<Guid> Seen = new HashSet<Guid>();
+            internal readonly HashSet<string> CompletedPickups = new HashSet<string>();
+        }
         private static readonly ConditionalWeakTable<ZRpc, Session> sessions = new ConditionalWeakTable<ZRpc, Session>();
 
         internal static void Receive(ZRpc rpc, string json)
@@ -19,7 +23,6 @@ namespace Landoria.ServerInventory.Server
             var peer = ZNet.instance.GetPeers().FirstOrDefault(value => value.m_rpc == rpc && value.IsReady());
             if (peer == null || !InventoryChangesServer.IsLoaded(rpc)) return;
             string requestId = "";
-            bool committed = false;
             try
             {
                 if (json == null || json.Length > 8192) throw new InvalidDataException("Invalid world action request.");
@@ -29,30 +32,60 @@ namespace Landoria.ServerInventory.Server
                 var session = sessions.GetOrCreateValue(rpc);
                 if (session.Seen.Count > 100000) throw new InvalidDataException("Too many world actions.");
                 if (!session.Seen.Add(id)) return;
+                if (!PendingPickups.Defer(peer, request)) Execute(peer, request);
+            }
+            catch (Exception error)
+            {
+                CharacterRpc.Log.LogError(error);
+                rpc.Invoke(CharacterRpc.WorldActionResult, requestId, false, error.Message, new ZPackage());
+            }
+        }
+
+        internal static void Execute(ZNetPeer peer, JObject request)
+        {
+            string requestId = (string)request["id"];
+            bool committed = false;
+            try
+            {
                 var instance = ZNetScene.instance.FindInstance(peer.m_characterID);
                 var player = instance == null ? null : instance.GetComponent<Player>();
                 if (player == null) throw new InvalidOperationException("Character unavailable.");
+                var session = sessions.GetOrCreateValue(peer.m_rpc);
+                string pickup = PickupKey(peer, request);
                 using (var action = new WorldActionTransaction(peer, player))
                 using (var scope = new CombatScope(player))
                 using (var inventory = new NativeCraftInventory(player, action.Inventory))
                 {
-                    Apply(action, request);
+                    if (pickup != null && session.CompletedPickups.Contains(pickup)) action.ReadOnly = true;
+                    else if (!Apply(action, request))
+                    {
+                        peer.m_rpc.Invoke(CharacterRpc.WorldActionResult, requestId, false, "", new ZPackage());
+                        return;
+                    }
                     var result = action.Commit();
                     committed = true;
-                    rpc.Invoke(CharacterRpc.WorldActionResult, requestId, true, "", result);
+                    if (pickup != null) session.CompletedPickups.Add(pickup);
+                    peer.m_rpc.Invoke(CharacterRpc.WorldActionResult, requestId, true, "", result);
                 }
             }
             catch (Exception error)
             {
                 CharacterRpc.Log.LogError(error);
-                if (!committed) rpc.Invoke(CharacterRpc.WorldActionResult, requestId, false, error.Message, new ZPackage());
+                if (!committed) peer.m_rpc.Invoke(CharacterRpc.WorldActionResult, requestId, false, error.Message, new ZPackage());
             }
         }
 
-        private static void Apply(WorldActionTransaction action, JObject request)
+        private static string PickupKey(ZNetPeer peer, JObject request)
+        {
+            if ((string)request["kind"] != "pickup") return null;
+            var id = new ZDOID(long.Parse((string)request["user"]), (uint)request["object"]);
+            return peer.m_characterID.ToString() + "/" + id;
+        }
+
+        private static bool Apply(WorldActionTransaction action, JObject request)
         {
             string kind = (string)request["kind"];
-            if (kind == "tombstone") { ServerTombstone.Create(action); return; }
+            if (kind == "tombstone") { ServerTombstone.Create(action); return true; }
             if ((float)action.Document["profile"]["playerData"]["health"] <= 0f || action.Player.IsDead())
                 throw new InvalidOperationException("Character is dead.");
             if (kind == "drop") Drop(action, request);
@@ -60,9 +93,10 @@ namespace Landoria.ServerInventory.Server
             else if (kind == "interact") NativeWorldInteraction.Apply(action, request);
             else if (kind == "trade") ServerTrading.Trade(action, request);
             else if (kind == "craft") ServerCrafting.Craft(action, request);
-            else if (kind == "pickup") WorldInventoryActions.Pickup(action, request);
+            else if (kind == "pickup") return WorldInventoryActions.Pickup(action, request);
             else if (kind == "container") WorldInventoryActions.Container(action, request);
             else throw new InvalidDataException("Unsupported world action.");
+            return true;
         }
 
         private static void Drop(WorldActionTransaction action, JObject request)

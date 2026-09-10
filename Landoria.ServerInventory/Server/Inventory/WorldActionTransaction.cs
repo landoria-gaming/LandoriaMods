@@ -83,7 +83,7 @@ namespace Landoria.ServerInventory.Server
                 if (view != null && view.IsValid() && view.GetZDO().Persistent) Touch(view);
             }
             foreach (var pair in touched) objects.Add(InventoryCommitLog.Snapshot(pair.Value, deleted.Contains(pair.Key)));
-            string journal = InventoryCommitLog.Prepare(path, Document, objects);
+            string journal = InventoryCommitLog.WriteIntent(path, Document, objects);
             committed = true;
             try
             {
