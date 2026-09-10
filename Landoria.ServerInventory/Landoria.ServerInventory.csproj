@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props"
+          Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
+    <Platform Condition="'$(Platform)' == ''">AnyCPU</Platform>
+    <ProjectGuid>{A177B8DB-A8A8-4CB8-B2E9-78317E073F3D}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>Landoria.ServerInventory</RootNamespace>
+    <AssemblyName>Landoria.ServerInventory</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols><DebugType>full</DebugType><Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath><DefineConstants>DEBUG;TRACE</DefineConstants><WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
+    <DebugType>pdbonly</DebugType><Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath><DefineConstants>TRACE</DefineConstants><WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="0Harmony"><HintPath>$(BepInExPath)\core\0Harmony.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="Splatform"><HintPath>$(ValheimGamePath)/valheim_Data/Managed/Splatform.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="System" /><Reference Include="System.Core" />
+    <Reference Include="BepInEx"><HintPath>$(BepInExPath)\core\BepInEx.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="assembly_valheim"><HintPath>$(ValheimGamePath)\valheim_Data\Managed\assembly_valheim.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="assembly_utils"><HintPath>$(ValheimGamePath)\valheim_Data\Managed\assembly_utils.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="UnityEngine"><HintPath>$(ValheimGamePath)\valheim_Data\Managed\UnityEngine.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="UnityEngine.PhysicsModule"><HintPath>$(ValheimGamePath)/valheim_Data/Managed/UnityEngine.PhysicsModule.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="UnityEngine.AudioModule"><HintPath>$(ValheimGamePath)/valheim_Data/Managed/UnityEngine.AudioModule.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="UnityEngine.CoreModule"><HintPath>$(ValheimGamePath)\valheim_Data\Managed\UnityEngine.CoreModule.dll</HintPath><Private>false</Private></Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Server/**/*.cs" /><Compile Include="Network/*.cs" /><Compile Include="Client/**/*.cs" /><Compile Include="ServerInventoryPlugin.cs" /><Compile Include="Serialization\*.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="icon.png" /><Content Include="LICENSE" /><Content Include="manifest.json" />
+    <Content Include="README.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" GeneratePathProperty="true" />
+    <Reference Include="Newtonsoft.Json"><HintPath>$(PkgNewtonsoft_Json)\lib\net45\Newtonsoft.Json.dll</HintPath></Reference>
+  </ItemGroup>
+  <Target Name="IncludeCharacterJsonDependencies" BeforeTargets="MergeLandoriaSharedLib">
+    <ItemGroup><LandoriaAdditionalAssembliesToMerge Include="$(PkgNewtonsoft_Json)\lib\net45\Newtonsoft.Json.dll" /></ItemGroup>
+  </Target>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
