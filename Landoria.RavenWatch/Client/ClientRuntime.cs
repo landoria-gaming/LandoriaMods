@@ -38,6 +38,9 @@ namespace Landoria.RavenWatch.Client
             harmony.CreateClassProcessor(typeof(ItemBrokenPatch)).Patch();
             harmony.CreateClassProcessor(typeof(ItemCraftedPatch)).Patch();
             harmony.CreateClassProcessor(typeof(ClientConnectionPatch)).Patch();
+            harmony.CreateClassProcessor(typeof(ItemDroppedPatch)).Patch();
+            harmony.CreateClassProcessor(typeof(InventoryAlertVisibilityPatch)).Patch();
+            ToggleRavenWatchCommand.Register();
             installed = true;
         }
     }

@@ -24,10 +24,9 @@ namespace Landoria.RavenWatch.Server.Network
             if (package.Size() > InventoryWire.MaximumBytes) throw new InvalidDataException("Inventory event too large.");
             var entry = JObject.Parse(package.ReadString());
             if (package.GetPos() != package.Size() || entry["items"] != null || entry["status"] != null
-                || !Guid.TryParse((string)entry["eventId"], out _) || !Guid.TryParse((string)entry["streamId"], out _)
-                || (long?)entry["sequence"] < 1 || entry["sequence"] == null)
+                || !Guid.TryParse((string)entry["eventId"], out _) || !Guid.TryParse((string)entry["streamId"], out _))
                 throw new InvalidDataException("Invalid inventory event envelope.");
-            var fields = new[] { "eventId", "clientCapturedUtc", "streamId", "sequence", "context",
+            var fields = new[] { "eventId", "clientCapturedUtc", "streamId", "context",
                 "operation", "changes", "craftedItem", "upgrade", "craftCount", "upgrader", "brokenItem", "destroyed" };
             foreach (var property in entry.Properties().Where(p => !fields.Contains(p.Name)).ToList()) property.Remove();
             entry["contextSource"] = "client_reported";

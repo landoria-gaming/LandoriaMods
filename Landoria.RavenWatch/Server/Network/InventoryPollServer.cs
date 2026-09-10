@@ -16,7 +16,7 @@ namespace Landoria.RavenWatch.Server.Network
         {
             internal long Character;
             internal string Stream;
-            internal long Sequence;
+            internal readonly HashSet<string> EventIds = new HashSet<string>();
             internal string RequestId;
             internal float Sent;
         }
@@ -34,14 +34,11 @@ namespace Landoria.RavenWatch.Server.Network
         {
             if (!states.TryGetValue(rpc, out var state)) return false;
             string stream = (string)entry["streamId"];
-            long sequence = (long)entry["sequence"];
-            if (state.Character != id) { state.Character = id; state.Stream = null; state.Sequence = 0; }
+            if (state.Character != id) { state.Character = id; state.Stream = null; state.EventIds.Clear(); }
             if (state.Stream != null && state.Stream != stream)
                 throw new InvalidDataException("Inventory stream changed within a character connection.");
-            if (sequence <= state.Sequence) return false;
             state.Stream = stream;
-            state.Sequence = sequence;
-            return true;
+            return state.EventIds.Add((string)entry["eventId"]);
         }
 
         internal static void Tick()
@@ -77,10 +74,9 @@ namespace Landoria.RavenWatch.Server.Network
                 var snapshot = InventoryResponseWire.Read(package, id);
                 if (!states.TryGetValue(rpc, out var state) || state.RequestId != (string)snapshot["requestId"])
                     throw new InvalidDataException("Unsolicited or expired inventory response.");
-                if (state.Character != id) { state.Character = id; state.Stream = null; state.Sequence = 0; }
-                if ((state.Stream != null && state.Stream != (string)snapshot["streamId"])
-                    || state.Sequence != (long)snapshot["sequence"])
-                    throw new InvalidDataException("Inventory response does not match the received event sequence.");
+                if (state.Character != id) { state.Character = id; state.Stream = null; state.EventIds.Clear(); }
+                if (state.Stream != null && state.Stream != (string)snapshot["streamId"])
+                    throw new InvalidDataException("Inventory response does not match the character connection.");
                 state.Stream = (string)snapshot["streamId"];
                 InventoryCapture.ClientInventory(peer, snapshot);
                 state.RequestId = null;

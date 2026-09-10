@@ -19,7 +19,6 @@ namespace Landoria.RavenWatch.Client
                 var package = new ZPackage();
                 package.Write(requestId);
                 package.Write(InventoryEventSender.Stream);
-                package.Write(InventoryEventSender.Sequence);
                 package.Write(InventorySnapshotCapture.Capture(player).GetArray());
                 rpc.Invoke(InventoryProtocol.Response, player.GetPlayerID(), package);
             }

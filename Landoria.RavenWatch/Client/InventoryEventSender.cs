@@ -11,7 +11,7 @@ namespace Landoria.RavenWatch.Client
         private static ZRpc connection;
         private static long character;
         internal static string Stream;
-        internal static long Sequence;
+        internal static bool EventsEnabled = true;
 
         internal static void Prepare(ZRpc rpc, long id)
         {
@@ -19,18 +19,17 @@ namespace Landoria.RavenWatch.Client
             connection = rpc;
             character = id;
             Stream = Guid.NewGuid().ToString("D");
-            Sequence = 0;
         }
 
         internal static void Send(Player player, JObject entry)
         {
+            if (!EventsEnabled) return;
             var peer = ZNet.instance?.GetServerPeer();
             if (peer == null || !peer.m_rpc.IsConnected()) return;
             Prepare(peer.m_rpc, player.GetPlayerID());
             entry["eventId"] = Guid.NewGuid().ToString("D");
             entry["clientCapturedUtc"] = DateTime.UtcNow;
             entry["streamId"] = Stream;
-            entry["sequence"] = ++Sequence;
             entry["contextSource"] = "client_reported";
             var package = new ZPackage();
             package.Write(entry.ToString(Formatting.None));

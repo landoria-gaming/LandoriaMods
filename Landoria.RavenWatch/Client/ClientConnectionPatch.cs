@@ -10,7 +10,7 @@ namespace Landoria.RavenWatch.Client
         private static void Postfix(ZNetPeer peer)
         {
             if (ZNet.instance.IsServer()) return;
-            try { InventoryPollClient.Register(peer); }
+            try { InventoryPollClient.Register(peer); InventoryAlertChat.Register(peer); }
             catch (Exception error) { RavenWatchLog.Log.LogError(error); }
         }
     }

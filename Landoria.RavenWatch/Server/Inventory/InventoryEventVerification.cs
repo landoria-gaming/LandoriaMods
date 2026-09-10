@@ -10,22 +10,26 @@ namespace Landoria.RavenWatch.Server.Inventory
 {
     internal static class InventoryEventVerification
     {
+        internal const string PendingFile = "inventory-events-pending.json";
         internal const string UnverifiedFile = "inventory-events-unverified.json";
+        private const string VerifiedFile = "inventory-events-verified.json";
+        private const string TransactionFile = ".inventory-events-review.json";
 
-        internal static string PrepareUnverified(string directory)
+        internal static string PreparePending(string directory)
         {
-            string target = Path.Combine(directory, UnverifiedFile);
+            Recover(directory);
+            var pending = Read(directory, PendingFile);
+            var rejected = Read(directory, UnverifiedFile);
             var legacy = Directory.EnumerateFiles(directory, "*inventory-events*.json")
-                .Where(path => IsLegacyName(Path.GetFileName(path))).OrderBy(path => path, StringComparer.Ordinal).ToList();
-            if (legacy.Count == 0) return target;
-            var paths = File.Exists(target) ? new[] { target }.Concat(legacy) : legacy;
-            var entries = paths.SelectMany(path => JArray.Parse(File.ReadAllText(path)).Cast<JObject>())
-                .GroupBy(e => (string)e["eventId"]).Select(group => group.First())
-                .OrderBy(e => e["utc"].Value<DateTime>()).ToList();
-            // Persist all entries first; retries deduplicate an interrupted rename by event ID.
-            Write(target, new JArray(entries));
+                .Where(path => IsLegacyName(Path.GetFileName(path))).ToList();
+            var migrated = rejected.Where(e => (int?)e["verificationAttempts"] < 3
+                || e["verificationAttempts"] == null).ToList();
+            foreach (var entry in migrated) { entry.Remove(); pending.Add(entry); }
+            foreach (string path in legacy)
+                foreach (var entry in JArray.Parse(File.ReadAllText(path))) pending.Add(entry);
+            Commit(directory, pending, Read(directory, VerifiedFile), rejected);
             foreach (string path in legacy) File.Delete(path);
-            return target;
+            return Path.Combine(directory, PendingFile);
         }
 
         private static bool IsLegacyName(string name)
@@ -37,52 +41,75 @@ namespace Landoria.RavenWatch.Server.Inventory
                 && name.Substring(prefix.Length, 8).All(char.IsDigit);
         }
 
-        internal static void Review(string directory)
+        internal static void Review(string directory, Action<JObject> onUnverified = null)
         {
-            string archivePath = Path.Combine(directory, "inventory-events-verified.json");
-            var archive = File.Exists(archivePath) ? JArray.Parse(File.ReadAllText(archivePath)) : new JArray();
-            var files = Directory.EnumerateFiles(directory, "*inventory-events*.json")
-                .Where(path => path != archivePath).OrderBy(path => path, StringComparer.Ordinal).ToList();
-            var journals = files.ToDictionary(path => path, path => JArray.Parse(File.ReadAllText(path)));
-            var events = archive.Cast<JObject>()
-                .Concat(journals.Values.SelectMany(array => array.Cast<JObject>())).GroupBy(e => (string)e["eventId"])
-                .Select(group => group.First()).OrderBy(e => e["utc"].Value<DateTime>()).ToList();
-            var snapshots = events.Where(e => (string)e["status"] == "received" && e["items"] is JArray).ToList();
-            var verified = InventoryEventMatcher.Match(events, snapshots);
-            var retained = new JArray(archive.Cast<JObject>().Where(e =>
-                (string)e["verification"]?["basis"] != "consecutive_client_inventories")
-                .GroupBy(e => (string)e["eventId"]).Select(group => group.First()));
-            var retainedIds = new HashSet<string>(retained.Cast<JObject>().Select(e => (string)e["eventId"]));
-            foreach (var entry in verified)
-                if (retainedIds.Add((string)entry["eventId"])) retained.Add(entry);
-            RestoreLegacyEvents(archive, retainedIds, journals, directory);
-            // Commit the archive first; retries remove any remaining duplicate source IDs.
-            if (retained.Count > 0 || File.Exists(archivePath)) Write(archivePath, retained);
-            foreach (var pair in journals)
+            Recover(directory);
+            var archive = Read(directory, VerifiedFile);
+            var rejected = Read(directory, UnverifiedFile);
+            var finished = new HashSet<string>(archive.Concat(rejected).Select(e => (string)e["eventId"]));
+            var pending = Unique(Read(directory, PendingFile).Where(e => !finished.Contains((string)e["eventId"])));
+            foreach (var snapshot in pending.OfType<JObject>().Where(e => e["items"] is JArray).ToList())
             {
-                var remaining = new JArray(pair.Value.Cast<JObject>()
-                    .Where(e => !retainedIds.Contains((string)e["eventId"])));
-                if (remaining.Count != pair.Value.Count) Write(pair.Key, remaining);
+                var candidates = pending.TakeWhile(e => e != snapshot).OfType<JObject>()
+                    .Where(e => e["items"] == null && JToken.DeepEquals(e["characterId"], snapshot["characterId"])).ToList();
+                InventoryPendingMatcher.Match(candidates, archive, snapshot);
+                int rejectedBefore = rejected.Count;
+                Finish(candidates, snapshot, archive, rejected);
+                snapshot["verification"] = new JObject { ["basis"] = "inventory_snapshot_recorded",
+                    ["verifiedUtc"] = DateTime.UtcNow };
+                snapshot.Remove();
+                archive.Add(snapshot);
+                Commit(directory, pending, archive, rejected);
+                foreach (var entry in rejected.Skip(rejectedBefore).OfType<JObject>()) onUnverified?.Invoke(entry);
             }
         }
 
-        private static void RestoreLegacyEvents(JArray archive, HashSet<string> retainedIds,
-            Dictionary<string, JArray> journals, string directory)
+        private static void Finish(List<JObject> candidates, JObject snapshot,
+            JArray archive, JArray rejected)
         {
-            // Rebuild old matches with the corrected association, preserving all event payloads.
-            foreach (var entry in archive.Cast<JObject>().Where(e => !retainedIds.Contains((string)e["eventId"])))
+            foreach (var entry in candidates)
             {
-                var copy = (JObject)entry.DeepClone();
-                copy.Remove("verification");
-                string path = Path.Combine(directory, UnverifiedFile);
-                if (!journals.ContainsKey(path)) journals[path] = new JArray();
-                if (!journals[path].Cast<JObject>().Any(e => (string)e["eventId"] == (string)copy["eventId"]))
-                    journals[path].Add(copy);
-                Write(path, journals[path]);
+                if (entry["verification"] != null) { entry.Remove(); archive.Add(entry); continue; }
+                if ((string)entry["lastAttemptInventoryId"] == (string)snapshot["eventId"]) continue;
+                entry["lastAttemptInventoryId"] = snapshot["eventId"].DeepClone();
+                int attempts = ((int?)entry["verificationAttempts"] ?? 0) + 1;
+                entry["verificationAttempts"] = attempts;
+                if (attempts < 3) continue;
+                entry["verificationStatus"] = "unverified";
+                entry.Remove();
+                rejected.Add(entry);
             }
         }
 
-        private static void Write(string path, JArray entries)
+        private static JArray Read(string directory, string name)
+            => File.Exists(Path.Combine(directory, name))
+                ? JArray.Parse(File.ReadAllText(Path.Combine(directory, name))) : new JArray();
+        private static JArray Unique(IEnumerable<JToken> entries)
+            => new JArray(entries.GroupBy(e => (string)e["eventId"]).Select(g => g.First()));
+
+        private static void Commit(string directory, JArray pending, JArray archive, JArray rejected)
+        {
+            var complete = Unique(archive);
+            var ids = new HashSet<string>(complete.Select(e => (string)e["eventId"]));
+            var failed = Unique(rejected.Where(e => !ids.Contains((string)e["eventId"])));
+            ids.UnionWith(failed.Select(e => (string)e["eventId"]));
+            var state = new JObject { [PendingFile] = Unique(pending.Where(e => !ids.Contains((string)e["eventId"]))),
+                [VerifiedFile] = complete, [UnverifiedFile] = failed };
+            Write(Path.Combine(directory, TransactionFile), state);
+            Recover(directory);
+        }
+
+        internal static void Recover(string directory)
+        {
+            string path = Path.Combine(directory, TransactionFile);
+            if (!File.Exists(path)) return;
+            var state = JObject.Parse(File.ReadAllText(path));
+            foreach (string name in new[] { PendingFile, VerifiedFile, UnverifiedFile })
+                Write(Path.Combine(directory, name), state[name]);
+            File.Delete(path);
+        }
+
+        private static void Write(string path, JToken entries)
         {
             string temporary = path + ".tmp";
             byte[] bytes = new UTF8Encoding(false).GetBytes(entries.ToString(Formatting.Indented));

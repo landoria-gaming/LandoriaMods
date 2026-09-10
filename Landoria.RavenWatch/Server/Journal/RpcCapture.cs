@@ -11,13 +11,16 @@ namespace Landoria.RavenWatch.Server.Journal
 {
     internal static class RpcCapture
     {
-        // Decoding stays active so rpc-errors files are always written.
+        // Disable RPC inspection without disabling inventory collection or transport.
+        internal const bool EnableRpcCapture = false;
         internal const bool LogRpcTraffic = false;
 
         private static RpcJournal journal;
         private static RpcJournal errorJournal;
         private static RpcJsonDecoder decoder;
         [ThreadStatic] private static JObject active;
+
+        internal static bool CaptureEnabled => EnableRpcCapture && Enabled;
 
         internal static bool Enabled => ZNet.instance != null && ZNet.instance.IsDedicated();
 
@@ -110,8 +113,8 @@ namespace Landoria.RavenWatch.Server.Journal
 
         internal static void Start()
         {
+            if (!CaptureEnabled) return;
             string directory = Path.Combine(Utils.GetSaveDataPath(FileHelpers.FileSource.Local), "RavenWatch");
-            if (errorJournal == null) errorJournal = new RpcJournal(directory, "rpc-errors");
             if (journal == null) journal = LogRpcTraffic ? new RpcJournal(directory) : null;
         }
 
@@ -120,6 +123,9 @@ namespace Landoria.RavenWatch.Server.Journal
             if ((string)packet?["decodeStatus"] != "error") return;
             try
             {
+                if (errorJournal == null)
+                    errorJournal = new RpcJournal(Path.Combine(Utils.GetSaveDataPath(FileHelpers.FileSource.Local),
+                        "RavenWatch"), "rpc-errors");
                 errorJournal.Append(new JObject
                 {
                     ["callId"] = entry["callId"].DeepClone(), ["role"] = role,

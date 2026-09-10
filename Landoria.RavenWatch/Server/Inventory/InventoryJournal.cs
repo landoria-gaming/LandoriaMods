@@ -20,9 +20,13 @@ namespace Landoria.RavenWatch.Server.Inventory
             internal void Review()
             {
                 Journal.Dispose();
-                try { InventoryEventVerification.Review(Directory); }
+                try { InventoryEventVerification.Review(Directory, Network.InventoryUnverifiedBroadcast.Send); }
                 catch (Exception error) { RavenWatchLog.Log.LogError(error); }
-                finally { Journal = RpcJournal.OpenPersistent(Path); }
+                finally
+                {
+                    InventoryEventVerification.Recover(Directory);
+                    Journal = RpcJournal.OpenPersistent(Path);
+                }
             }
 
             internal void Append(JObject entry)
@@ -31,8 +35,8 @@ namespace Landoria.RavenWatch.Server.Inventory
                 entry["eventDate"] = entry["utc"]?.Type == JTokenType.Date
                     ? new JValue(entry["utc"].Value<DateTime>().ToUniversalTime())
                     : entry["utc"]?.DeepClone() ?? new JValue(DateTime.UtcNow);
+                if (entry["items"] == null) entry["verificationAttempts"] = 0;
                 Journal.Append(entry);
-                if ((long?)entry["quantityDelta"] != 0) Review();
             }
         }
 
@@ -118,7 +122,7 @@ namespace Landoria.RavenWatch.Server.Inventory
             // Legacy journals also count as history before their filenames are consolidated.
             bool isNew = !Directory.EnumerateFiles(playerDirectory, "inventory-events*.json").Any()
                 && !Directory.EnumerateFiles(playerDirectory, "_inventory-events*.json").Any();
-            string path = InventoryEventVerification.PrepareUnverified(playerDirectory);
+            string path = InventoryEventVerification.PreparePending(playerDirectory);
             var journal = new CharacterJournal { Directory = playerDirectory, Path = path,
                 Journal = RpcJournal.OpenPersistent(path) };
             journals.Add(folder, journal);
@@ -135,6 +139,7 @@ namespace Landoria.RavenWatch.Server.Inventory
                 item["eventId"] = Guid.NewGuid().ToString("D");
                 item["utc"] = identity["utc"]?.DeepClone();
                 item["event"] = "pickup";
+                item["startingItem"] = true;
                 item["characterId"] = identity["characterId"]?.DeepClone();
                 item["playerName"] = identity["playerName"]?.DeepClone();
                 item["quantityDelta"] = 1;

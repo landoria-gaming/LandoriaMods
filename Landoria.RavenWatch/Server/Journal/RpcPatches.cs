@@ -13,7 +13,7 @@ namespace Landoria.RavenWatch.Server.Journal
         private static void Prefix(ZRpc __instance, ZPackage package, bool ___m_DEBUG, out State __state)
         {
             __state = null;
-            if (!RpcCapture.Enabled) return;
+            if (!RpcCapture.CaptureEnabled) return;
             try { __state = new State { Previous = RpcCapture.Begin(__instance, package, ___m_DEBUG) }; }
             catch (Exception error) { RavenWatchLog.Log.LogError(error); }
         }
@@ -33,7 +33,7 @@ namespace Landoria.RavenWatch.Server.Journal
         private static void Prefix(ZRpc __instance, ZPackage pkg, bool ___m_DEBUG, out JObject __state)
         {
             __state = null;
-            if (!RpcCapture.Enabled) return;
+            if (!RpcCapture.CaptureEnabled) return;
             // PlayFab appends a four-byte sequence and a one-byte message type during Send.
             // Decode the RPC before that mutation; record it only after SendPackage returns.
             try { __state = RpcCapture.Outgoing(__instance, pkg, ___m_DEBUG); }
