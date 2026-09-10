@@ -1,7 +1,7 @@
+using Landoria.RavenWatch.Shared;
 using System;
 using System.IO;
 using System.Linq;
-using Landoria.SharedLib;
 using Landoria.RavenWatch.Server.Journal.Decoding;
 using Landoria.RavenWatch.Server.Inventory;
 using Newtonsoft.Json.Linq;
@@ -11,7 +11,9 @@ namespace Landoria.RavenWatch.Server.Journal
 {
     internal static class RpcCapture
     {
-        internal static ModLog Log;
+        // Decoding stays active so rpc-errors files are always written.
+        internal const bool LogRpcTraffic = false;
+
         private static RpcJournal journal;
         private static RpcJournal errorJournal;
         private static RpcJsonDecoder decoder;
@@ -71,12 +73,13 @@ namespace Landoria.RavenWatch.Server.Journal
             try
             {
                 if (decoder == null) decoder = new RpcJsonDecoder();
-                result["data"] = JObject.Parse(decoder.Decode(bytes, incoming,
-                    global::Version.CurrentVersion.ToString(), debug, Components, ObjectComponents));
+                result["data"] = InventoryRpcLog.Decode(bytes, incoming, debug)
+                    ?? JObject.Parse(decoder.Decode(bytes, incoming,
+                        global::Version.CurrentVersion.ToString(), debug, Components, ObjectComponents));
             }
             catch (Exception error)
             {
-                Log.LogError(error);
+                RavenWatchLog.Log.LogError(error);
                 result["decodeStatus"] = "error";
                 result["error"] = error.ToString();
             }
@@ -102,14 +105,14 @@ namespace Landoria.RavenWatch.Server.Journal
             SaveDecodeError(entry, entry["request"] as JObject, "request");
             foreach (JObject response in (JArray)entry["response"])
                 SaveDecodeError(entry, response, "response");
-            journal.Append(entry);
+            journal?.Append(entry);
         }
 
         internal static void Start()
         {
             string directory = Path.Combine(Utils.GetSaveDataPath(FileHelpers.FileSource.Local), "RavenWatch");
             if (errorJournal == null) errorJournal = new RpcJournal(directory, "rpc-errors");
-            if (journal == null) journal = new RpcJournal(directory);
+            if (journal == null) journal = LogRpcTraffic ? new RpcJournal(directory) : null;
         }
 
         private static void SaveDecodeError(JObject entry, JObject packet, string role)
@@ -123,7 +126,7 @@ namespace Landoria.RavenWatch.Server.Journal
                     ["packet"] = packet.DeepClone()
                 });
             }
-            catch (Exception error) { Log.LogError(error); }
+            catch (Exception error) { RavenWatchLog.Log.LogError(error); }
         }
 
         internal static void Close()
@@ -140,7 +143,7 @@ namespace Landoria.RavenWatch.Server.Journal
         private static void CloseJournal(IDisposable value)
         {
             try { value?.Dispose(); }
-            catch (Exception error) { Log.LogError(error); }
+            catch (Exception error) { RavenWatchLog.Log.LogError(error); }
         }
     }
 }

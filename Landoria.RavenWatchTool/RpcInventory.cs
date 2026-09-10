@@ -2,7 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 
-namespace RavenWatch.Tools;
+namespace Landoria.RavenWatchTool;
 
 internal static class RpcInventory
 {

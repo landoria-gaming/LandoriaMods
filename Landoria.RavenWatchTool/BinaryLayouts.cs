@@ -1,8 +1,8 @@
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
-using static RavenWatch.Tools.WireSchema;
+using static Landoria.RavenWatchTool.WireSchema;
 
-namespace RavenWatch.Tools;
+namespace Landoria.RavenWatchTool;
 
 internal static class BinaryLayouts
 {
@@ -17,8 +17,9 @@ internal static class BinaryLayouts
         }
         return new()
         {
+            // Utils.Write(BinaryWriter, Quaternion) stores three Euler angles, unlike ZPackage.Write.
             [Key("s_roomData")] = Struct("DungeonGenerator.Load", Array("rooms", Struct("DungeonGenerator.Save",
-                Field("prefabHash", "int32"), Field("position", "Vector3"), Field("rotation", "Quaternion")))),
+                Field("prefabHash", "int32"), Field("position", "Vector3"), Field("rotationEulerDegrees", "Vector3")))),
             [Key("s_TCData")] = Terrain(), [Key("s_liquidData")] = Liquid(),
             [Key("s_items")] = Struct("Inventory.Save / Load (current wire version)", Version("int32", 109), Array("items", Item(), "uint16")),
             [Key("s_itemData")] = Struct("ItemDrop.SaveToZDO / LoadFromZDO (current wire version)", Version("uint8", 109), Named("item", Item())),

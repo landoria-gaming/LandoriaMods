@@ -37,6 +37,8 @@ namespace Landoria.RavenWatch.Server.Inventory
             if (zdo.m_uid.UserID != scope.Peer.m_uid || zdo.GetOwner() != scope.Peer.m_uid) return;
             var prefab = ZNetScene.instance?.GetPrefab(zdo.GetPrefab());
             if (prefab == null) return;
+            if (created && (prefab.name == "sfx_gui_craftitem" || prefab.name == "sfx_gui_craftitem_end"))
+                Journal.CraftSound(scope.Utc, scope.Peer, zdo, prefab.name);
             if (prefab.GetComponent<Player>() != null)
             {
                 long id = zdo.GetLong(ZDOVars.s_playerID, 0L);
@@ -101,6 +103,9 @@ namespace Landoria.RavenWatch.Server.Inventory
                 ["variant"] = item.m_variant, ["worldLevel"] = item.m_worldLevel };
             Journal.Append(utc, peer, fields, action, delta, prefab, zdo.GetPosition());
         }
+
+        internal static void ClientInventory(ZNetPeer peer, JObject snapshot)
+            => Journal.ClientInventory(peer, snapshot);
 
         internal static void Close()
         {

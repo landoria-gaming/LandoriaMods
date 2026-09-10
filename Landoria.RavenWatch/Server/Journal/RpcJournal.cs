@@ -1,3 +1,4 @@
+using Landoria.RavenWatch.Shared;
 using System;
 using System.IO;
 using System.Text;
@@ -35,7 +36,7 @@ namespace Landoria.RavenWatch.Server.Journal
             }
             catch (Exception error)
             {
-                RpcCapture.Log.LogError(error);
+                RavenWatchLog.Log.LogError(error);
                 stream.Dispose();
                 throw;
             }

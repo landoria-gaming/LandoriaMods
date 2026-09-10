@@ -1,8 +1,8 @@
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
-using static RavenWatch.Tools.WireSchema;
+using static Landoria.RavenWatchTool.WireSchema;
 
-namespace RavenWatch.Tools;
+namespace Landoria.RavenWatchTool;
 
 // Reviewed against the dedicated-server 1.0.7 serialization code. No previous JSON is read.
 internal static class WireLayouts

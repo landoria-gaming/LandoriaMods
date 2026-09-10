@@ -1,7 +1,7 @@
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 
-namespace RavenWatch.Tools;
+namespace Landoria.RavenWatchTool;
 
 internal sealed record SourceMethod(string Name, string ReturnType, string Signature, int Start, int End, int Line);
 

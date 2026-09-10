@@ -3,7 +3,7 @@ using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Unicode;
 
-namespace RavenWatch.Tools;
+namespace Landoria.RavenWatchTool;
 
 internal static class Program
 {
@@ -13,7 +13,7 @@ internal static class Program
         {
             if (args.Length == 0 || args.Contains("--help"))
             {
-                Console.WriteLine("RpcDefinitions --source <dedicated server source directory> [--output <output JSON>]");
+                Console.WriteLine("Landoria.RavenWatchTool --source <dedicated server source directory> [--output <output JSON>]");
                 return args.Length == 0 ? 1 : 0;
             }
             Run(args);
@@ -37,7 +37,7 @@ internal static class Program
         }
         if (!options.TryGetValue("--source", out var source)) throw new ArgumentException("--source is required.");
         var reviewed = WireLayouts.Generate(Path.GetFullPath(source));
-        string output = Path.GetFullPath(options.GetValueOrDefault("--output", Path.Combine("Resources", $"valheim-{reviewed["gameVersion"]}-rpc.json")));
+        string output = Path.GetFullPath(options.GetValueOrDefault("--output", Path.Combine("Landoria.RavenWatch", "Resources", $"valheim-{reviewed["gameVersion"]}-rpc.json")));
         var document = DefinitionBuilder.Generate(Path.GetFullPath(source), reviewed);
         Directory.CreateDirectory(Path.GetDirectoryName(output)!);
         string temporary = output + ".tmp";

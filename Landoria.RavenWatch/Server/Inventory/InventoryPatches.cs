@@ -1,3 +1,4 @@
+using Landoria.RavenWatch.Shared;
 using Landoria.RavenWatch.Server.Journal;
 using System;
 using HarmonyLib;
@@ -13,7 +14,7 @@ namespace Landoria.RavenWatch.Server.Inventory
             __state = InventoryCapture.Current;
             if (!RpcCapture.Enabled) return;
             try { __state = InventoryCapture.Begin(rpc); }
-            catch (Exception error) { InventoryCapture.Current = null; RpcCapture.Log.LogError(error); }
+            catch (Exception error) { InventoryCapture.Current = null; RavenWatchLog.Log.LogError(error); }
         }
 
         private static Exception Finalizer(Exception __exception, InventoryCapture.ReceiveScope __state)
@@ -30,7 +31,7 @@ namespace Landoria.RavenWatch.Server.Inventory
         {
             if (InventoryCapture.Current == null || __result == null) return;
             try { InventoryCapture.Current.Created.Add(__result.m_uid); }
-            catch (Exception error) { RpcCapture.Log.LogError(error); }
+            catch (Exception error) { RavenWatchLog.Log.LogError(error); }
         }
     }
 
@@ -41,16 +42,16 @@ namespace Landoria.RavenWatch.Server.Inventory
         {
             __state = null;
             try { __state = TombstoneCapture.Before(__instance); }
-            catch (Exception error) { RpcCapture.Log.LogError(error); }
+            catch (Exception error) { RavenWatchLog.Log.LogError(error); }
         }
 
         private static void Postfix(ZDO __instance, byte[] __state)
         {
             if (InventoryCapture.Current == null) return;
             try { InventoryCapture.Received(__instance); }
-            catch (Exception error) { RpcCapture.Log.LogError(error); }
+            catch (Exception error) { RavenWatchLog.Log.LogError(error); }
             try { TombstoneCapture.After(__instance, __state); }
-            catch (Exception error) { RpcCapture.Log.LogError(error); }
+            catch (Exception error) { RavenWatchLog.Log.LogError(error); }
         }
     }
 
@@ -61,7 +62,7 @@ namespace Landoria.RavenWatch.Server.Inventory
         {
             if (!RpcCapture.Enabled) return;
             try { InventoryCapture.Destroyed(sender, pkg); }
-            catch (Exception error) { RpcCapture.Log.LogError(error); }
+            catch (Exception error) { RavenWatchLog.Log.LogError(error); }
         }
     }
 }

@@ -1,6 +1,6 @@
 using System.Text.Json.Nodes;
 
-namespace RavenWatch.Tools;
+namespace Landoria.RavenWatchTool;
 
 internal static class WireSchema
 {

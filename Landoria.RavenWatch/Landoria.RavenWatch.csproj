@@ -26,8 +26,9 @@
     <Reference Include="UnityEngine.CoreModule"><HintPath>$(ValheimGamePath)\valheim_Data\Managed\UnityEngine.CoreModule.dll</HintPath><Private>false</Private></Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="RavenWatchPlugin.cs" /><Compile Include="Server\Journal\Decoding\*.cs" /><Compile Include="Server\Inventory\*.cs" /><Compile Include="Server\Journal\*.cs" />
+    <Compile Include="RavenWatchPlugin.cs" /><Compile Include="RuntimePatches.cs" /><Compile Include="Server\*.cs" /><Compile Include="Server\Journal\Decoding\*.cs" /><Compile Include="Server\Inventory\*.cs" /><Compile Include="Server\Journal\*.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Client\*.cs" /><Compile Include="Shared\*.cs" /><Compile Include="Server\Network\*.cs" />
     <Content Include="README.md" /><Content Include="manifest.json" />
     <Content Include="icon.png" /><Content Include="LICENSE" />
     <EmbeddedResource Include="Resources\valheim-1.0.7-rpc.json"><LogicalName>Landoria.RavenWatch.Resources.valheim-1.0.7-rpc.json</LogicalName></EmbeddedResource>

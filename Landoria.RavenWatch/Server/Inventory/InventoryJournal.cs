@@ -1,3 +1,4 @@
+using Landoria.RavenWatch.Shared;
 using Landoria.RavenWatch.Server.Journal;
 using System;
 using System.Collections.Generic;
@@ -11,34 +12,32 @@ namespace Landoria.RavenWatch.Server.Inventory
     internal sealed class InventoryJournal : IDisposable
     {
         private readonly string directory;
-        private sealed class DailyJournal
+        private sealed class CharacterJournal
         {
-            internal string Date;
             internal RpcJournal Journal;
             internal string Directory;
-            internal InventorySnapshot Snapshot;
+            internal string Path;
+            internal void Review()
+            {
+                Journal.Dispose();
+                try { InventoryEventVerification.Review(Directory); }
+                catch (Exception error) { RavenWatchLog.Log.LogError(error); }
+                finally { Journal = RpcJournal.OpenPersistent(Path); }
+            }
 
             internal void Append(JObject entry)
             {
+                // Use the server observation time consistently for every inventory event.
+                entry["eventDate"] = entry["utc"]?.Type == JTokenType.Date
+                    ? new JValue(entry["utc"].Value<DateTime>().ToUniversalTime())
+                    : entry["utc"]?.DeepClone() ?? new JValue(DateTime.UtcNow);
                 Journal.Append(entry);
-                try
-                {
-                    // Reload after a previous projection failure; the journal remains authoritative.
-                    if (Snapshot == null) Snapshot = new InventorySnapshot(Directory);
-                    else Snapshot.Apply(entry);
-                    Snapshot.Save();
-                }
-                catch (Exception error)
-                {
-                    RpcCapture.Log.LogError(error);
-                    Snapshot = null;
-                    throw;
-                }
+                if ((long?)entry["quantityDelta"] != 0) Review();
             }
         }
 
-        private readonly Dictionary<string, DailyJournal> journals =
-            new Dictionary<string, DailyJournal>(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, CharacterJournal> journals =
+            new Dictionary<string, CharacterJournal>(StringComparer.OrdinalIgnoreCase);
         internal InventoryJournal(string directory) { this.directory = directory; }
 
         internal void Append(JToken utc, ZNetPeer peer, JObject item, string action, int delta,
@@ -59,6 +58,43 @@ namespace Landoria.RavenWatch.Server.Inventory
             Journal(peer, entry, character?.GetPosition()).Append(entry);
         }
 
+        internal void CraftSound(JToken utc, ZNetPeer peer, ZDO sound, string signal)
+        {
+            var entry = CharacterIdentity.Add(new JObject
+            {
+                ["eventId"] = Guid.NewGuid().ToString("D"),
+                ["utc"] = utc.DeepClone(),
+                ["event"] = signal == "sfx_gui_craftitem" ? "craft_started" : "craft_ended",
+                ["signal"] = signal, ["sourceZdo"] = sound.m_uid.ToString(),
+                ["withoutStation"] = true, ["inferred"] = true, ["quantityDelta"] = 0
+            }, peer);
+            EventLocation.Add(entry, sound.GetPosition());
+            var character = ZDOMan.instance?.GetZDO(peer.m_characterID);
+            var journal = Journal(peer, entry, character?.GetPosition());
+            journal.Append(entry);
+        }
+
+        internal void ClientInventory(ZNetPeer peer, JObject snapshot)
+        {
+            var entry = CharacterIdentity.Add((JObject)snapshot.DeepClone(), peer);
+            if ((string)entry["context"] == "item_crafted") CraftMaterials.Add(entry);
+            if (entry["eventId"] == null) entry["eventId"] = Guid.NewGuid().ToString("D");
+            entry["utc"] = DateTime.UtcNow;
+            entry["event"] = entry["context"].DeepClone();
+            entry["inventorySource"] = "client_reported";
+            // Item changes are detailed in the report context, not a single top-level delta.
+            entry["quantityDelta"] = 0;
+            var character = ZDOMan.instance?.GetZDO(peer.m_characterID);
+            EventLocation.Add(entry, character?.GetPosition());
+            var journal = Journal(peer, entry, character?.GetPosition());
+            journal.Append(entry);
+            if (entry["items"] is JArray)
+            {
+                ReceivedInventoryStore.Save(journal.Directory, entry);
+                journal.Review();
+            }
+        }
+
         internal void EnsureCharacter(JToken utc, ZNetPeer peer, long characterId, string playerName, Vector3 position)
         {
             Journal(peer, new JObject
@@ -69,37 +105,28 @@ namespace Landoria.RavenWatch.Server.Inventory
             }, position);
         }
 
-        private DailyJournal Journal(ZNetPeer peer, JObject identity, Vector3? characterPosition)
+        private CharacterJournal Journal(ZNetPeer peer, JObject identity, Vector3? characterPosition)
         {
             string playerName = (string)identity["playerName"];
             string account = peer?.m_socket?.GetHostName();
             if (string.IsNullOrWhiteSpace(account) || string.IsNullOrWhiteSpace(playerName))
                 throw new InvalidDataException("Missing account or character name for inventory journal.");
             string folder = SafeName(account + "_" + playerName);
-            string date = identity["utc"].Value<DateTime>().ToLocalTime()
-                .ToString("yyyyMMdd", System.Globalization.CultureInfo.InvariantCulture);
-            if (journals.TryGetValue(folder, out var current))
-            {
-                if (current.Date == date) return current;
-                current.Journal.Dispose();
-                journals.Remove(folder);
-            }
+            if (journals.TryGetValue(folder, out var current)) return current;
             string playerDirectory = Path.Combine(directory, folder);
             Directory.CreateDirectory(playerDirectory);
-            // A new day is not a new character; the legacy filename also counts as history.
+            // Legacy journals also count as history before their filenames are consolidated.
             bool isNew = !Directory.EnumerateFiles(playerDirectory, "inventory-events*.json").Any()
                 && !Directory.EnumerateFiles(playerDirectory, "_inventory-events*.json").Any();
-            string path = Path.Combine(playerDirectory, "inventory-events-" + date + ".json");
-            var snapshot = new InventorySnapshot(playerDirectory);
-            snapshot.Save();
-            var journal = new DailyJournal { Date = date, Directory = playerDirectory,
-                Journal = RpcJournal.OpenPersistent(path), Snapshot = snapshot };
+            string path = InventoryEventVerification.PrepareUnverified(playerDirectory);
+            var journal = new CharacterJournal { Directory = playerDirectory, Path = path,
+                Journal = RpcJournal.OpenPersistent(path) };
             journals.Add(folder, journal);
             if (isNew) AddStartingItems(journal, identity, characterPosition);
             return journal;
         }
 
-        private static void AddStartingItems(DailyJournal journal, JObject identity, Vector3? position)
+        private static void AddStartingItems(CharacterJournal journal, JObject identity, Vector3? position)
         {
             // Current policy: a missing journal means a new character with starting equipment.
             foreach (JObject item in StartingInventory.Create())
@@ -129,7 +156,7 @@ namespace Landoria.RavenWatch.Server.Inventory
             foreach (var journal in journals.Values)
             {
                 try { journal.Journal.Dispose(); }
-                catch (Exception error) { RpcCapture.Log.LogError(error); }
+                catch (Exception error) { RavenWatchLog.Log.LogError(error); }
             }
             journals.Clear();
         }

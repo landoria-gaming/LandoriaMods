@@ -16593,8 +16593,8 @@
                   "type": "Vector3"
                 },
                 {
-                  "name": "rotation",
-                  "type": "Quaternion"
+                  "name": "rotationEulerDegrees",
+                  "type": "Vector3"
                 }
               ]
             }

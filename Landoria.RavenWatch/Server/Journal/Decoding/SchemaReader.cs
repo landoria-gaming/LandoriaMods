@@ -23,7 +23,7 @@ namespace Landoria.RavenWatch.Server.Journal.Decoding
                 return Read(input, alias, scope, depth + 1);
             switch (type)
             {
-                case "integer": case "float": case "boolean": case "string": case "character":
+                case "integer": case "float": case "character":
                     throw new InvalidDataException("Primitive must be referenced by its declared name.");
                 case "bytes": return BinaryValue(input, scope, depth);
                 case "struct": return Structure(input, schema, scope, depth);

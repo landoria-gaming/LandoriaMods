@@ -1,7 +1,8 @@
+using Landoria.RavenWatch.Shared;
 using BepInEx;
 using Landoria.SharedLib;
 using HarmonyLib;
-using Landoria.RavenWatch.Server.Journal;
+using Landoria.RavenWatch.Server.Network;
 
 namespace Landoria.RavenWatch
 {
@@ -12,12 +13,19 @@ namespace Landoria.RavenWatch
         private const string PluginName = "Landoria.RavenWatch";
         private const string PluginVersion = "1.0.0";
 
+        private void Update()
+        {
+            if (ZNet.instance != null && ZNet.instance.IsDedicated()) InventoryPollServer.Tick();
+        }
+
         private void Awake()
         {
             var log = new ModLog(Logger);
-            RpcCapture.Log = log;
-            new Harmony(PluginGuid).PatchAll();
+            RavenWatchLog.Log = log;
+            RuntimePatches.Harmony = new Harmony(PluginGuid);
+            RuntimePatches.Harmony.CreateClassProcessor(typeof(RuntimePatches)).Patch();
             log.LogInfo("RavenWatch proof of concept loaded.");
         }
+
     }
 }
