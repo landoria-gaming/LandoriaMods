@@ -24,7 +24,6 @@ Thunderstore. A mod may also include a changelog.
 | [Moderator](Landoria.Moderator/) | Both | Adds multiplayer moderation commands gated by server-validated administrator access. |
 | [NoServerPassword](Landoria.NoServerPassword/) | Both | Allows public and crossplay servers to run without a password. |
 | [QuickLaunch](Landoria.QuickLaunch/) | Client-only | Automatically resumes the last local or multiplayer session by default. |
-| [RavenWatch](Landoria.RavenWatch/) | Both | Minimal proof of concept plugin. |
 | [ExpandedServer](Landoria.ExpandedServer/) | Both | Raises the server player limit. |
 | [Structure Protection](Landoria.StructureProtection/) | Both | Protects structures while their authorized players are offline. |
 | [SealedTombstone](Landoria.SealedTombstone/) | Both | Protects tombstones and lets their owners approve access. |
