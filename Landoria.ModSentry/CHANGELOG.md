@@ -1,8 +1,8 @@
 # Changelog
 
-## Unreleased
+## 1.0.18
 
-- Remove cheat and code injection detection. Client mod verification remains enabled.
+- Migration to Valheim 1.0.x.
 
 ## 1.0.14
 

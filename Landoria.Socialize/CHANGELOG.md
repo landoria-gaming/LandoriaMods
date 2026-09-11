@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.16
+
+- Migration to Valheim 1.0.x.
+
 ## 1.0.14
 
 - Updated documentation

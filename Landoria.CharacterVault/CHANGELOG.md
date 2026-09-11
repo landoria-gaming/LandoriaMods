@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.28
+
+- Migration to Valheim 1.0.x.
+
 ## 1.0.26
 
 - Fixed intermittent PlayFab invalid handle connection failures.

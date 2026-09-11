@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.9
+
+- Migration to Valheim 1.0.x.
+
 ## 1.0.8
 
 - Remember successful server passwords securely on Windows for automatic reconnects.
