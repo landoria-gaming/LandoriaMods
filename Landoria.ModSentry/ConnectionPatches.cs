@@ -66,10 +66,6 @@ namespace Landoria.ModSentry
                 VerifiedModpackMarker.Unmark(peer.m_rpc);
                 PendingDisconnects.Remove(peer.m_rpc);
             }
-            if (ZNet.instance?.IsServer() != true)
-            {
-                ManagedCheatDetector.Shutdown();
-            }
         }
     }
 

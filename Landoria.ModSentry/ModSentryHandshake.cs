@@ -14,19 +14,11 @@ namespace Landoria.ModSentry
             {
                 peer.m_rpc.Register<ZPackage>(ModSentryPlugin.InventoryRpc, ReceiveInventory);
                 peer.m_rpc.Register(ModSentryPlugin.RejectionAckRpc, ReceiveRejectionAck);
-                if (ModSentrySettings.KnownCheatProtectionEnabled)
-                {
-                    peer.m_rpc.Register<ZPackage>(
-                        ModSentryPlugin.CheatDetectionRpc,
-                        KnownCheatReport.Receive);
-                }
             }
             else
             {
                 ClientMessage.Clear();
                 peer.m_rpc.Register<string>(ModSentryPlugin.RejectionRpc, ClientMessage.Receive);
-                peer.m_rpc.Register(ModSentryPlugin.CheatDetectionEnableRpc,
-                    ReceiveCheatDetectionEnable);
             }
         }
 
@@ -97,21 +89,12 @@ namespace Landoria.ModSentry
             PendingDisconnects.Acknowledge(rpc);
         }
 
-        private static void ReceiveCheatDetectionEnable(ZRpc rpc)
-        {
-            ManagedCheatDetector.Enable(rpc);
-        }
-
         internal static void Record(ZRpc rpc, ValidationResult result)
         {
             if (result.Accepted)
             {
                 HandshakeState.Accept(rpc);
                 VerifiedModpackMarker.Mark(rpc);
-                if (ModSentrySettings.KnownCheatProtectionEnabled)
-                {
-                    rpc.Invoke(ModSentryPlugin.CheatDetectionEnableRpc);
-                }
                 ModSentryPlugin.Log.LogInfo(result.TechnicalMessage);
                 return;
             }

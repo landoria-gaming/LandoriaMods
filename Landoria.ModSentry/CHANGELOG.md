@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Remove cheat and code injection detection. Client mod verification remains enabled.
+
 ## 1.0.14
 
 - Detect known cheat tools, with server-configurable kick or ban (kick by default).

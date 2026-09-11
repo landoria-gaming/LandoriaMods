@@ -8,13 +8,10 @@ conditions.
 
 - Checks that players have the required mods and only use approved files and versions.
 - Rejects connections with extra, missing, or outdated mods and explains what needs fixing.
-- Detects known cheat tools and lets the server kick or ban the player (kick by default).
 - Prevents players from reusing an old mod check response when connecting again. (Nonce-based server challenge.)
 
-> **ModSentry is not a complete anti-cheat solution.** It helps players use
-> the correct mods and versions and includes client-side checks for known cheat tools.
-> These checks can be bypassed by a determined cheater.
-> If stronger anti-cheat protection is important for your server, use a complementary server-side mod.
+> **ModSentry verifies client mod files.** It does not detect cheats or injected code.
+> A modified client can falsify its mod inventory.
 
 ## Installation
 
@@ -45,13 +42,6 @@ Any client DLL listed in neither folder is rejected.
 
 Server-only mods stay in `BepInEx/plugins` and are not copied into either policy
 folder.
-
-Configure known cheat detection with these dedicated server arguments:
-
-| Server argument | Action |
-|---|---|
-| `--modsentry-known-cheat-protection` | `true` or `false` (default: `true`). |
-| `--modsentry-known-cheat-action` | `kick` or `ban` (default: `kick`). |
 
 ## Contact
 

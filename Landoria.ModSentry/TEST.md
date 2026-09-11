@@ -13,4 +13,3 @@ Use Valheim `0.221.12`. Check dedicated-server and peer-hosted sessions.
 | Server access lists | Join with a banned account or an account outside an enabled permitted list. | Connection is rejected. |
 | Reconnect | Disconnect, then reconnect. | A new nonce and inventory are required. |
 | Replay | Resend an old inventory on a new connection. | Connection is rejected. |
-| Known cheat tool | Enable inspection, then load a recognized tool. | Detection is reported and the server kicks the client. |
