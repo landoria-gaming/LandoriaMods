@@ -4,18 +4,7 @@
 
 ## Valheim compatibility
 
-| Valheim channel | Version | Compatibility |
-|---|---:|---|
-| Current release | `0.221.12` | Compatible |
-| Public Test | `0.221.13` | Compatible |
-
-| Component | Purpose |
-|---|---|
-| `LandoriaPlugin` | Initializes and removes Harmony patches belonging to the concrete plugin namespace. |
-| `ModLog` | Routes plugin diagnostics through the BepInEx logger and the debugger output. |
-| `ILRepack.targets` | Embeds this library into each standalone plugin DLL. |
-
-The library is a build-time project dependency. Players and server operators do not install a separate `Landoria.SharedLib.dll`; every player-facing Landoria DLL contains the required code through ILRepack.
+Current release: 1.0.x
 
 ## Development
 

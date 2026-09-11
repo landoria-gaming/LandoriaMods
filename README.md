@@ -35,6 +35,12 @@ Thunderstore. A mod may also include a changelog.
 plugin base, Harmony registration, and logging. It is an internal component and
 is never installed as a standalone mod.
 
+## Build validation
+
+Every plugin build runs [HarmonyValidator](tools/HarmonyValidator/) against its
+resolved game references. Missing or ambiguous Harmony targets fail the build;
+dynamic targets are reported as unverified warnings.
+
 ## Discover the mods
 
 - [Watch Landoria mod demos on YouTube](https://www.youtube.com/channel/UC7JKJ6QyDyFbWrgQGg8k5jQ).

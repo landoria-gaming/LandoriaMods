@@ -7,7 +7,7 @@ namespace Landoria.Moderator
     {
         typeof(string), typeof(string), typeof(Terminal.ConsoleEvent),
         typeof(bool), typeof(bool), typeof(bool), typeof(bool), typeof(bool),
-        typeof(Terminal.ConsoleOptionsFetcher), typeof(bool), typeof(bool), typeof(bool)
+        typeof(bool), typeof(Terminal.ConsoleOptionsFetcher), typeof(bool), typeof(bool), typeof(bool)
     })]
     internal static class ConsoleEventCommandConstructorPatch
     {
@@ -21,7 +21,7 @@ namespace Landoria.Moderator
     {
         typeof(string), typeof(string), typeof(Terminal.ConsoleEventFailable),
         typeof(bool), typeof(bool), typeof(bool), typeof(bool), typeof(bool),
-        typeof(Terminal.ConsoleOptionsFetcher), typeof(bool), typeof(bool), typeof(bool)
+        typeof(bool), typeof(Terminal.ConsoleOptionsFetcher), typeof(bool), typeof(bool), typeof(bool)
     })]
     internal static class FailableCommandConstructorPatch
     {

@@ -34,7 +34,7 @@ namespace Landoria.Moderator
         {
             RectTransform rect = map.m_mapImageLarge.transform as RectTransform;
             if (rect == null || !RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                    rect, ZInput.mousePosition, null, out Vector2 localPoint))
+                    rect, ZInput.pointerPosition, null, out Vector2 localPoint))
             {
                 position = Vector3.zero;
                 return false;

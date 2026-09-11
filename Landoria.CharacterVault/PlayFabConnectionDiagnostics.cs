@@ -222,7 +222,7 @@ namespace Landoria.CharacterVault
         }
     }
 
-    [HarmonyPatch(typeof(ZPlayFabSocket), MethodType.Constructor)]
+    [HarmonyPatch(typeof(ZPlayFabSocket), MethodType.Constructor, new Type[0])]
     internal static class PlayFabServerSocketCreatedPatch
     {
         private static void Postfix() => PlayFabVerboseDiagnostics.Enable();

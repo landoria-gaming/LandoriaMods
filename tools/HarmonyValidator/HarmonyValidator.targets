@@ -1,0 +1,21 @@
+<Project>
+  <PropertyGroup>
+    <HvProject>$(MSBuildThisFileDirectory)HarmonyValidator.csproj</HvProject>
+  </PropertyGroup>
+  <Target Name="ValidateHarmonyTargets"
+          AfterTargets="CoreCompile"
+          BeforeTargets="CopyFilesToOutputDirectory;MergeLandoriaSharedLib"
+          Condition="'$(DesignTimeBuild)' != 'true'">
+    <PropertyGroup>
+      <_HvCmd>dotnet run --project &quot;$(HvProject)&quot;</_HvCmd>
+      <_HvCmd>$(_HvCmd) --configuration Release --no-launch-profile --</_HvCmd>
+      <_HvAssembly>@(IntermediateAssembly->'%(FullPath)')</_HvAssembly>
+      <_HvRefs>$(MSBuildProjectDirectory)/$(IntermediateOutputPath)</_HvRefs>
+      <_HvRefs>$(_HvRefs)harmony-references.txt</_HvRefs>
+    </PropertyGroup>
+    <WriteLinesToFile File="$(_HvRefs)"
+                      Lines="@(ReferencePath->'%(FullPath)')"
+                      Overwrite="true" />
+    <Exec Command="$(_HvCmd) &quot;$(_HvAssembly)&quot; &quot;$(_HvRefs)&quot;" />
+  </Target>
+</Project>
