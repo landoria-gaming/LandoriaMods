@@ -38,8 +38,9 @@ is never installed as a standalone mod.
 ## Build validation
 
 Every plugin build runs [HarmonyValidator](tools/HarmonyValidator/) against its
-resolved game references. Missing or ambiguous Harmony targets fail the build;
-dynamic targets are reported as unverified warnings.
+resolved game references. Missing or ambiguous targets and invalid patch signatures
+or injections fail the build. Dynamic targets and unsupported signature checks
+are reported as unverified warnings.
 
 ## Discover the mods
 

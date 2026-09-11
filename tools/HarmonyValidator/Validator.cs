@@ -91,9 +91,15 @@ internal sealed class Validator(string assemblyPath)
                 + ". Specify argument types. Candidates: "
                 + string.Join("; ", methods.Select(m => m.FullName)));
         }
+        else
+        {
+            new SignatureValidator((code, message, warning) =>
+                Report(patch, code, message, warning)).Check(patch, methods[0]);
+        }
     }
 
-    private static MethodDefinition[] Candidates(PatchTarget target)
+    // Find matching methods, including inherited targets.
+    internal static MethodDefinition[] Candidates(PatchTarget target)
     {
         var type = target.Type!.Resolve();
         while (type != null)
