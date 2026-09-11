@@ -40,6 +40,9 @@ Copy the approved client DLLs into the appropriate folder. ModSentry compares
 their plugin identifier, version, and SHA-256 hash with each connecting client.
 Any client DLL listed in neither folder is rejected.
 
+If a DLL contains several plugins, ModSentry checks each plugin's identifier and
+version against the same approved DLL hash. Copy that DLL only once.
+
 Server-only mods stay in `BepInEx/plugins` and are not copied into either policy
 folder.
 

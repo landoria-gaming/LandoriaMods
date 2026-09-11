@@ -24,7 +24,7 @@ namespace Landoria.ModSentry
                 plugins.AddRange(Directory.GetFiles(Paths.PluginPath, "*.dll",
                         SearchOption.AllDirectories)
                     .Where(path => !pluginPaths.Contains(Path.GetFullPath(path)))
-                    .Select(PluginPolicyLoader.ReadDescriptor));
+                    .SelectMany(PluginPolicyLoader.ReadDescriptors));
             }
             return plugins
                 .OrderBy(plugin => plugin.Guid, StringComparer.Ordinal)

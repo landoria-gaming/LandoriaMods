@@ -7,6 +7,7 @@ using Mono.Cecil;
 
 namespace Landoria.ModSentry
 {
+    // Reads every plugin in an approved DLL, including plugins merged with ILRepack.
     internal static class PluginPolicyLoader
     {
         internal static PluginPolicy Load()
@@ -25,35 +26,39 @@ namespace Landoria.ModSentry
             }
 
             return Directory.GetFiles(directory, "*.dll", SearchOption.TopDirectoryOnly)
-                .Select(ReadDescriptor)
+                .SelectMany(ReadDescriptors)
                 .OrderBy(plugin => plugin.Guid, StringComparer.Ordinal)
                 .ToList();
         }
 
-        internal static PluginDescriptor ReadDescriptor(string path)
+        // Plugins sharing a DLL keep their own identity and share the file hash.
+        internal static IReadOnlyList<PluginDescriptor> ReadDescriptors(string path)
         {
             try
             {
                 using (AssemblyDefinition assembly = AssemblyDefinition.ReadAssembly(path))
                 {
-                    CustomAttribute attribute = assembly.MainModule.Types
+                    CustomAttribute[] attributes = assembly.MainModule.GetTypes()
                         .SelectMany(type => type.CustomAttributes)
-                        .SingleOrDefault(item =>
-                            item.AttributeType.FullName == typeof(BepInPlugin).FullName);
+                        .Where(item =>
+                            item.AttributeType.FullName == typeof(BepInPlugin).FullName)
+                        .ToArray();
 
-                    if (attribute == null || attribute.ConstructorArguments.Count < 3)
+                    if (attributes.Length == 0)
                     {
-                        return CreateFallbackDescriptor(assembly, path);
+                        return new[] { CreateFallbackDescriptor(assembly, path) };
                     }
 
-                    return CreateDescriptor(path, attribute);
+                    string hash = PluginInventory.Sha256(path);
+                    return attributes.Select(attribute => CreateDescriptor(hash, attribute))
+                        .ToArray();
                 }
             }
             catch (BadImageFormatException exception)
             {
                 ModSentryPlugin.Log.LogDebug(
                     $"Using a fallback descriptor for {path}: {exception}");
-                return CreateFallbackDescriptor(null, path);
+                return new[] { CreateFallbackDescriptor(null, path) };
             }
         }
 
@@ -66,12 +71,18 @@ namespace Landoria.ModSentry
             return new PluginDescriptor(guid, name, version, PluginInventory.Sha256(path), false);
         }
 
-        private static PluginDescriptor CreateDescriptor(string path, CustomAttribute attribute)
+        private static PluginDescriptor CreateDescriptor(
+            string hash, CustomAttribute attribute)
         {
+            if (attribute.ConstructorArguments.Count < 3)
+            {
+                throw new InvalidDataException("Invalid BepInPlugin metadata.");
+            }
+
             string guid = (string)attribute.ConstructorArguments[0].Value;
             string name = (string)attribute.ConstructorArguments[1].Value;
             string version = (string)attribute.ConstructorArguments[2].Value;
-            return new PluginDescriptor(guid, name, version, PluginInventory.Sha256(path));
+            return new PluginDescriptor(guid, name, version, hash);
         }
     }
 }
