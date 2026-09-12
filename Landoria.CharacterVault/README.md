@@ -30,6 +30,9 @@ connection is already unavailable.
 
 ## Installation
 
+CharacterVault is distributed as a standalone package. Install it on the dedicated
+server and on every connecting client; LandoriaModPack is not required.
+
 Most of Landoria mods need to be installed also on the dedicated server, we show you in this video how to do it on windows:
 
 [Setup a Valheim Modded dedicated server on Windows](https://youtu.be/X5J1wSRr7Uo)
