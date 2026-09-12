@@ -32,7 +32,9 @@ Your first-person toggle and FOV are saved locally.
 First person silently adds 15 degrees without changing the saved value, up to
 an effective FOV of 100.
 
-Compatible with Valheim `0.221.12` and Public Test `0.221.13`.
+## Valheim compatibility
+
+Current release: 1.0.x
 
 
 ## Contact

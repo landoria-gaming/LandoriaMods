@@ -45,6 +45,10 @@ Most of Landoria mods need to be installed also on the dedicated server, we show
 |---|---|---|
 | Yes | Yes | Not Supported |
 
+## Valheim compatibility
+
+Current release: 1.0.x
+
 ## Server configuration
 
 Add these optional switches to the dedicated-server command line:

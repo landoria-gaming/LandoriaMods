@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.0.28
+## 1.0.29
 
 - Migration to Valheim 1.0.x.
 
