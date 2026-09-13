@@ -9,7 +9,7 @@ namespace Landoria.AfkDetector
     {
         private const string PluginGuid = "Landoria.AfkDetector";
         private const string PluginName = "Landoria.AfkDetector";
-        private const string PluginVersion = "1.0.10";
+        private const string PluginVersion = "1.0.11";
         internal static ModLog Log { get; private set; }
 
         // Starts the plugin.
