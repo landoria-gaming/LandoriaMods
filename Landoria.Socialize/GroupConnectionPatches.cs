@@ -14,7 +14,7 @@ namespace Landoria.Socialize
         }
     }
 
-    [HarmonyPatch(typeof(ZNet), "Disconnect")]
+    [HarmonyPatch(typeof(ZNet), nameof(ZNet.Disconnect))]
     internal static class GroupDisconnectPatch
     {
         private static void Prefix(ZNetPeer peer)

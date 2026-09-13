@@ -97,7 +97,7 @@ namespace Landoria.StructureProtection
                 peer.m_playerName ?? string.Empty, seenOnlineUtc);
         }
 
-        [HarmonyPatch(typeof(ZNet), "Save")]
+        [HarmonyPatch(typeof(ZNet), nameof(ZNet.Save))]
         private static class WorldSaveActivityPatch
         {
             private static void Prefix(ZNet __instance)
@@ -194,7 +194,7 @@ namespace Landoria.StructureProtection
             return false;
         }
 
-        [HarmonyPatch(typeof(Player), "OnSpawned")]
+        [HarmonyPatch(typeof(Player), nameof(Player.OnSpawned))]
         private static class PlayerSpawnPatch
         {
             private static void Postfix(Player __instance)

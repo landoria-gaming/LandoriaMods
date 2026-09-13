@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Landoria.Moderator
 {
-    [HarmonyPatch(typeof(Minimap), "OnMapLeftClick")]
+    [HarmonyPatch(typeof(Minimap), nameof(Minimap.OnMapLeftClick))]
     internal static class MapTeleportPatch
     {
         private static bool Prefix(Minimap __instance)

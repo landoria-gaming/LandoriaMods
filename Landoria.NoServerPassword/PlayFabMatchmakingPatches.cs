@@ -31,7 +31,7 @@ namespace Landoria.NoServerPassword
         }
     }
 
-    [HarmonyPatch(typeof(PlayFabMultiplayerAPI), "CreateLobby")]
+    [HarmonyPatch(typeof(PlayFabMultiplayerAPI), nameof(PlayFabMultiplayerAPI.CreateLobby))]
     internal static class PublishPasswordFreeServerMarkerPatch
     {
         private static void Prefix(CreateLobbyRequest request)
@@ -62,7 +62,7 @@ namespace Landoria.NoServerPassword
         }
     }
 
-    [HarmonyPatch(typeof(PlayFabMatchmakingServerData), "ToServerMatchmakingData")]
+    [HarmonyPatch(typeof(PlayFabMatchmakingServerData), nameof(PlayFabMatchmakingServerData.ToServerMatchmakingData))]
     internal static class PlayFabPasswordDisplayPatch
     {
         private static bool Prefix(PlayFabMatchmakingServerData __instance,

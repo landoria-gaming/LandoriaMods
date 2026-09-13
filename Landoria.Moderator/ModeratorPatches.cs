@@ -26,7 +26,7 @@ namespace Landoria.Moderator
         }
     }
 
-    [HarmonyPatch(typeof(ZNet), "GetOtherPublicPlayers")]
+    [HarmonyPatch(typeof(ZNet), nameof(ZNet.GetOtherPublicPlayers))]
     internal static class ShowPlayersToModeratorOnMapPatch
     {
         private static void Postfix(System.Collections.Generic.List<ZNet.PlayerInfo> playerList)
@@ -35,7 +35,7 @@ namespace Landoria.Moderator
         }
     }
 
-    [HarmonyPatch(typeof(Player), "OnSpawned")]
+    [HarmonyPatch(typeof(Player), nameof(Player.OnSpawned))]
     internal static class LocalModeratorStatePatch
     {
         private static void Postfix(Player __instance)
@@ -71,7 +71,7 @@ namespace Landoria.Moderator
         }
     }
 
-    [HarmonyPatch(typeof(Player), "GetHoverName")]
+    [HarmonyPatch(typeof(Player), nameof(Player.GetHoverName))]
     internal static class ModeratorHoverNamePatch
     {
         private static void Postfix(Player __instance, ref string __result)
@@ -84,7 +84,7 @@ namespace Landoria.Moderator
         }
     }
 
-    [HarmonyPatch(typeof(Terminal.ConsoleCommand), "IsValid")]
+    [HarmonyPatch(typeof(Terminal.ConsoleCommand), nameof(Terminal.ConsoleCommand.IsValid))]
     internal static class ModeratorCommandValidationPatch
     {
         private static void Postfix(Terminal.ConsoleCommand __instance, ref bool __result)

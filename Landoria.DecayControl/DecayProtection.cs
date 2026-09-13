@@ -123,7 +123,7 @@ namespace Landoria.DecayControl
             }
         }
 
-        [HarmonyPatch(typeof(WearNTear), "UpdateWear")]
+        [HarmonyPatch(typeof(WearNTear), nameof(WearNTear.UpdateWear))]
         private static class NativeWearPatch
         {
             private static void Prefix(WearNTear __instance)

@@ -98,7 +98,7 @@ namespace Landoria.FirstPerson
     }
 
     // Validates and saves values handled by Valheim's FOV command.
-    [HarmonyPatch(typeof(Terminal.ConsoleCommand), "RunAction")]
+    [HarmonyPatch(typeof(Terminal.ConsoleCommand), nameof(Terminal.ConsoleCommand.RunAction))]
     internal static class FirstPersonFieldOfViewCommandPatch
     {
         private static bool Prefix(
@@ -147,7 +147,7 @@ namespace Landoria.FirstPerson
     }
 
     // Restores saved first-person settings when the local player spawns.
-    [HarmonyPatch(typeof(Player), "OnSpawned")]
+    [HarmonyPatch(typeof(Player), nameof(Player.OnSpawned))]
     internal static class FirstPersonPlayerSpawnPatch
     {
         private static void Postfix(Player __instance)

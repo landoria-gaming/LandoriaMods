@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Landoria.FreeFlyCommand
 {
-    [HarmonyPatch(typeof(Player), "OnSpawned")]
+    [HarmonyPatch(typeof(Player), nameof(Player.OnSpawned))]
     internal static class FreeFlyAuthorizationOnSpawnPatch
     {
         private static void Postfix(Player __instance)
@@ -24,7 +24,7 @@ namespace Landoria.FreeFlyCommand
         }
     }
 
-    [HarmonyPatch(typeof(Terminal.ConsoleCommand), "IsValid")]
+    [HarmonyPatch(typeof(Terminal.ConsoleCommand), nameof(Terminal.ConsoleCommand.IsValid))]
     internal static class FreeFlyCommandValidationPatch
     {
         [HarmonyPriority(Priority.Last)]
@@ -37,7 +37,7 @@ namespace Landoria.FreeFlyCommand
         }
     }
 
-    [HarmonyPatch(typeof(GameCamera), "ToggleFreeFly")]
+    [HarmonyPatch(typeof(GameCamera), nameof(GameCamera.ToggleFreeFly))]
     internal static class UnauthorizedFreeFlyTogglePatch
     {
         private static bool Prefix()

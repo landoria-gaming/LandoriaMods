@@ -33,7 +33,7 @@ namespace Landoria.StructureProtection
             }
         }
 
-        [HarmonyPatch(typeof(BaseAI), "CanSeeTarget", new Type[] { typeof(StaticTarget) })]
+        [HarmonyPatch(typeof(BaseAI), nameof(BaseAI.CanSeeTarget), new Type[] { typeof(StaticTarget) })]
         private static class VisibilityPatch
         {
             private static void Postfix(StaticTarget target, ref bool __result)

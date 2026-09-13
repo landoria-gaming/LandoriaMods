@@ -14,7 +14,7 @@ namespace Landoria.Socialize
         }
     }
 
-    [HarmonyPatch(typeof(ZNet), "SetPublicReferencePosition")]
+    [HarmonyPatch(typeof(ZNet), nameof(ZNet.SetPublicReferencePosition))]
     internal static class DisablePublicPositionPatch
     {
         private static void Prefix(ref bool pub)
@@ -24,7 +24,7 @@ namespace Landoria.Socialize
         }
     }
 
-    [HarmonyPatch(typeof(ZNet), "GetOtherPublicPlayers")]
+    [HarmonyPatch(typeof(ZNet), nameof(ZNet.GetOtherPublicPlayers))]
     internal static class ShowGroupMembersOnMapPatch
     {
         private static void Postfix(List<ZNet.PlayerInfo> playerList)

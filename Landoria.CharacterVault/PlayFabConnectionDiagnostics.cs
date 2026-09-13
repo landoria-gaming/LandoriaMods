@@ -262,7 +262,7 @@ namespace Landoria.CharacterVault
             PlayFabConnectionDiagnostics.Connected(__instance);
     }
 
-    [HarmonyPatch(typeof(ZPlayFabSocket), "Dispose")]
+    [HarmonyPatch(typeof(ZPlayFabSocket), nameof(ZPlayFabSocket.Dispose))]
     internal static class PlayFabSocketDisposedPatch
     {
         private static void Prefix(ZPlayFabSocket __instance) =>

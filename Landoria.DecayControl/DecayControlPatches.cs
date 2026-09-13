@@ -11,7 +11,7 @@ namespace Landoria.DecayControl
         }
     }
 
-    [HarmonyPatch(typeof(Player), "OnSpawned")]
+    [HarmonyPatch(typeof(Player), nameof(Player.OnSpawned))]
     internal static class DecayStateOnSpawnPatch
     {
         private static void Postfix(Player __instance)

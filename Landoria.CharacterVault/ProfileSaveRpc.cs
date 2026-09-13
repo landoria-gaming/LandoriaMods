@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Landoria.CharacterVault
 {
-    [HarmonyPatch(typeof(ZNet), "SaveWorldAndPlayerProfiles")]
+    [HarmonyPatch(typeof(ZNet), nameof(ZNet.SaveWorldAndPlayerProfiles))]
     internal static class CharacterVaultManualSavePatch
     {
         private static void Prefix()
@@ -119,7 +119,7 @@ namespace Landoria.CharacterVault
         }
     }
 
-    [HarmonyPatch(typeof(ZNet), "Disconnect")]
+    [HarmonyPatch(typeof(ZNet), nameof(ZNet.Disconnect))]
     internal static class CharacterVaultDisconnectPatch
     {
         private static void Prefix(ZNetPeer peer)
@@ -185,7 +185,7 @@ namespace Landoria.CharacterVault
         }
     }
 
-    [HarmonyPatch(typeof(Game), "Logout")]
+    [HarmonyPatch(typeof(Game), nameof(Game.Logout))]
     internal static class CharacterVaultVoluntaryLogoutPatch
     {
         private static bool Prefix(Game __instance, bool save, bool changeToStartScene)
@@ -239,7 +239,7 @@ namespace Landoria.CharacterVault
         }
     }
 
-    [HarmonyPatch(typeof(Player), "OnSpawned")]
+    [HarmonyPatch(typeof(Player), nameof(Player.OnSpawned))]
     internal static class CharacterVaultStartingItemsPatch
     {
         private static void Postfix(Player __instance)
@@ -258,7 +258,7 @@ namespace Landoria.CharacterVault
         }
     }
 
-    [HarmonyPatch(typeof(ZNet), "Save")]
+    [HarmonyPatch(typeof(ZNet), nameof(ZNet.Save))]
     internal static class CharacterVaultWorldSavePatch
     {
         private static void Prefix(ZNet __instance)

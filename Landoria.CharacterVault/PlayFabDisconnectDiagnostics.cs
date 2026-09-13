@@ -24,7 +24,7 @@ namespace Landoria.CharacterVault
         }
     }
 
-    [HarmonyPatch(typeof(ZPlayFabSocket), "Dispose")]
+    [HarmonyPatch(typeof(ZPlayFabSocket), nameof(ZPlayFabSocket.Dispose))]
     internal static class CharacterVaultPlayFabSocketDisposeDiagnosticsPatch
     {
         private static void Prefix(ZPlayFabSocket __instance)
@@ -49,7 +49,7 @@ namespace Landoria.CharacterVault
         }
     }
 
-    [HarmonyPatch(typeof(ZPlayFabMatchmaking), "LeaveLobby")]
+    [HarmonyPatch(typeof(ZPlayFabMatchmaking), nameof(ZPlayFabMatchmaking.LeaveLobby))]
     internal static class CharacterVaultLeaveLobbyDiagnosticsPatch
     {
         private static void Prefix(string lobbyId)
@@ -59,7 +59,7 @@ namespace Landoria.CharacterVault
         }
     }
 
-    [HarmonyPatch(typeof(PlayFabMultiplayerManager), "LeaveNetwork")]
+    [HarmonyPatch(typeof(PlayFabMultiplayerManager), nameof(PlayFabMultiplayerManager.LeaveNetwork))]
     internal static class CharacterVaultLeaveNetworkDiagnosticsPatch
     {
         private static readonly HashSet<PlayFabMultiplayerManager> Observed =
@@ -172,7 +172,7 @@ namespace Landoria.CharacterVault
         }
     }
 
-    [HarmonyPatch(typeof(PlayFabMultiplayerManager), "ResetParty")]
+    [HarmonyPatch(typeof(PlayFabMultiplayerManager), nameof(PlayFabMultiplayerManager.ResetParty))]
     internal static class CharacterVaultResetPartyDiagnosticsPatch
     {
         private static void Prefix(PlayFabMultiplayerManager __instance)

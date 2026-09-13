@@ -31,7 +31,7 @@ namespace Landoria.Moderator
         }
     }
 
-    [HarmonyPatch(typeof(Terminal.ConsoleCommand), "ShowCommand")]
+    [HarmonyPatch(typeof(Terminal.ConsoleCommand), nameof(Terminal.ConsoleCommand.ShowCommand))]
     internal static class HideDevCommandsPatch
     {
         private static void Postfix(Terminal.ConsoleCommand __instance, ref bool __result)
@@ -43,7 +43,7 @@ namespace Landoria.Moderator
         }
     }
 
-    [HarmonyPatch(typeof(Terminal.ConsoleCommand), "RunAction")]
+    [HarmonyPatch(typeof(Terminal.ConsoleCommand), nameof(Terminal.ConsoleCommand.RunAction))]
     internal static class BlockDevCommandsPatch
     {
         private static bool Prefix(Terminal.ConsoleCommand __instance)

@@ -3,7 +3,7 @@ using HarmonyLib;
 
 namespace Landoria.ExpandedServer
 {
-    [HarmonyPatch(typeof(ZNet), "GetNrOfPlayers")]
+    [HarmonyPatch(typeof(ZNet), nameof(ZNet.GetNrOfPlayers))]
     internal static class AllowPeerInfoUntilServerPlayerLimitPatch
     {
         private static bool _logged;

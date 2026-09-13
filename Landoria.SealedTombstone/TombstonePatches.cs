@@ -11,7 +11,7 @@ namespace Landoria.SealedTombstone
         }
     }
 
-    [HarmonyPatch(typeof(TombStone), "Setup")]
+    [HarmonyPatch(typeof(TombStone), nameof(TombStone.Setup))]
     internal static class TombstoneSetupPatch
     {
         private static void Postfix(TombStone __instance, long ownerUID)
@@ -20,7 +20,7 @@ namespace Landoria.SealedTombstone
         }
     }
 
-    [HarmonyPatch(typeof(TombStone), "Interact")]
+    [HarmonyPatch(typeof(TombStone), nameof(TombStone.Interact))]
     internal static class TombstoneInteractPatch
     {
         private static bool Prefix(TombStone __instance, Humanoid character)
@@ -38,7 +38,7 @@ namespace Landoria.SealedTombstone
         }
     }
 
-    [HarmonyPatch(typeof(Player), "OnDeath")]
+    [HarmonyPatch(typeof(Player), nameof(Player.OnDeath))]
     internal static class PlayerDeathPatch
     {
         private static void Prefix(Player __instance)

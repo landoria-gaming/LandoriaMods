@@ -5,7 +5,7 @@ using PlayFab.Party;
 
 namespace Landoria.ExpandedServer
 {
-    [HarmonyPatch(typeof(PlayFabMultiplayerAPI), "CreateLobby")]
+    [HarmonyPatch(typeof(PlayFabMultiplayerAPI), nameof(PlayFabMultiplayerAPI.CreateLobby))]
     internal static class IncreasePlayFabLobbyPlayerLimitPatch
     {
         private static void Prefix(CreateLobbyRequest request)
@@ -21,7 +21,7 @@ namespace Landoria.ExpandedServer
         }
     }
 
-    [HarmonyPatch(typeof(PlayFabMultiplayerManager), "CreateAndJoinNetwork",
+    [HarmonyPatch(typeof(PlayFabMultiplayerManager), nameof(PlayFabMultiplayerManager.CreateAndJoinNetwork),
         typeof(PlayFabNetworkConfiguration))]
     internal static class IncreasePlayFabNetworkPlayerLimitPatch
     {

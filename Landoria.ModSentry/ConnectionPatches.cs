@@ -64,7 +64,7 @@ namespace Landoria.ModSentry
     }
 
     // Clears all verification state when a peer disconnects.
-    [HarmonyPatch(typeof(ZNet), "Disconnect")]
+    [HarmonyPatch(typeof(ZNet), nameof(ZNet.Disconnect))]
     internal static class ClearHandshakePatch
     {
         // Removes the disconnected peer from every ModSentry registry.

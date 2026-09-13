@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Landoria.HammerFreedom
 {
-    [HarmonyPatch(typeof(Player), "OnSpawned")]
+    [HarmonyPatch(typeof(Player), nameof(Player.OnSpawned))]
     internal static class HammerFreedomAuthorizationOnSpawnPatch
     {
         private static void Postfix(Player __instance)
@@ -24,7 +24,7 @@ namespace Landoria.HammerFreedom
         }
     }
 
-    [HarmonyPatch(typeof(Terminal.ConsoleCommand), "IsValid")]
+    [HarmonyPatch(typeof(Terminal.ConsoleCommand), nameof(Terminal.ConsoleCommand.IsValid))]
     internal static class FlyCommandValidationPatch
     {
         private static void Postfix(Terminal.ConsoleCommand __instance, ref bool __result)
@@ -37,7 +37,7 @@ namespace Landoria.HammerFreedom
         }
     }
 
-    [HarmonyPatch(typeof(Character), "Damage")]
+    [HarmonyPatch(typeof(Character), nameof(Character.Damage))]
     internal static class FallDamagePatch
     {
         private static bool Prefix(Character __instance, HitData hit)
@@ -50,7 +50,7 @@ namespace Landoria.HammerFreedom
         }
     }
 
-    [HarmonyPatch(typeof(Player), "UseStamina")]
+    [HarmonyPatch(typeof(Player), nameof(Player.UseStamina))]
     internal static class StaminaConsumptionPatch
     {
         private static bool Prefix(Player __instance)
@@ -105,7 +105,7 @@ namespace Landoria.HammerFreedom
         }
     }
 
-    [HarmonyPatch(typeof(Attack), "OnAttackTrigger")]
+    [HarmonyPatch(typeof(Attack), nameof(Attack.OnAttackTrigger))]
     internal static class AttackDurabilityPatch
     {
         private static void Prefix(Humanoid ___m_character, ItemDrop.ItemData ___m_weapon,
@@ -201,7 +201,7 @@ namespace Landoria.HammerFreedom
         }
     }
 
-    [HarmonyPatch(typeof(Character), "Jump")]
+    [HarmonyPatch(typeof(Character), nameof(Character.Jump))]
     internal static class FlyingJumpPatch
     {
         private static bool Prefix(Character __instance)

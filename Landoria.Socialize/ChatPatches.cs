@@ -22,7 +22,7 @@ namespace Landoria.Socialize
         }
     }
 
-    [HarmonyPatch(typeof(Player), "OnSpawned")]
+    [HarmonyPatch(typeof(Player), nameof(Player.OnSpawned))]
     internal static class RequestSocialStateOnSpawnPatch
     {
         private static void Postfix(Player __instance)
@@ -43,7 +43,7 @@ namespace Landoria.Socialize
         }
     }
 
-    [HarmonyPatch(typeof(Chat), "SendPing")]
+    [HarmonyPatch(typeof(Chat), nameof(Chat.SendPing))]
     internal static class LimitMapPingToGroupPatch
     {
         private static bool Prefix(Vector3 position)
@@ -78,7 +78,7 @@ namespace Landoria.Socialize
         }
     }
 
-    [HarmonyPatch(typeof(Chat), "SendInput")]
+    [HarmonyPatch(typeof(Chat), nameof(Chat.SendInput))]
     internal static class PersistentChatInputPatch
     {
         private static bool Prefix(Chat __instance)
@@ -95,7 +95,7 @@ namespace Landoria.Socialize
         }
     }
 
-    [HarmonyPatch(typeof(Chat), "SendText")]
+    [HarmonyPatch(typeof(Chat), nameof(Chat.SendText))]
     internal static class PersistentChatChannelPatch
     {
         private static bool Prefix(Talker.Type type, string text)
@@ -122,7 +122,7 @@ namespace Landoria.Socialize
         }
     }
 
-    [HarmonyPatch(typeof(Chat), "Update")]
+    [HarmonyPatch(typeof(Chat), nameof(Chat.Update))]
     internal static class ChatPresentationPatch
     {
         private static Chat owner;
@@ -170,13 +170,13 @@ namespace Landoria.Socialize
         }
     }
 
-    [HarmonyPatch(typeof(Terminal), "AddString", typeof(string))]
+    [HarmonyPatch(typeof(Terminal), nameof(Terminal.AddString), typeof(string))]
     internal static class AutoDisplaySimpleChatPatch
     {
         private static void Postfix(Terminal __instance) => ChatPresentationPatch.Show(__instance);
     }
 
-    [HarmonyPatch(typeof(Terminal), "AddString", typeof(string), typeof(string), typeof(Talker.Type), typeof(bool))]
+    [HarmonyPatch(typeof(Terminal), nameof(Terminal.AddString), typeof(string), typeof(string), typeof(Talker.Type), typeof(bool))]
     internal static class FormatTitleChatPatch
     {
         private static bool Prefix(Terminal __instance, string title, string text, Talker.Type type, bool timestamp)
@@ -197,7 +197,7 @@ namespace Landoria.Socialize
         private static void Postfix(Terminal __instance) => ChatPresentationPatch.Show(__instance);
     }
 
-    [HarmonyPatch(typeof(Terminal), "AddString", typeof(PlatformUserID), typeof(string), typeof(Talker.Type), typeof(bool))]
+    [HarmonyPatch(typeof(Terminal), nameof(Terminal.AddString), typeof(PlatformUserID), typeof(string), typeof(Talker.Type), typeof(bool))]
     internal static class FormatUserChatPatch
     {
         private static bool Prefix(Terminal __instance, PlatformUserID user, string text, Talker.Type type, bool timestamp)
