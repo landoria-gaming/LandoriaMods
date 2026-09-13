@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.19
+
+- Automatic creation of ModSentry_Required et ModSentry_Optional folders at startup
+
 ## 1.0.18
 
 - Migration to Valheim 1.0.x.
