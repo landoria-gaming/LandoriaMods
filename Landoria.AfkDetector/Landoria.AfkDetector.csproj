@@ -31,8 +31,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ActivityMonitor.cs" /><Compile Include="AfkDetectorPlugin.cs" />
+    <Compile Include="AfkDetectorServer.cs" />
     <Compile Include="ChatActivityPatch.cs" /><Compile Include="ClientDisconnectReason.cs" />
-    <Compile Include="ClientPatches.cs" /><Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ClientConnectionPatch.cs" /><Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="icon.png" /><Content Include="LICENSE" /><Content Include="manifest.json" />

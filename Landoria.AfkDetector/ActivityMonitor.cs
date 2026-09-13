@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace Landoria.AfkDetector
 {
+    // Tracks player activity and finds inactive players.
     internal sealed class ActivityMonitor
     {
         private readonly Dictionary<long, PlayerActivity> _players =
@@ -12,6 +13,7 @@ namespace Landoria.AfkDetector
         private float _timeoutSeconds;
         private float _movementToleranceSquared;
 
+        // Creates a monitor with its timeout and movement settings.
         internal ActivityMonitor(float timeoutSeconds, float movementTolerance,
             Action<ZNetPeer> disconnect)
         {
@@ -19,12 +21,14 @@ namespace Landoria.AfkDetector
             Configure(timeoutSeconds, movementTolerance);
         }
 
+        // Updates the timeout and movement settings.
         internal void Configure(float timeoutSeconds, float movementTolerance)
         {
             _timeoutSeconds = timeoutSeconds;
             _movementToleranceSquared = movementTolerance * movementTolerance;
         }
 
+        // Checks the activity of all connected players.
         internal void Update(List<ZNetPeer> peers, float now)
         {
             HashSet<long> connected = new HashSet<long>();
@@ -40,6 +44,7 @@ namespace Landoria.AfkDetector
             RemoveDisconnected(connected);
         }
 
+        // Records chat activity for a player.
         internal void RecordChat(long peerId, float now)
         {
             if (_players.TryGetValue(peerId, out PlayerActivity activity))
@@ -48,6 +53,7 @@ namespace Landoria.AfkDetector
             }
         }
 
+        // Updates the activity state of one player.
         private void UpdatePeer(ZNetPeer peer, float now)
         {
             if (!_players.TryGetValue(peer.m_uid, out PlayerActivity activity))
@@ -68,11 +74,13 @@ namespace Landoria.AfkDetector
             }
         }
 
+        // Checks whether a player moved far enough.
         private bool HasMoved(Vector3 previous, Vector3 current)
         {
             return (current - previous).sqrMagnitude >= _movementToleranceSquared;
         }
 
+        // Removes players who are no longer connected.
         private void RemoveDisconnected(HashSet<long> connected)
         {
             List<long> stale = new List<long>();
@@ -89,12 +97,14 @@ namespace Landoria.AfkDetector
             }
         }
 
+        // Stores the latest activity of one player.
         private sealed class PlayerActivity
         {
             internal Vector3 Position;
             internal float LastActivityAt;
             internal bool DisconnectRequested;
 
+            // Creates an activity record for a player.
             internal PlayerActivity(Vector3 position, float now)
             {
                 Position = position;
