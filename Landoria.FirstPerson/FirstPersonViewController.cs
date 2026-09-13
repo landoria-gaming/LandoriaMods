@@ -20,7 +20,8 @@ namespace Landoria.FirstPerson
                 player.transform.rotation = Quaternion.LookRotation(bodyDirection, Vector3.up);
             }
 
-            camera.transform.position = player.GetEyePoint();
+            // Keep Valheim's native camera position smoothing.
+            // It prevents stuttering during sideways movement.
             camera.transform.rotation = cameraRotation;
         }
     }
