@@ -34,16 +34,13 @@
     <Compile Include="FirstPersonCommand.cs" />
     <Compile Include="FirstPersonHelmetLightController.cs" />
     <Compile Include="FirstPersonMode.cs" />
-    <Compile Include="FirstPersonMessages.cs" />
     <Compile Include="FirstPersonPreference.cs" />
     <Compile Include="FirstPersonPlugin.cs" />
-    <Compile Include="FirstPersonPolicy.cs" />
     <Compile Include="FirstPersonViewController.cs" />
     <Compile Include="FirstPersonVisibilityController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="FirstPersonMessages.resx" />
     <Content Include="icon.png" /><Content Include="LICENSE" /><Content Include="manifest.json" />
     <Content Include="README.md" />
     <Content Include="CHANGELOG.md" />

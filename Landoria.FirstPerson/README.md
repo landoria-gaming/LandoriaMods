@@ -1,11 +1,12 @@
 # First Person
 
-See Valheim through your character's eyes with a stable first-person camera that
-follows your full look direction.
+Enjoy a smooth first-person view that follows where you look.
 
 Zoom all the way in to enter first person, then scroll back to return to third
 person. Your body is hidden only from your own first-person view, while items
 held in either hand remain visible without changing how other players see you.
+
+First Person is not enabled by default, run command `/firstperson` in the chat to enable it.
 
 ## Video demo
 
@@ -13,24 +14,19 @@ held in either hand remain visible without changing how other players see you.
 
 ## Highlights
 
-- Disabled by default and instantly toggleable with `firstperson`.
 - Stable camera movement while walking in every direction.
 - Stable helmet lighting while moving in any direction.
-- A saved FOV setting with 15 extra degrees applied only in first person.
 - Client-side only: no server installation or configuration required.
 
 ## Commands
 
 | Command | Action |
 |---|---|
-| `firstperson` | Enable or disable first person |
+| `firstperson` | Enable or disable first person (disabled by default) |
 | `fov <degrees>` | Set the saved FOV, up to 85 |
 | `fov` | Show the current FOV |
 | `fov reset` | Restore the default FOV of 65 |
 
-Your first-person toggle and FOV are saved locally.
-First person silently adds 15 degrees without changing the saved value, up to
-an effective FOV of 100.
 
 ## Valheim compatibility
 

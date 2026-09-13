@@ -3,6 +3,7 @@ using UnityEngine;
 
 namespace Landoria.FirstPerson
 {
+    // Saves and applies camera distance settings when the camera starts.
     [HarmonyPatch(typeof(GameCamera), "Awake")]
     internal static class FirstPersonCameraAwakePatch
     {
@@ -17,15 +18,15 @@ namespace Landoria.FirstPerson
         }
     }
 
+    // Updates first-person state after Valheim positions the camera.
     [HarmonyPatch(typeof(GameCamera), "UpdateCamera")]
     internal static class FirstPersonCameraUpdatePatch
     {
         private static void Postfix(GameCamera __instance, float ___m_distance)
         {
             Player player = Player.m_localPlayer;
-            bool shouldApply = FirstPersonPolicy.ShouldApplyFirstPerson(
-                FirstPersonMode.Enabled, player, player && player.IsDead(),
-                GameCamera.InFreeFly(), ___m_distance);
+            bool shouldApply = FirstPersonMode.ShouldActivate(
+                player, GameCamera.InFreeFly(), ___m_distance);
             FirstPersonMode.SetActive(shouldApply);
             FirstPersonMode.ApplyConfiguredFieldOfView(__instance);
             FirstPersonVisibilityController.SetHidden(player, shouldApply);
@@ -41,6 +42,7 @@ namespace Landoria.FirstPerson
         }
     }
 
+    // Keeps the local character active so its animations still run while hidden.
     [HarmonyPatch(typeof(Character), "SetVisible")]
     internal static class FirstPersonPlayerVisibilityPatch
     {
@@ -53,6 +55,7 @@ namespace Landoria.FirstPerson
         }
     }
 
+    // Refreshes hidden visuals and held items after equipment changes.
     [HarmonyPatch(typeof(VisEquipment), "UpdateVisuals")]
     internal static class FirstPersonVisualVisibilityPatch
     {
@@ -73,6 +76,7 @@ namespace Landoria.FirstPerson
         }
     }
 
+    // Repositions helmet lights after Valheim finishes its frame updates.
     [HarmonyPatch(typeof(MonoUpdaters), "LateUpdate")]
     internal static class FirstPersonHelmetLightLateUpdatePatch
     {
@@ -83,6 +87,7 @@ namespace Landoria.FirstPerson
         }
     }
 
+    // Registers the first-person command whenever the terminal is created.
     [HarmonyPatch(typeof(Terminal), "InitTerminal")]
     internal static class FirstPersonCommandRegistrationPatch
     {
@@ -92,6 +97,7 @@ namespace Landoria.FirstPerson
         }
     }
 
+    // Validates and saves values handled by Valheim's FOV command.
     [HarmonyPatch(typeof(Terminal.ConsoleCommand), "RunAction")]
     internal static class FirstPersonFieldOfViewCommandPatch
     {
@@ -99,17 +105,23 @@ namespace Landoria.FirstPerson
             Terminal.ConsoleCommand __instance, Terminal.ConsoleEventArgs args)
         {
             string value = args.Length > 1 ? args[1] : null;
-            if (!FirstPersonPolicy.ShouldResetFieldOfView(
-                    __instance.Command, args.Length, value))
+            bool shouldReset = __instance.Command == "fov" && args.Length == 2 &&
+                               string.Equals(value, "reset",
+                                   System.StringComparison.OrdinalIgnoreCase);
+            if (!shouldReset)
             {
                 bool parsed = args.TryParameterFloat(1, out float requestedFieldOfView);
-                if (!FirstPersonPolicy.ShouldRejectFieldOfView(
-                        __instance.Command, args.Length, parsed, requestedFieldOfView))
+                bool exceedsMaximum = __instance.Command == "fov" && args.Length > 1 &&
+                                      parsed && requestedFieldOfView >
+                                      FirstPersonPreference.MaximumFieldOfView;
+                if (!exceedsMaximum)
                 {
                     return true;
                 }
 
-                args.Context?.AddString(FirstPersonMessages.FieldOfViewAboveMaximum);
+                args.Context?.AddString(
+                    $"FOV must not exceed {FirstPersonPreference.MaximumFieldOfView}. " +
+                    "The current FOV was not changed.");
                 return false;
             }
 
@@ -123,8 +135,10 @@ namespace Landoria.FirstPerson
             Terminal.ConsoleCommand __instance, Terminal.ConsoleEventArgs args)
         {
             bool parsed = args.TryParameterFloat(1, out float fieldOfView);
-            if (FirstPersonPolicy.ShouldPersistFieldOfView(
-                __instance.Command, args.Length, parsed, fieldOfView))
+            bool shouldSave = __instance.Command == "fov" && args.Length > 1 &&
+                              parsed && fieldOfView > 5f && fieldOfView <=
+                              FirstPersonPreference.MaximumFieldOfView;
+            if (shouldSave)
             {
                 FirstPersonPreference.SetFieldOfView(fieldOfView);
                 FirstPersonMode.ApplyConfiguredFieldOfView(GameCamera.instance);
@@ -132,6 +146,7 @@ namespace Landoria.FirstPerson
         }
     }
 
+    // Restores saved first-person settings when the local player spawns.
     [HarmonyPatch(typeof(Player), "OnSpawned")]
     internal static class FirstPersonPlayerSpawnPatch
     {
@@ -145,6 +160,7 @@ namespace Landoria.FirstPerson
         }
     }
 
+    // Restores changed state when the player leaves a game session.
     [HarmonyPatch(typeof(ZNet), "OnDestroy")]
     internal static class FirstPersonDisconnectPatch
     {

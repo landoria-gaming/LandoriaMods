@@ -3,6 +3,7 @@ using UnityEngine;
 
 namespace Landoria.FirstPerson
 {
+    // Hides the local body while keeping held items visible in first person.
     internal static class FirstPersonVisibilityController
     {
         private static readonly HashSet<Renderer> HiddenRenderers =
@@ -14,6 +15,7 @@ namespace Landoria.FirstPerson
         private static GameObject leftHandItem;
         private static GameObject rightHandItem;
 
+        // Remembers the items currently shown in the player's hands.
         internal static void TrackHeldItems(
             Player player, GameObject leftItem, GameObject rightItem)
         {
@@ -26,6 +28,7 @@ namespace Landoria.FirstPerson
             }
         }
 
+        // Hides or restores the local player's first-person visuals.
         internal static void SetHidden(Player player, bool hidden)
         {
             if (!hidden || !player)
@@ -42,6 +45,7 @@ namespace Landoria.FirstPerson
             }
         }
 
+        // Hides any visuals that were added after the last update.
         internal static void Refresh(Player player)
         {
             if (player && player == hiddenPlayer)
@@ -50,6 +54,7 @@ namespace Landoria.FirstPerson
             }
         }
 
+        // Restores all renderers and animator settings changed by the mod.
         internal static void Restore()
         {
             foreach (Renderer renderer in HiddenRenderers)

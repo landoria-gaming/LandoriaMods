@@ -1,19 +1,25 @@
 namespace Landoria.FirstPerson
 {
+    // Stores and applies the current first-person camera state.
     internal static class FirstPersonMode
     {
+        private const float DistanceThreshold = 0.001f;
+        private const float FieldOfViewOffset = 15f;
+
         private static float vanillaMinimumDistance;
         private static bool distanceCaptured;
 
         internal static bool Enabled { get; private set; }
         internal static bool Active { get; private set; }
 
+        // Remembers Valheim's original minimum camera distance.
         internal static void CaptureVanillaDistance(GameCamera camera)
         {
             vanillaMinimumDistance = camera.m_minDistance;
             distanceCaptured = true;
         }
 
+        // Allows zero camera distance only when first person is enabled.
         internal static void Apply(GameCamera camera)
         {
             if (!camera)
@@ -24,6 +30,7 @@ namespace Landoria.FirstPerson
             camera.m_minDistance = Enabled ? 0f : vanillaMinimumDistance;
         }
 
+        // Enables or disables first-person mode.
         internal static void SetEnabled(bool enabled)
         {
             Enabled = enabled;
@@ -35,11 +42,21 @@ namespace Landoria.FirstPerson
             ApplyConfiguredFieldOfView(GameCamera.instance);
         }
 
+        // Records whether the camera is currently in first person.
         internal static void SetActive(bool active)
         {
             Active = active;
         }
 
+        // Checks whether first person should be active for this frame.
+        internal static bool ShouldActivate(
+            Player player, bool isFreeFly, float cameraDistance)
+        {
+            return Enabled && player && !player.IsDead() && !isFreeFly &&
+                   cameraDistance <= DistanceThreshold;
+        }
+
+        // Applies a field of view to the active game camera.
         internal static void SetFieldOfView(GameCamera camera, float fieldOfView)
         {
             if (camera)
@@ -48,17 +65,20 @@ namespace Landoria.FirstPerson
             }
         }
 
+        // Applies the saved field of view with the first-person adjustment.
         internal static void ApplyConfiguredFieldOfView(GameCamera camera)
         {
-            SetFieldOfView(camera, FirstPersonPolicy.EffectiveFieldOfView(
-                FirstPersonPreference.FieldOfView, Active));
+            float offset = Active ? FieldOfViewOffset : 0f;
+            SetFieldOfView(camera, FirstPersonPreference.FieldOfView + offset);
         }
 
+        // Disables first person when leaving the current game session.
         internal static void ResetSession()
         {
             SetEnabled(false);
         }
 
+        // Restores all camera and visual state when the plugin stops.
         internal static void Reset()
         {
             FirstPersonHelmetLightController.Restore();

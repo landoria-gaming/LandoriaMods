@@ -3,6 +3,7 @@ using Landoria.SharedLib;
 
 namespace Landoria.FirstPerson
 {
+    // Starts and stops the First Person mod.
     [BepInPlugin(PluginGuid, PluginName, PluginVersion)]
     public sealed class FirstPersonPlugin : LandoriaPlugin
     {

@@ -2,8 +2,10 @@ using UnityEngine;
 
 namespace Landoria.FirstPerson
 {
+    // Controls the local player's view while first person is active.
     internal static class FirstPersonViewController
     {
+        // Aligns the player with the camera while keeping Valheim's camera position.
         internal static void Apply(GameCamera camera, Player player)
         {
             if (!camera || !player || player.IsAttached() || player.InCutscene())
@@ -20,8 +22,8 @@ namespace Landoria.FirstPerson
                 player.transform.rotation = Quaternion.LookRotation(bodyDirection, Vector3.up);
             }
 
-            // Keep Valheim's native camera position smoothing.
-            // It prevents stuttering during sideways movement.
+            // Keep the position produced by GameCamera so its native player-motion
+            // smoothing is not replaced with the animated eye transform.
             camera.transform.rotation = cameraRotation;
         }
     }
