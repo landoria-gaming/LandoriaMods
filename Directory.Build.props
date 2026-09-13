@@ -20,7 +20,4 @@
       <Private>false</Private>
     </Reference>
   </ItemGroup>
-  <Import
-      Project="$(MSBuildThisFileDirectory)tools/HarmonyValidator/HarmonyValidator.targets"
-      Condition="'$(MSBuildProjectName)' != 'Landoria.SharedLib' and '$(MSBuildProjectName)' != 'DllMetadataVersion'" />
 </Project>
