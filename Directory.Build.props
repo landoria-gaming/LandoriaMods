@@ -7,7 +7,6 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(IsPluginProject)' == 'true'">
     <ILRepackTargetsFile>$(MSBuildThisFileDirectory)Landoria.SharedLib\ILRepack.targets</ILRepackTargetsFile>
-    <HvAssembly>$(MSBuildThisFileDirectory)lib\HarmonyValidator.dll</HvAssembly>
   </PropertyGroup>
   <ItemGroup Condition="'$(IsPluginProject)' == 'true'">
     <ProjectReference Include="$(MSBuildThisFileDirectory)Landoria.SharedLib\Landoria.SharedLib.csproj">
@@ -24,20 +23,6 @@
       <Private>false</Private>
     </Reference>
   </ItemGroup>
-  <Target Name="ValidateHarmonyTargets"
-          AfterTargets="CoreCompile"
-          BeforeTargets="CopyFilesToOutputDirectory;MergeLandoriaSharedLib"
-          Condition="'$(IsPluginProject)' == 'true'">
-    <PropertyGroup>
-      <_HarmonyAssembly>@(IntermediateAssembly->'%(FullPath)')</_HarmonyAssembly>
-      <_HvRefs>$(IntermediateOutputPath)harmony-references.txt</_HvRefs>
-      <_HvCmd>dotnet &quot;$(HvAssembly)&quot;</_HvCmd>
-      <_HvCmd>$(_HvCmd) &quot;$(_HarmonyAssembly)&quot;</_HvCmd>
-      <_HvCmd>$(_HvCmd) &quot;$(_HvRefs)&quot;</_HvCmd>
-    </PropertyGroup>
-    <WriteLinesToFile File="$(_HvRefs)"
-                      Lines="@(ReferencePath->'%(FullPath)')"
-                      Overwrite="true" />
-    <Exec Command="$(_HvCmd)" />
-  </Target>
+  <Import Project="$(MSBuildThisFileDirectory)lib\HarmonyValidator.targets"
+          Condition="'$(IsPluginProject)' == 'true'" />
 </Project>
