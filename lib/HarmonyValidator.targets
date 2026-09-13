@@ -1,21 +1,19 @@
 <Project>
   <PropertyGroup>
-    <HarmonyValidatorExe Condition="'$(HarmonyValidatorExe)' == ''">$(MSBuildThisFileDirectory)HarmonyValidator.exe</HarmonyValidatorExe>
+    <HarmonyValidatorAssembly Condition="'$(HarmonyValidatorAssembly)' == ''">$(MSBuildThisFileDirectory)HarmonyValidator.dll</HarmonyValidatorAssembly>
   </PropertyGroup>
+  <UsingTask TaskName="Landoria.Build.HarmonyValidatorTask"
+             AssemblyFile="$(HarmonyValidatorAssembly)" />
   <Target Name="ValidateHarmonyTargets"
           AfterTargets="CoreCompile"
           BeforeTargets="CopyFilesToOutputDirectory;MergeLandoriaSharedLib"
           Condition="'$(DesignTimeBuild)' != 'true'">
-    <Error Condition="!Exists('$(HarmonyValidatorExe)')"
-           Text="HarmonyValidator executable not found: $(HarmonyValidatorExe). Build HarmonyValidator.csproj in Release first." />
+    <Error Condition="!Exists('$(HarmonyValidatorAssembly)')"
+           Text="HarmonyValidator assembly not found: $(HarmonyValidatorAssembly)." />
     <PropertyGroup>
       <_HvAssembly>@(IntermediateAssembly->'%(FullPath)')</_HvAssembly>
-      <_HvRefs>$(MSBuildProjectDirectory)/$(IntermediateOutputPath)</_HvRefs>
-      <_HvRefs>$(_HvRefs)harmony-references.txt</_HvRefs>
     </PropertyGroup>
-    <WriteLinesToFile File="$(_HvRefs)"
-                      Lines="@(ReferencePath->'%(FullPath)')"
-                      Overwrite="true" />
-    <Exec Command="&quot;$(HarmonyValidatorExe)&quot; &quot;$(_HvAssembly)&quot; &quot;$(_HvRefs)&quot;" />
+    <HarmonyValidatorTask AssemblyPath="$(_HvAssembly)"
+                          References="@(ReferencePath)" />
   </Target>
 </Project>
