@@ -8,13 +8,16 @@ namespace Landoria.StructureProtection
     {
         // Existing worlds already use this prefab name for persistent activity records.
         internal const string Name = "Landoria_CharacterActivity";
+        private static GameObject template;
 
         [HarmonyPatch(typeof(ZNetScene), "Awake")]
         private static class ZNetSceneAwakePatch
         {
             private static void Prefix(ZNetScene __instance)
             {
-                if (__instance.m_prefabs.Any(prefab => prefab != null && prefab.name == Name))
+                template = __instance.m_prefabs.FirstOrDefault(prefab =>
+                    prefab != null && prefab.name == Name);
+                if (template != null)
                 {
                     return;
                 }
@@ -25,8 +28,26 @@ namespace Landoria.StructureProtection
                 view.m_distant = false;
                 view.m_type = ZDO.ObjectType.Default;
                 __instance.m_prefabs.Add(prefab);
+                template = prefab;
                 StructureProtectionPlugin.Log.LogInfo(
                     $"Registered the {Name} world-record prefab.");
+            }
+        }
+
+        // Marks data-only activity records as loaded without creating scene objects.
+        [HarmonyPatch(typeof(ZNetScene), "CreateObject")]
+        private static class ZNetSceneCreateObjectPatch
+        {
+            private static bool Prefix(ZDO zdo, ref GameObject __result)
+            {
+                if (zdo.GetPrefab() != Name.GetStableHashCode())
+                {
+                    return true;
+                }
+
+                zdo.Created = true;
+                __result = template;
+                return false;
             }
         }
     }
