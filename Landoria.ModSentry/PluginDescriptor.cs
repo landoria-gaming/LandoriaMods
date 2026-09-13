@@ -1,7 +1,9 @@
 namespace Landoria.ModSentry
 {
+    // Describes a plugin or library included in an inventory.
     internal sealed class PluginDescriptor
     {
+        // Creates an immutable plugin inventory descriptor.
         internal PluginDescriptor(string guid, string name, string version, string hash,
             bool isBepInPlugin = true)
         {

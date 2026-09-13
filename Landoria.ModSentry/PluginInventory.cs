@@ -8,8 +8,10 @@ using BepInEx.Bootstrap;
 
 namespace Landoria.ModSentry
 {
+    // Captures and serializes the client's installed plugin inventory.
     internal static class PluginInventory
     {
+        // Captures loaded plugins and additional DLLs from the plugin directory.
         internal static IReadOnlyList<PluginDescriptor> Capture()
         {
             List<PluginDescriptor> plugins = Chainloader.PluginInfos.Values
@@ -31,6 +33,7 @@ namespace Landoria.ModSentry
                 .ToList();
         }
 
+        // Serializes the current inventory with its challenge nonce.
         internal static ZPackage Serialize(string nonce)
         {
             IReadOnlyList<PluginDescriptor> plugins = Capture();
@@ -46,6 +49,7 @@ namespace Landoria.ModSentry
             return package;
         }
 
+        // Reads and bounds-checks a serialized plugin inventory.
         internal static List<PluginDescriptor> Deserialize(ZPackage package)
         {
             int count = package.ReadInt();
@@ -63,20 +67,25 @@ namespace Landoria.ModSentry
             return plugins;
         }
 
+        // Computes the SHA-256 hash of a file.
         internal static string Sha256(string path)
         {
             using (SHA256 algorithm = SHA256.Create())
-            using (FileStream stream = File.OpenRead(path))
             {
-                return BitConverter.ToString(algorithm.ComputeHash(stream)).Replace("-", "");
+                using (FileStream stream = File.OpenRead(path))
+                {
+                    return BitConverter.ToString(algorithm.ComputeHash(stream)).Replace("-", "");
+                }
             }
         }
 
+        // Creates a descriptor for a loaded BepInEx plugin.
         private static PluginDescriptor Create(string guid, string name, string version, string path)
         {
             return new PluginDescriptor(guid, name, version, Sha256(path));
         }
 
+        // Writes one plugin descriptor to a package.
         private static void Write(ZPackage package, PluginDescriptor plugin)
         {
             package.Write(plugin.Guid);
@@ -85,6 +94,7 @@ namespace Landoria.ModSentry
             package.Write(plugin.Hash);
         }
 
+        // Reads one plugin descriptor from a package.
         private static PluginDescriptor Read(ZPackage package)
         {
             string guid = package.ReadString();

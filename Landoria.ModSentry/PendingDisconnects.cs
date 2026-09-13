@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace Landoria.ModSentry
 {
+    // Coordinates graceful and forced disconnection of rejected clients.
     internal static class PendingDisconnects
     {
         private const float FallbackSeconds = 2f;
@@ -12,11 +13,13 @@ namespace Landoria.ModSentry
         private static readonly HashSet<ZRpc> DisconnectRequested =
             new HashSet<ZRpc>();
 
+        // Schedules a rejected connection for disconnection.
         internal static void Schedule(ZRpc rpc)
         {
             Deadlines[rpc] = Time.unscaledTime + FallbackSeconds;
         }
 
+        // Advances disconnection after the client acknowledges rejection.
         internal static void Acknowledge(ZRpc rpc)
         {
             if (Deadlines.ContainsKey(rpc))
@@ -25,12 +28,14 @@ namespace Landoria.ModSentry
             }
         }
 
+        // Removes all pending disconnection state for a connection.
         internal static void Remove(ZRpc rpc)
         {
             Deadlines.Remove(rpc);
             DisconnectRequested.Remove(rpc);
         }
 
+        // Advances connections whose disconnection deadline expired.
         internal static void Tick()
         {
             ZRpc[] expired = Deadlines
@@ -43,12 +48,14 @@ namespace Landoria.ModSentry
             }
         }
 
+        // Clears every pending disconnection.
         internal static void Clear()
         {
             Deadlines.Clear();
             DisconnectRequested.Clear();
         }
 
+        // Requests or forces the next disconnection stage.
         private static void AdvanceDisconnect(ZRpc rpc)
         {
             if (DisconnectRequested.Contains(rpc))
@@ -61,6 +68,7 @@ namespace Landoria.ModSentry
             RequestDisconnect(rpc);
         }
 
+        // Sends the initial disconnection request to a client.
         private static void RequestDisconnect(ZRpc rpc)
         {
             DisconnectRequested.Add(rpc);

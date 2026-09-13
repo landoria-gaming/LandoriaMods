@@ -7,16 +7,28 @@ using Mono.Cecil;
 
 namespace Landoria.ModSentry
 {
-    // Reads every plugin in an approved DLL, including plugins merged with ILRepack.
+    // Loads every plugin in approved DLLs, including plugins merged with ILRepack.
     internal static class PluginPolicyLoader
     {
+        private const string RequiredDirectoryName = "ModSentry_Required";
+        private const string OptionalDirectoryName = "ModSentry_Optional";
+
+        // Creates the required and optional policy directories when absent.
+        internal static void EnsureDirectories()
+        {
+            Directory.CreateDirectory(Path.Combine(Paths.ConfigPath, RequiredDirectoryName));
+            Directory.CreateDirectory(Path.Combine(Paths.ConfigPath, OptionalDirectoryName));
+        }
+
+        // Loads the complete required and optional plugin policy.
         internal static PluginPolicy Load()
         {
             return new PluginPolicy(
-                LoadDirectory(Path.Combine(Paths.ConfigPath, "ModSentry_Required")),
-                LoadDirectory(Path.Combine(Paths.ConfigPath, "ModSentry_Optional")));
+                LoadDirectory(Path.Combine(Paths.ConfigPath, RequiredDirectoryName)),
+                LoadDirectory(Path.Combine(Paths.ConfigPath, OptionalDirectoryName)));
         }
 
+        // Loads every top-level DLL descriptor from a policy directory.
         private static IReadOnlyList<PluginDescriptor> LoadDirectory(string directory)
         {
             if (!Directory.Exists(directory))
@@ -31,7 +43,7 @@ namespace Landoria.ModSentry
                 .ToList();
         }
 
-        // Plugins sharing a DLL keep their own identity and share the file hash.
+        // Reads plugin descriptors while preserving identities within merged DLLs.
         internal static IReadOnlyList<PluginDescriptor> ReadDescriptors(string path)
         {
             try
@@ -62,6 +74,7 @@ namespace Landoria.ModSentry
             }
         }
 
+        // Creates a descriptor for a DLL without BepInPlugin metadata.
         private static PluginDescriptor CreateFallbackDescriptor(AssemblyDefinition assembly, string path)
         {
             string name = assembly?.Name?.Name ?? Path.GetFileNameWithoutExtension(path);
@@ -71,6 +84,7 @@ namespace Landoria.ModSentry
             return new PluginDescriptor(guid, name, version, PluginInventory.Sha256(path), false);
         }
 
+        // Creates a descriptor from BepInPlugin metadata.
         private static PluginDescriptor CreateDescriptor(
             string hash, CustomAttribute attribute)
         {

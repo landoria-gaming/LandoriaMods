@@ -3,6 +3,7 @@ using Landoria.SharedLib;
 
 namespace Landoria.ModSentry
 {
+    // Initializes ModSentry and maintains its connection verification state.
     [BepInPlugin(PluginGuid, PluginName, PluginVersion)]
     public sealed class ModSentryPlugin : LandoriaPlugin
     {
@@ -17,12 +18,15 @@ namespace Landoria.ModSentry
         internal static ModLog Log { get; private set; }
         internal static PluginPolicy Policy { get; private set; }
 
+        // Initializes the plugin and its policy directories.
         private void Awake()
         {
             Log = InitializePlugin(PluginGuid);
+            PluginPolicyLoader.EnsureDirectories();
             Log.LogInfo($"{PluginName} {PluginVersion} is loaded.");
         }
 
+        // Loads the server policy once and returns the cached result.
         internal static PluginPolicy EnsurePolicy()
         {
             if (Policy == null)
@@ -35,12 +39,14 @@ namespace Landoria.ModSentry
             return Policy;
         }
 
+        // Advances verification and disconnect timeouts each frame.
         private void Update()
         {
             NonceHandshake.Tick();
             PendingDisconnects.Tick();
         }
 
+        // Clears all ModSentry state when the plugin unloads.
         private void OnDestroy()
         {
             Log?.LogInfo($"{PluginName} {PluginVersion} is unloaded.");

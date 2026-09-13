@@ -5,8 +5,10 @@ using Landoria.SharedLib;
 
 namespace Landoria.ModSentry
 {
+    // Coordinates inventory verification and connection admission.
     internal static class ModSentryHandshake
     {
+        // Registers the client or server RPC handlers for a peer.
         internal static void Register(ZNet network, ZNetPeer peer)
         {
             NonceHandshake.Register(network, peer.m_rpc);
@@ -22,12 +24,21 @@ namespace Landoria.ModSentry
             }
         }
 
+        // Validates an inventory received from a challenged client.
         internal static void ReceiveInventory(ZRpc rpc, ZPackage package)
         {
-            if (NonceHandshake.IsFinal(rpc)) return;
+            if (NonceHandshake.IsFinal(rpc))
+            {
+                return;
+            }
+
             try
             {
-                if (!NonceHandshake.Consume(rpc, package)) return;
+                if (!NonceHandshake.Consume(rpc, package))
+                {
+                    return;
+                }
+
                 IReadOnlyList<PluginDescriptor> inventory = PluginInventory.Deserialize(package);
                 ValidationResult result = PolicyValidator.Validate(
                     ModSentryPlugin.EnsurePolicy(), inventory);
@@ -42,6 +53,7 @@ namespace Landoria.ModSentry
             }
         }
 
+        // Allows only accepted clients to continue joining the server.
         internal static bool Admit(ZRpc rpc)
         {
             if (HandshakeState.IsAccepted(rpc))
@@ -59,6 +71,7 @@ namespace Landoria.ModSentry
             return false;
         }
 
+        // Asks a rejected client to close its connection.
         internal static void RequestDisconnect(ZRpc rpc)
         {
             ModSentryPlugin.Log.LogDebug(
@@ -66,6 +79,7 @@ namespace Landoria.ModSentry
             rpc?.Invoke("Disconnect");
         }
 
+        // Closes a rejected connection that remained open.
         internal static void ForceDisconnect(ZRpc rpc)
         {
             ZNetPeer peer = ZNet.instance?.GetPeers()
@@ -78,17 +92,20 @@ namespace Landoria.ModSentry
             }
         }
 
+        // Returns a readable description of a peer.
         internal static string Describe(ZNetPeer peer)
         {
             return string.IsNullOrWhiteSpace(peer?.m_playerName)
                 ? "with an unavailable player name" : $"'{peer.m_playerName}'";
         }
 
+        // Records that the client received its rejection message.
         private static void ReceiveRejectionAck(ZRpc rpc)
         {
             PendingDisconnects.Acknowledge(rpc);
         }
 
+        // Applies and communicates a completed validation result.
         internal static void Record(ZRpc rpc, ValidationResult result)
         {
             if (result.Accepted)
