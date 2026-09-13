@@ -10,6 +10,7 @@ Gets you back into Valheim faster by automatically resuming your last local or m
 
 - Automatically selects your last character.
 - Reopens your last local world or reconnects to your most recent server, including crossplay servers.
+- Skips the startup cinematic.
 - Supports Steam and Xbox clients, local worlds, Steam network servers, and crossplay servers (PlayFab).
 - Briefly shows the world or server name and your character during automatic loading.
 - Stays in the menu if the saved character, world, or server entry is missing.

@@ -81,8 +81,16 @@
     </ItemGroup>
     <ItemGroup>
         <Compile Include="QuickLaunchPlugin.cs"/>
+        <Compile Include="QuickLaunchSession.cs"/>
+        <Compile Include="StartPatch.cs"/>
+        <Compile Include="LocalSessionPatch.cs"/>
+        <Compile Include="MultiplayerSessionPatch.cs"/>
+        <Compile Include="ConnectedServerPatch.cs"/>
         <Compile Include="LoadingWorldLabel.cs"/>
         <Compile Include="RememberedPassword.cs"/>
+        <Compile Include="CapturePasswordPatch.cs"/>
+        <Compile Include="SubmitPasswordPatch.cs"/>
+        <Compile Include="InvalidPasswordPatch.cs"/>
         <Compile Include="Properties\AssemblyInfo.cs"/>
     </ItemGroup>
     <ItemGroup>

@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.10
+
+- QuickLaunch now skips the cinematic introduction.
+
 ## 1.0.9
 
 - Migration to Valheim 1.0.x.
