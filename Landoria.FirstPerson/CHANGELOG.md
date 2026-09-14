@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- Add subtle first-person camera movement synchronized with footsteps.
+- Add continuous figure-eight first-person camera movement matched to vanilla movement paces.
 
 ## 1.0.9
 

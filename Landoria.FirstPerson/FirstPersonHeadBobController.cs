@@ -2,69 +2,67 @@ using UnityEngine;
 
 namespace Landoria.FirstPerson
 {
-    // Adds a small camera impulse synchronized with the local player's footsteps.
+    // Moves the camera through alternating halves of a continuous figure eight.
     internal static class FirstPersonHeadBobController
     {
-        private const float WalkDuration = 0.22f;
-        private const float RunDuration = 0.16f;
-        private const float MetersPerMillimeter = 0.001f;
+        private const float MetersPerMillimeter = 0.001f; // Meters per millimeter.
+        private const float MovementThreshold = 0.01f; // Squared unitless input.
+        private const float FadeDuration = 0.12f; // Seconds.
 
-        private static float elapsed = float.PositiveInfinity;
-        private static float duration;
-        private static float verticalAmplitude;
-        private static float horizontalDirection = 1f;
+        private static float phase;
+        private static float blend;
 
-        // Starts one bob impulse for a vanilla walking or running step.
-        internal static void Trigger(FootStep.MotionType motionType)
+        // Applies a continuous cycle after Valheim has positioned the camera.
+        internal static void Apply(GameCamera camera, Player player)
         {
-            if (!FirstPersonPlugin.HeadBobEnabled || !FirstPersonMode.Active ||
-                !IsGroundStep(motionType))
+            if (FirstPersonPlugin.HeadBobMultiplier <= 0f || !FirstPersonMode.Active ||
+                !camera || !player)
             {
                 return;
             }
 
-            bool running = (motionType & FootStep.MotionType.Run) != 0;
-            duration = running ? RunDuration : WalkDuration;
-            verticalAmplitude = (running
-                ? FirstPersonPlugin.HeadBobRunVerticalAmplitude
-                : FirstPersonPlugin.HeadBobWalkVerticalAmplitude) *
-                MetersPerMillimeter;
-            horizontalDirection = -horizontalDirection;
-            elapsed = 0f;
+            bool moving = player.IsOnGround() &&
+                          player.GetMoveDir().sqrMagnitude > MovementThreshold;
+            blend = Mathf.MoveTowards(
+                blend, moving ? 1f : 0f, Time.deltaTime / FadeDuration);
+            bool running = player.IsRunning();
+            float halfCycleDuration = running
+                ? FirstPersonPlugin.HeadBobSprintStepInterval
+                : player.IsWalking()
+                    ? FirstPersonPlugin.HeadBobWalkStepInterval
+                    : FirstPersonPlugin.HeadBobJogStepInterval;
+            phase = Mathf.Repeat(
+                phase + Time.deltaTime * Mathf.PI / halfCycleDuration,
+                Mathf.PI * 2f);
+            float verticalAmplitude = (running
+                ? FirstPersonPlugin.HeadBobSprintVerticalAmplitude
+                : player.IsWalking()
+                    ? FirstPersonPlugin.HeadBobWalkVerticalAmplitude
+                    : FirstPersonPlugin.HeadBobJogVerticalAmplitude) *
+                MetersPerMillimeter * FirstPersonPlugin.HeadBobMultiplier;
+            float horizontalAmplitude = FirstPersonPlugin.HeadBobHorizontalAmplitude *
+                                        MetersPerMillimeter *
+                                        FirstPersonPlugin.HeadBobMultiplier;
+            float horizontal = Mathf.Sin(phase) * horizontalAmplitude * blend;
+            float vertical = Mathf.Sin(phase * 2f) * verticalAmplitude * blend;
+            ApplyMovement(camera.transform, horizontal, vertical);
         }
 
-        // Applies the current impulse after Valheim has positioned the camera.
-        internal static void Apply(GameCamera camera)
+        private static void ApplyMovement(
+            Transform transform, float horizontal, float vertical)
         {
-            if (!FirstPersonPlugin.HeadBobEnabled || !FirstPersonMode.Active ||
-                !camera || elapsed >= duration)
-            {
-                return;
-            }
-
-            elapsed = Mathf.Min(elapsed + Time.deltaTime, duration);
-            float progress = elapsed / duration;
-            float contact = Mathf.Sin(progress * Mathf.PI);
-            float rebound = Mathf.Sin(progress * Mathf.PI * 2f) * 0.15f;
-            float vertical = (-contact + rebound) * verticalAmplitude;
-            float horizontal = contact * FirstPersonPlugin.HeadBobHorizontalAmplitude *
-                               MetersPerMillimeter * horizontalDirection;
-            camera.transform.position += camera.transform.up * vertical +
-                                         camera.transform.right * horizontal;
+            Vector3 horizonPoint = transform.position + transform.forward *
+                                   FirstPersonPlugin.HeadBobHorizonDistance;
+            transform.position += transform.right * horizontal +
+                                  transform.up * vertical;
+            transform.rotation = Quaternion.LookRotation(
+                horizonPoint - transform.position, Vector3.up);
         }
 
         internal static void Reset()
         {
-            elapsed = float.PositiveInfinity;
-        }
-
-        private static bool IsGroundStep(FootStep.MotionType motionType)
-        {
-            const FootStep.MotionType groundSteps = FootStep.MotionType.Jog |
-                                                    FootStep.MotionType.Run |
-                                                    FootStep.MotionType.Sneak |
-                                                    FootStep.MotionType.Walk;
-            return (motionType & groundSteps) != 0;
+            phase = 0f;
+            blend = 0f;
         }
     }
 }

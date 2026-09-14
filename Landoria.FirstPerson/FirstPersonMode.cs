@@ -3,8 +3,8 @@ namespace Landoria.FirstPerson
     // Stores and applies the current first-person camera state.
     internal static class FirstPersonMode
     {
-        private const float DistanceThreshold = 0.001f;
-        private const float FieldOfViewOffset = 15f;
+        private const float DistanceThreshold = 0.001f; // Meters.
+        private const float FieldOfViewOffset = 15f; // Degrees.
 
         private static float vanillaMinimumDistance;
         private static bool distanceCaptured;

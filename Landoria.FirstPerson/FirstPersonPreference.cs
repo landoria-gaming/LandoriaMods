@@ -5,8 +5,8 @@ namespace Landoria.FirstPerson
     // Reads and saves the player's first-person settings.
     internal static class FirstPersonPreference
     {
-        internal const float DefaultFieldOfView = 65f;
-        internal const float MaximumFieldOfView = 85f;
+        internal const float DefaultFieldOfView = 65f; // Degrees.
+        internal const float MaximumFieldOfView = 85f; // Degrees.
 
         private static ConfigEntry<bool> enabled;
         private static ConfigEntry<float> fieldOfView;
