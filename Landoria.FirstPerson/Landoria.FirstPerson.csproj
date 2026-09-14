@@ -32,6 +32,7 @@
   <ItemGroup>
     <Compile Include="FirstPersonPatches.cs" />
     <Compile Include="FirstPersonCommand.cs" />
+    <Compile Include="FirstPersonHeadBobController.cs" />
     <Compile Include="FirstPersonHelmetLightController.cs" />
     <Compile Include="FirstPersonMode.cs" />
     <Compile Include="FirstPersonPreference.cs" />

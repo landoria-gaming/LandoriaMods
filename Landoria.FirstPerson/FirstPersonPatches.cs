@@ -33,12 +33,31 @@ namespace Landoria.FirstPerson
             if (shouldApply)
             {
                 FirstPersonViewController.Apply(__instance, player);
+                FirstPersonHeadBobController.Apply(__instance);
                 FirstPersonHelmetLightController.Apply(__instance, player);
             }
             else
             {
+                FirstPersonHeadBobController.Reset();
                 FirstPersonHelmetLightController.Restore();
             }
+        }
+    }
+
+    // Synchronizes first-person head bob with vanilla footstep effects.
+    [HarmonyPatch(typeof(FootStep), "RPC_Step")]
+    internal static class FirstPersonFootStepPatch
+    {
+        private static void Postfix(FootStep __instance, int effectIndex)
+        {
+            if (__instance.GetComponent<Player>() != Player.m_localPlayer ||
+                effectIndex < 0 || effectIndex >= __instance.m_effects.Count)
+            {
+                return;
+            }
+
+            FirstPersonHeadBobController.Trigger(
+                __instance.m_effects[effectIndex].m_motionType);
         }
     }
 
@@ -166,6 +185,7 @@ namespace Landoria.FirstPerson
     {
         private static void Prefix()
         {
+            FirstPersonHeadBobController.Reset();
             FirstPersonHelmetLightController.Restore();
             FirstPersonVisibilityController.Restore();
             FirstPersonMode.ResetSession();

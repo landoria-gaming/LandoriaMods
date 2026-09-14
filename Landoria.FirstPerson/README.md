@@ -15,6 +15,7 @@ First Person is not enabled by default, run command `/firstperson` in the chat t
 ## Highlights
 
 - Stable camera movement while walking in every direction.
+- Subtle camera movement synchronized with each footstep.
 - Stable helmet lighting while moving in any direction.
 - Client-side only: no server installation or configuration required.
 

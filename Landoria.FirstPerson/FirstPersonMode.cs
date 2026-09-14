@@ -81,6 +81,7 @@ namespace Landoria.FirstPerson
         // Restores all camera and visual state when the plugin stops.
         internal static void Reset()
         {
+            FirstPersonHeadBobController.Reset();
             FirstPersonHelmetLightController.Restore();
             FirstPersonVisibilityController.Restore();
             if (distanceCaptured && GameCamera.instance)

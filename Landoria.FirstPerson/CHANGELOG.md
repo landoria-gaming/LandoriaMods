@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Add subtle first-person camera movement synchronized with footsteps.
+
 ## 1.0.9
 
  - Bug fix: Keep Valheim’s native camera position smoothing to prevent stuttering during sideways movement.
