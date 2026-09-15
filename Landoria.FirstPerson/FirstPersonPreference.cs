@@ -10,21 +10,21 @@ namespace Landoria.FirstPerson
         internal const float MaximumFieldOfView = 120f; // Degrees.
         internal const float DefaultCombatReturnDelay = 1f; // Seconds.
         internal const float DefaultZoomReturnDelay = 3f; // Seconds.
-        internal const int DefaultHeadBobMultiplier = 2;
+        internal const int DefaultHeadBobStrength = 2;
 
         private static ConfigEntry<bool> enabled;
         private static ConfigEntry<float> fieldOfView;
         private static ConfigEntry<KeyboardShortcut> toggleShortcut;
         private static ConfigEntry<float> combatReturnDelay;
         private static ConfigEntry<float> zoomReturnDelay;
-        private static ConfigEntry<int> headBobMultiplier;
+        private static ConfigEntry<int> headBobStrength;
 
         internal static bool Enabled => enabled.Value;
         internal static float FieldOfView => fieldOfView.Value;
         internal static KeyboardShortcut ToggleShortcut => toggleShortcut.Value;
         internal static float CombatReturnDelay => combatReturnDelay.Value;
         internal static float ZoomReturnDelay => zoomReturnDelay.Value;
-        internal static int HeadBobMultiplier => headBobMultiplier.Value;
+        internal static int HeadBobStrength => headBobStrength.Value;
 
         // Creates the saved configuration entries used by the mod.
         internal static void Initialize(ConfigFile config)
@@ -55,10 +55,10 @@ namespace Landoria.FirstPerson
                 "Transitions", "ZoomReturnDelay", DefaultZoomReturnDelay,
                 "Seconds to remain in third person after the last camera zoom. " +
                 "Set to 0 to disable temporary third person for zoom.");
-            headBobMultiplier = config.Bind(
-                "Camera", "HeadBobMultiplier", DefaultHeadBobMultiplier,
+            headBobStrength = config.Bind(
+                "Camera", "HeadBobStrength", DefaultHeadBobStrength,
                 new ConfigDescription(
-                    "First-person head bob multiplier. Set to 0 to disable head bob.",
+                    "First-person head bob strength. Set to 0 to disable head bob.",
                     new AcceptableValueRange<int>(0, 3)));
             SetFieldOfView(fieldOfView.Value);
         }

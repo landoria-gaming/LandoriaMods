@@ -32,14 +32,15 @@ Enjoy a smooth first-person view that follows where you look.
 
 The file `Landoria.FirstPerson.cfg` is created automatically in the config folder of the bepinex current profile containing the following settings:
 
-| Section | Setting | Default | Range | Description |
-|---|---|---|---|---|
-| `Controls` | `ToggleShortcut` | `F6` | Unity `KeyCode` | First-person toggle shortcut. May be changed to `Mouse2` or `Mouse3` for example |
-| `Transitions` | `CombatReturnDelay` | `1` | `0` or higher | Delay after combat ends; `0` disables temporary third person for combat |
-| `Transitions` | `ZoomReturnDelay` | `3` | `0` or higher | Delay after camera zoom; `0` disables temporary third person for zoom |
-| `Camera` | `HeadBobMultiplier` | `2` | `0` to `3` | First-person head bob strength; `0` disables it |
-| `Camera` | `FirstPersonEnabled` | `false` | `true` or `false` | Saved first-person state. Normally changed using F6. |
-| `Camera` | `FieldOfView` | `65` | `65` to `120` | Saved camera FOV. Normally changed using /fov command in-game. |
+| Setting | Default | Description |
+|---|---|---|
+| `ToggleShortcut` | `F6` | First-person toggle shortcut. May be changed to `Mouse2` or `Mouse3` for example |
+| `CombatReturnDelay` | `1` | Return to first person delay in seconds after combat ends; `0` disables temporary third person for combat |
+| `ZoomReturnDelay` | `3` | Return to first person delay in seconds after camera zoom; `0` disables temporary third person for zoom |
+| `HeadBobStrength` | `2` | First-person head bob strength; `0` disables it |
+| `FirstPersonEnabled` | `false` | Saved first-person state. Normally changed using F6. |
+| `FieldOfView` | `65` | Saved camera FOV. Normally changed using /fov command in-game. |
+
 ## Valheim compatibility
 
 Current release: 1.0.x

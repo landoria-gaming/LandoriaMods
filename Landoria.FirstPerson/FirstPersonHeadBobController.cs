@@ -23,7 +23,7 @@ namespace Landoria.FirstPerson
         // Applies a continuous cycle after Valheim has positioned the camera.
         internal static void Apply(GameCamera camera, Player player)
         {
-            if (FirstPersonPreference.HeadBobMultiplier <= 0 || !FirstPersonMode.Active ||
+            if (FirstPersonPreference.HeadBobStrength <= 0 || !FirstPersonMode.Active ||
                 !camera || !player)
             {
                 return;
@@ -47,10 +47,10 @@ namespace Landoria.FirstPerson
                 : player.IsWalking()
                     ? WalkVerticalAmplitude
                     : JogVerticalAmplitude) *
-                MetersPerMillimeter * FirstPersonPreference.HeadBobMultiplier;
+                MetersPerMillimeter * FirstPersonPreference.HeadBobStrength;
             float horizontalAmplitude = HorizontalAmplitude *
                                         MetersPerMillimeter *
-                                        FirstPersonPreference.HeadBobMultiplier;
+                                        FirstPersonPreference.HeadBobStrength;
             float horizontal = Mathf.Sin(phase) * horizontalAmplitude * blend;
             float vertical = Mathf.Sin(phase * 2f) * verticalAmplitude * blend;
             ApplyMovement(camera.transform, horizontal, vertical);
