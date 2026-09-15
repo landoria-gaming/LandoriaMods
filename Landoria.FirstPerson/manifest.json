@@ -1,6 +1,6 @@
 {
   "name": "FirstPerson",
-  "version_number": "1.0.9",
+  "version_number": "1.0.10-draft",
   "website_url": "https://github.com/landoria-gaming/LandoriaMods/tree/main/Landoria.FirstPerson",
   "description": "Adds first-person view and FOV control to Valheim.",
   "dependencies": [
