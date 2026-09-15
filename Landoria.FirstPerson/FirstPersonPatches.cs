@@ -22,13 +22,15 @@ namespace Landoria.FirstPerson
     [HarmonyPatch(typeof(GameCamera), "UpdateCamera")]
     internal static class FirstPersonCameraUpdatePatch
     {
-        private static void Postfix(GameCamera __instance, float ___m_distance)
+        private static void Postfix(
+            GameCamera __instance, Camera ___m_camera, float ___m_distance)
         {
             Player player = Player.m_localPlayer;
             bool shouldApply = FirstPersonMode.ShouldActivate(
                 player, GameCamera.InFreeFly(), ___m_distance);
             FirstPersonMode.SetActive(shouldApply);
             FirstPersonMode.ApplyConfiguredFieldOfView(__instance);
+            FirstPersonMode.ApplyNearClipPlane(___m_camera);
             FirstPersonVisibilityController.SetHidden(player, shouldApply);
             if (shouldApply)
             {
@@ -41,6 +43,29 @@ namespace Landoria.FirstPerson
                 FirstPersonHeadBobController.Reset();
                 FirstPersonHelmetLightController.Restore();
             }
+        }
+    }
+
+    // Keeps movement relative to the camera without turning the body toward strafing.
+    [HarmonyPatch(typeof(Player), "AlwaysRotateCamera")]
+    internal static class FirstPersonPlayerRotationPatch
+    {
+        private static void Postfix(Player __instance, ref bool __result)
+        {
+            if (FirstPersonMode.Active && __instance == Player.m_localPlayer)
+            {
+                __result = true;
+            }
+        }
+    }
+
+    // Updates vegetation materials on objects loaded after first person activates.
+    [HarmonyPatch(typeof(ZNetView), "Awake")]
+    internal static class FirstPersonLoadedObjectPatch
+    {
+        private static void Postfix(ZNetView __instance)
+        {
+            FirstPersonVegetationController.Apply(__instance.gameObject);
         }
     }
 
@@ -168,9 +193,6 @@ namespace Landoria.FirstPerson
     {
         private static void Prefix()
         {
-            FirstPersonHeadBobController.Reset();
-            FirstPersonHelmetLightController.Restore();
-            FirstPersonVisibilityController.Restore();
             FirstPersonMode.ResetSession();
         }
     }

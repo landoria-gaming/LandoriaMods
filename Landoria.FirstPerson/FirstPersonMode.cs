@@ -36,7 +36,7 @@ namespace Landoria.FirstPerson
             Enabled = enabled;
             if (!enabled)
             {
-                Active = false;
+                SetActive(false);
             }
             Apply(GameCamera.instance);
             ApplyConfiguredFieldOfView(GameCamera.instance);
@@ -45,7 +45,20 @@ namespace Landoria.FirstPerson
         // Records whether the camera is currently in first person.
         internal static void SetActive(bool active)
         {
+            if (Active == active)
+            {
+                return;
+            }
+
             Active = active;
+            if (active)
+            {
+                FirstPersonVegetationController.Apply();
+            }
+            else
+            {
+                FirstPersonVegetationController.Restore();
+            }
         }
 
         // Checks whether first person should be active for this frame.
@@ -72,25 +85,33 @@ namespace Landoria.FirstPerson
             SetFieldOfView(camera, FirstPersonPreference.FieldOfView + offset);
         }
 
+        // Reduces nearby geometry clipping while first person is active.
+        internal static void ApplyNearClipPlane(UnityEngine.Camera camera)
+        {
+            if (Active && camera)
+            {
+                camera.nearClipPlane = FirstPersonPlugin.FirstPersonNearClipPlane;
+            }
+        }
+
         // Disables first person when leaving the current game session.
         internal static void ResetSession()
         {
             SetEnabled(false);
+            FirstPersonHeadBobController.Reset();
+            FirstPersonHelmetLightController.Restore();
+            FirstPersonVisibilityController.Restore();
         }
 
         // Restores all camera and visual state when the plugin stops.
         internal static void Reset()
         {
-            FirstPersonHeadBobController.Reset();
-            FirstPersonHelmetLightController.Restore();
-            FirstPersonVisibilityController.Restore();
+            ResetSession();
             if (distanceCaptured && GameCamera.instance)
             {
                 GameCamera.instance.m_minDistance = vanillaMinimumDistance;
             }
 
-            ResetSession();
-            Active = false;
             distanceCaptured = false;
         }
     }

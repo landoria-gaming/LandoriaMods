@@ -22,8 +22,9 @@ namespace Landoria.FirstPerson
                 player.transform.rotation = Quaternion.LookRotation(bodyDirection, Vector3.up);
             }
 
-            // Keep the position produced by GameCamera so its native player-motion
-            // smoothing is not replaced with the animated eye transform.
+            // Preserve Valheim's smoothed base position, then apply view offsets.
+            camera.transform.position -= lookDirection *
+                                         FirstPersonPlugin.FirstPersonBackwardOffset;
             camera.transform.rotation = cameraRotation;
         }
     }

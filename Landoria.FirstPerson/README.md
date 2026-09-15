@@ -15,6 +15,9 @@ First Person is not enabled by default, run command `/firstperson` in the chat t
 ## Highlights
 
 - Stable camera movement while walking in every direction.
+- Camera positioned 40 centimeters behind the vanilla first-person eye point.
+- Camera keeps the vanilla first-person eye height.
+- Nearby vegetation remains visible in first person.
 - Continuous figure-eight camera movement matched to each vanilla movement pace.
 - Stable helmet lighting while moving in any direction.
 - Client-side only: no server installation or configuration required.

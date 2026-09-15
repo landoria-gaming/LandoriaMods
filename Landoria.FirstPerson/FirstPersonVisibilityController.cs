@@ -45,15 +45,6 @@ namespace Landoria.FirstPerson
             }
         }
 
-        // Hides any visuals that were added after the last update.
-        internal static void Refresh(Player player)
-        {
-            if (player && player == hiddenPlayer)
-            {
-                HideCurrentVisuals();
-            }
-        }
-
         // Restores all renderers and animator settings changed by the mod.
         internal static void Restore()
         {
