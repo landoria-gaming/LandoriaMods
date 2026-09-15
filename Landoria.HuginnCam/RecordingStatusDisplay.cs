@@ -3,10 +3,12 @@ using UnityEngine;
 
 namespace Landoria.HuginnCam
 {
+    // Manages the recording status label displayed below the minimap.
     internal sealed class RecordingStatusDisplay
     {
         private TextMeshProUGUI _label;
 
+        // Displays the supplied recording status message.
         internal void Show(string message)
         {
             Attach(Minimap.instance);
@@ -17,6 +19,7 @@ namespace Landoria.HuginnCam
             }
         }
 
+        // Hides the recording status label without destroying it.
         internal void Hide()
         {
             if (_label != null)
@@ -25,6 +28,7 @@ namespace Landoria.HuginnCam
             }
         }
 
+        // Destroys the recording status label and releases its reference.
         internal void Dispose()
         {
             if (_label != null)
@@ -34,6 +38,7 @@ namespace Landoria.HuginnCam
             }
         }
 
+        // Creates and attaches the status label to the active minimap.
         private void Attach(Minimap minimap)
         {
             if (_label != null || minimap?.m_mapImageSmall == null || minimap.m_biomeNameSmall == null)
@@ -48,6 +53,7 @@ namespace Landoria.HuginnCam
             ConfigureLabel(target.AddComponent<TextMeshProUGUI>(), minimap.m_biomeNameSmall);
         }
 
+        // Positions the status label immediately below the small map.
         private static void ConfigurePosition(RectTransform rect, RectTransform mapRect)
         {
             rect.anchorMin = new Vector2(0.5f, 0.5f);
@@ -58,6 +64,7 @@ namespace Landoria.HuginnCam
             rect.SetAsLastSibling();
         }
 
+        // Configures the status label to match Valheim's minimap typography.
         private void ConfigureLabel(TextMeshProUGUI label, TMP_Text reference)
         {
             _label = label;

@@ -1,6 +1,6 @@
 {
   "name": "HuginnCam",
-  "version_number": "0.1.0-draft",
+  "version_number": "1.0.0",
   "website_url": "https://github.com/landoria-gaming/LandoriaMods/tree/main/Landoria.HuginnCam",
   "description": "Records gameplay at its native resolution and up to 60 FPS with audio.",
   "dependencies": [

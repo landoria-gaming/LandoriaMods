@@ -2,6 +2,10 @@
 /*.user
 /**/bin/
 /**/obj/
+/**/*.obj
+/**/Native/x64/
+/**/Native/Landoria.*/
+/**/x64/
 dist/
 /artifacts/
 /scripts/deploy/logs/
