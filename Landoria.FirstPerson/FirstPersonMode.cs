@@ -3,6 +3,7 @@ namespace Landoria.FirstPerson
     // Stores and applies the current first-person camera state.
     internal static class FirstPersonMode
     {
+        private const float NearClipPlane = 0.09f; // Meters.
         private const float DistanceThreshold = 0.001f; // Meters.
 
         private static float vanillaMinimumDistance;
@@ -99,7 +100,7 @@ namespace Landoria.FirstPerson
         {
             if (Active && camera)
             {
-                camera.nearClipPlane = FirstPersonPlugin.FirstPersonNearClipPlane;
+                camera.nearClipPlane = NearClipPlane;
             }
         }
 

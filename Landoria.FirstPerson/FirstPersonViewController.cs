@@ -5,6 +5,7 @@ namespace Landoria.FirstPerson
     // Controls the local player's view while first person is active.
     internal static class FirstPersonViewController
     {
+        private const float BackwardOffset = 0.4f; // Meters.
         // Aligns the player with the camera while keeping Valheim's camera position.
         internal static void Apply(
             GameCamera camera, Player player, float offsetWeight, bool alignPlayer)
@@ -26,7 +27,7 @@ namespace Landoria.FirstPerson
 
             // Preserve Valheim's smoothed base position, then apply view offsets.
             camera.transform.position -= lookDirection *
-                                         FirstPersonPlugin.FirstPersonBackwardOffset *
+                                         BackwardOffset *
                                          offsetWeight;
             camera.transform.rotation = cameraRotation;
         }

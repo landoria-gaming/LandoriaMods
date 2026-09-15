@@ -1,3 +1,4 @@
+using BepInEx.Configuration;
 using UnityEngine;
 
 namespace Landoria.FirstPerson
@@ -5,8 +6,6 @@ namespace Landoria.FirstPerson
     // Toggles first person while preserving the previous camera distance.
     internal static class FirstPersonShortcut
     {
-        private const float CombatReturnDelay = 0.5f;
-        private const float ZoomReturnDelay = 3f;
         private const float TransitionDuration = 0.2f;
 
         private static float previousDistance;
@@ -30,7 +29,7 @@ namespace Landoria.FirstPerson
             RememberDistance(cameraDistance);
             if (!CanToggle()) return;
 
-            if (ZInput.GetKeyDown(KeyCode.F6))
+            if (IsToggleShortcutDown())
             {
                 ToggleShortcut(camera, ref cameraDistance);
                 return;
@@ -65,7 +64,9 @@ namespace Landoria.FirstPerson
 
         private static void UpdateActionReturn(GameCamera camera, ref float cameraDistance)
         {
-            bool actionActive = IsCombatActionActive();
+            float returnDelay = Mathf.Max(
+                0f, FirstPersonPreference.CombatReturnDelay);
+            bool actionActive = returnDelay > 0f && IsCombatActionActive();
             bool isFirstPerson = FirstPersonMode.Enabled &&
                                  (FirstPersonMode.IsFirstPersonDistance(cameraDistance) ||
                                   IsTransitioningToFirstPerson());
@@ -78,7 +79,8 @@ namespace Landoria.FirstPerson
                 }
                 temporarilyThirdPerson = true;
                 firstPersonReturnTime = Mathf.Max(
-                    firstPersonReturnTime, Time.unscaledTime + CombatReturnDelay);
+                    firstPersonReturnTime,
+                    Time.unscaledTime + returnDelay);
             }
             else if (temporarilyThirdPerson && Time.unscaledTime >= firstPersonReturnTime)
             {
@@ -108,6 +110,14 @@ namespace Landoria.FirstPerson
             awaitingDistanceObservation = false;
             if (!changed) return;
 
+            float returnDelay = Mathf.Max(
+                0f, FirstPersonPreference.ZoomReturnDelay);
+            if (returnDelay <= 0f && !temporarilyThirdPerson)
+            {
+                cameraDistance = expectedCameraDistance;
+                return;
+            }
+
             float maximumDistance = Player.m_localPlayer.GetControlledShip() != null
                 ? camera.m_maxDistanceBoat
                 : camera.m_maxDistance;
@@ -119,9 +129,12 @@ namespace Landoria.FirstPerson
             hasPreviousDistance = true;
             transitioning = false;
             transitionOffsetWeight = 0f;
-            temporarilyThirdPerson = true;
-            firstPersonReturnTime = Mathf.Max(
-                firstPersonReturnTime, Time.unscaledTime + ZoomReturnDelay);
+            if (returnDelay > 0f)
+            {
+                temporarilyThirdPerson = true;
+                firstPersonReturnTime = Mathf.Max(
+                    firstPersonReturnTime, Time.unscaledTime + returnDelay);
+            }
         }
 
         internal static void KeepTemporaryThirdPerson(ref float cameraDistance)
@@ -219,6 +232,26 @@ namespace Landoria.FirstPerson
                    !StoreGui.IsVisible() && !Minimap.IsOpen() &&
                    !Hud.IsPieceSelectionVisible() && !Hud.InRadial() &&
                    (Chat.instance == null || !Chat.instance.HasFocus());
+        }
+
+        private static bool IsToggleShortcutDown()
+        {
+            KeyboardShortcut shortcut = FirstPersonPreference.ToggleShortcut;
+            if (shortcut.MainKey == KeyCode.None ||
+                !ZInput.GetKeyDown(shortcut.MainKey))
+            {
+                return false;
+            }
+
+            foreach (KeyCode modifier in shortcut.Modifiers)
+            {
+                if (!ZInput.GetKey(modifier))
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         private static void ShowState(bool enabled)

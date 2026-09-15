@@ -2,13 +2,16 @@
 
 Enjoy a smooth first-person view that follows where you look.
 
-Zoom all the way in to enter first person, then scroll back to return to third
-person. Your body is hidden only from your own first-person view, while items
-held in either hand remain visible without changing how other players see you.
+Press F6 to enable or disable first person. The shortcut is configurable in the
+BepInEx configuration and defaults to F6. First person is disabled by default,
+and your choice persists across characters, worlds, servers, and game restarts.
+Your body is hidden only from your own first-person view, while held items remain
+visible without changing how other players see you.
 
-Press F6 to enable or disable first person. While enabled, the camera returns to
-first person outside combat. Use the configured zoom controls during a temporary
-third-person view to choose its distance.
+While enabled, attacks and blocks temporarily use third person, then return to
+first person after the configured delay. Any configured camera zoom also uses
+third person for a configurable delay and sets the distance used by temporary
+third-person views. Zoom controls never enter first person.
 
 ## Video demo
 
@@ -18,22 +21,31 @@ third-person view to choose its distance.
 
 - Smooth first-person movement in every direction.
 - Smooth camera transitions between first and third person.
-- Temporarily returns to third person until 0.5 seconds after a primary attack, secondary attack, or block ends.
-- Temporarily returns to third person for three seconds after any configured camera zoom and uses it to set that view's distance.
-- Zoom controls never enter first person; only F6 and the automatic return can do so.
+- Uses third person during primary attacks, secondary attacks, blocks, and camera zooms.
 - Temporary third-person zoom stops at Valheim's native minimum camera distance.
 - Nearby vegetation and helmet lighting remain stable.
 - Adjustable FOV up to 120 degrees.
 - Client-side only: no server installation or configuration required.
 
-## Commands
+## Controls and commands
 
-| Command | Action |
+| Control | Action |
 |---|---|
-| `F6` | Enable or disable automatic first-person view |
+| `F6` (configurable) | Enable or disable automatic first-person view |
 | `fov <degrees>` | Set the saved FOV, up to 120 |
 | `fov` | Show the current FOV |
 | `fov reset` | Restore the default FOV of 65 |
+
+## Configuration
+
+| Section | Setting | Default | Range | Description |
+|---|---|---|---|---|
+| `Camera` | `FirstPersonEnabled` | `false` | `true` or `false` | Saved first-person state |
+| `Camera` | `FieldOfView` | `65` | `65` to `120` | Saved camera FOV |
+| `Camera` | `HeadBobMultiplier` | `2` | `0` to `3` | First-person head bob strength; `0` disables it |
+| `Controls` | `ToggleShortcut` | `F6` | Unity `KeyCode` | First-person toggle shortcut |
+| `Transitions` | `CombatReturnDelay` | `1` | `0` or higher | Delay after combat ends; `0` disables temporary third person for combat |
+| `Transitions` | `ZoomReturnDelay` | `3` | `0` or higher | Delay after camera zoom; `0` disables temporary third person for zoom |
 
 ## Valheim compatibility
 

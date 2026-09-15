@@ -168,16 +168,20 @@ namespace Landoria.FirstPerson
             if (!shouldReset)
             {
                 bool parsed = args.TryParameterFloat(1, out float requestedFieldOfView);
-                bool exceedsMaximum = __instance.Command == "fov" && args.Length > 1 &&
-                                      parsed && requestedFieldOfView >
-                                      FirstPersonPreference.MaximumFieldOfView;
-                if (!exceedsMaximum)
+                bool outsideSupportedRange = __instance.Command == "fov" &&
+                                             args.Length > 1 && parsed &&
+                                             (requestedFieldOfView <
+                                              FirstPersonPreference.MinimumFieldOfView ||
+                                              requestedFieldOfView >
+                                              FirstPersonPreference.MaximumFieldOfView);
+                if (!outsideSupportedRange)
                 {
                     return true;
                 }
 
                 args.Context?.AddString(
-                    $"FOV must not exceed {FirstPersonPreference.MaximumFieldOfView}. " +
+                    $"FOV must be between {FirstPersonPreference.MinimumFieldOfView} " +
+                    $"and {FirstPersonPreference.MaximumFieldOfView}. " +
                     "The current FOV was not changed.");
                 return false;
             }
@@ -193,7 +197,9 @@ namespace Landoria.FirstPerson
         {
             bool parsed = args.TryParameterFloat(1, out float fieldOfView);
             bool shouldSave = __instance.Command == "fov" && args.Length > 1 &&
-                              parsed && fieldOfView > 5f && fieldOfView <=
+                              parsed && fieldOfView >=
+                              FirstPersonPreference.MinimumFieldOfView &&
+                              fieldOfView <=
                               FirstPersonPreference.MaximumFieldOfView;
             if (shouldSave)
             {
