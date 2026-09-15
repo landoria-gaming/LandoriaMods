@@ -1,31 +1,12 @@
 # Changelog
 
-## Unreleased
+## 1.0.10
 
-- Add continuous figure-eight first-person camera movement matched to vanilla movement paces.
-- Stop first-person camera rotation from accelerating while the game menu is open.
-- Add F6 to enable automatic first-person view and restore the saved third-person distance when disabled.
-- Show First Person or Third Person when F6 changes the camera mode.
-- Make the first-person shortcut configurable, with F6 as the default.
-- Add shortcut examples to the generated BepInEx configuration comments.
-- Add the Unity KeyCode reference to the generated shortcut comments.
-- Show and enforce the supported FOV range in the BepInEx configuration.
-- Set the minimum supported FOV to 65.
-- Allow the first-person shortcut while movement or other unrelated keys are held.
-- Let any configured camera zoom choose the temporary third-person combat distance.
-- Temporarily switch to third person after any configured camera zoom.
-- Return to first person three seconds after the last configured camera zoom.
-- Prevent zoom-in controls from entering first person.
-- Limit temporary zoom-in to Valheim's native third-person minimum distance.
-- Apply temporary zoom limits before camera positioning to prevent a close-view flash.
-- Use a 0.09-metre near clip plane in first person.
-- Make the combat and zoom return delays configurable, defaulting to one and three seconds.
-- Allow zero return delay to disable temporary third person for combat or zoom.
-- Make the head bob multiplier configurable from zero to three, defaulting to two.
-- Smooth transitions between first- and third-person camera distances.
-- Include the final backward first-person offset in camera transitions.
-- Make camera transition acceleration and deceleration more progressive.
-- Blend Valheim's native camera offsets to remove the final first-person transition stutter.
+- remove /firstperson command, replaced by F6 by default
+- add configurable settings
+- auto switch to third person during combat
+- added slight head bob
+- bug fixes
 
 ## 1.0.9
 
