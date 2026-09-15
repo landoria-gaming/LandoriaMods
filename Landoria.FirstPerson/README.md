@@ -14,7 +14,7 @@ Enjoy a smooth first-person view that follows where you look.
 - Customize your field of view (FOV) in-game from 65 to 120.
 - Client-side mod; no server installation needed.
 
-## Controls and commands
+## Controls
 
 | Control | Action |
 |---|---|
@@ -30,17 +30,16 @@ Enjoy a smooth first-person view that follows where you look.
 
 ## BepInEx Configuration
 
-The file `Landoria.FirstPerson.cfg` is created automatically in the config folder of the bepinex current profile
+The file `Landoria.FirstPerson.cfg` is created automatically in the config folder of the bepinex current profile containing the following settings:
 
 | Section | Setting | Default | Range | Description |
 |---|---|---|---|---|
-| `Camera` | `FirstPersonEnabled` | `false` | `true` or `false` | Saved first-person state |
-| `Camera` | `FieldOfView` | `65` | `65` to `120` | Saved camera FOV |
-| `Camera` | `HeadBobMultiplier` | `2` | `0` to `3` | First-person head bob strength; `0` disables it |
 | `Controls` | `ToggleShortcut` | `F6` | Unity `KeyCode` | First-person toggle shortcut. May be changed to `Mouse2` or `Mouse3` for example |
 | `Transitions` | `CombatReturnDelay` | `1` | `0` or higher | Delay after combat ends; `0` disables temporary third person for combat |
 | `Transitions` | `ZoomReturnDelay` | `3` | `0` or higher | Delay after camera zoom; `0` disables temporary third person for zoom |
-
+| `Camera` | `HeadBobMultiplier` | `2` | `0` to `3` | First-person head bob strength; `0` disables it |
+| `Camera` | `FirstPersonEnabled` | `false` | `true` or `false` | Saved first-person state. Normally changed using F6. |
+| `Camera` | `FieldOfView` | `65` | `65` to `120` | Saved camera FOV. Normally changed using /fov command in-game. |
 ## Valheim compatibility
 
 Current release: 1.0.x
