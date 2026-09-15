@@ -3,17 +3,6 @@ using UnityEngine;
 
 namespace Landoria.FreeFly
 {
-    [HarmonyPatch(typeof(Terminal), "InitTerminal")]
-    // Registers commands when Valheim creates its terminal.
-    internal static class FreeFlyCommandRegistrationPatch
-    {
-        // Adds the commands after terminal setup.
-        private static void Postfix()
-        {
-            FreeFlyCommands.Register();
-        }
-    }
-
     [HarmonyPatch(typeof(GameCamera), nameof(GameCamera.ToggleFreeFly))]
     // Prepares camera values when free fly starts.
     internal static class FreeFlyInitializationPatch
@@ -59,15 +48,33 @@ namespace Landoria.FreeFly
         }
     }
 
+    [HarmonyPatch(typeof(ZInput), nameof(ZInput.GetMouseScrollWheel))]
+    // Disables mouse-wheel speed changes while free fly is active.
+    internal static class FreeFlyMouseWheelPatch
+    {
+        // Returns no scrolling while Valheim updates free fly.
+        private static bool Prefix(ref float __result)
+        {
+            if (!GameCamera.InFreeFly())
+            {
+                return true;
+            }
+
+            __result = 0f;
+            return false;
+        }
+    }
+
     [HarmonyPatch(typeof(GameCamera), "UpdateFreeFly")]
     // Limits and transitions free-fly movement.
     internal static class FreeFlyMovementPatch
     {
         // Saves the frame origin and clamps speed.
         private static void Prefix(
-            GameCamera __instance, ref float ___m_freeFlySpeed, out Vector3 __state)
+            GameCamera __instance, float dt,
+            ref float ___m_freeFlySpeed, out Vector3 __state)
         {
-            ___m_freeFlySpeed = FreeFlyController.ClampSpeed(___m_freeFlySpeed);
+            FreeFlyController.UpdateSpeed(ref ___m_freeFlySpeed, dt);
             __state = __instance.transform.position;
         }
 

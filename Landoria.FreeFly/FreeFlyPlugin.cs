@@ -10,7 +10,7 @@ namespace Landoria.FreeFly
         internal const string PluginGuid = "Landoria.FreeFly";
         internal const string PluginName = "Landoria.FreeFly";
         internal const string PluginVersion = "1.0.0";
-        internal static ModLog ModLogger { get; private set; }
+        private static ModLog ModLogger { get; set; }
 
         // Loads settings, commands, and patches.
         private void Awake()
@@ -31,7 +31,7 @@ namespace Landoria.FreeFly
         // Restores game state when the mod unloads.
         private void OnDestroy()
         {
-            FreeFlyController.DisableImmediately();
+            FreeFlyController.CompleteDisable();
             FreeFlyController.Reset();
             FreeFlyInterfaceController.Restore();
             ModLogger?.LogInfo($"{PluginName} {PluginVersion} is unloaded.");

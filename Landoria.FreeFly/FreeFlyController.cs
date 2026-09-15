@@ -6,10 +6,11 @@ namespace Landoria.FreeFly
     internal static class FreeFlyController
     {
         internal const float DefaultSmoothness = 0.25f;
-        internal const float MaximumDistance = 20f;
+        internal const float MaximumDistance = 50f;
         internal const float MaximumSpeed = 10f;
         private const float MinimumSpeed = 2f;
         private const float DefaultSpeed = 4f;
+        private const float SpeedTransitionSmoothTime = 0.35f; // Seconds.
         internal const float CollisionRadius = 1f;
         internal const float CollisionClearance = 0.05f;
         private const float InitialForwardDistance = 3f;
@@ -17,6 +18,7 @@ namespace Landoria.FreeFly
         private const float InitialSearchStep = 15f; // Degrees.
         private const int InitialSearchPositions = 24;
         private static bool smoothnessInitialized;
+        private static float speedTransitionVelocity;
 
         // Keeps speed within the allowed range.
         internal static float ClampSpeed(float speed)
@@ -28,6 +30,18 @@ namespace Landoria.FreeFly
         internal static void SetDefaultSpeed(ref float speed)
         {
             speed = DefaultSpeed;
+            speedTransitionVelocity = 0f;
+        }
+
+        // Smoothly boosts speed while either Shift key is held.
+        internal static void UpdateSpeed(ref float speed, float deltaTime)
+        {
+            bool boosted = ZInput.GetKey(KeyCode.LeftShift) ||
+                           ZInput.GetKey(KeyCode.RightShift);
+            float target = boosted ? MaximumSpeed : DefaultSpeed;
+            speed = Mathf.SmoothDamp(
+                speed, target, ref speedTransitionVelocity,
+                SpeedTransitionSmoothTime, Mathf.Infinity, deltaTime);
         }
 
         // Limits movement speed for the current frame.
@@ -93,6 +107,7 @@ namespace Landoria.FreeFly
         internal static void Reset()
         {
             smoothnessInitialized = false;
+            speedTransitionVelocity = 0f;
         }
 
         // Matches Valheim's angles to the camera direction.
@@ -174,12 +189,6 @@ namespace Landoria.FreeFly
             {
                 GameCamera.instance.ToggleFreeFly();
             }
-        }
-
-        // Turns free fly off without a transition.
-        internal static void DisableImmediately()
-        {
-            CompleteDisable();
         }
 
         // Keeps the camera close to the player.

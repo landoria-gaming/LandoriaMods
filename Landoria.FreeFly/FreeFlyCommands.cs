@@ -7,12 +7,10 @@ namespace Landoria.FreeFly
     // Registers and handles free-fly console commands.
     internal static class FreeFlyCommands
     {
-        private static Terminal.ConsoleCommand _smoothCommand;
-
         // Registers the smoothing command.
         internal static void Register()
         {
-            _smoothCommand = new Terminal.ConsoleCommand(
+            new Terminal.ConsoleCommand(
                 "ffsmooth",
                 "[0-1] sets native free-camera smoothing.",
                 SetSmoothness,

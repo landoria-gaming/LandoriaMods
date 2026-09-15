@@ -6,10 +6,9 @@ namespace Landoria.FreeFly
     internal static class FreeFlyTransitionController
     {
         private const float EnterDuration = 1f; // Seconds.
-        private const float ExitDuration = 2f; // Seconds.
-        private const float TurnEnd = 0.35f;
-        private const float ApproachEnd = 0.85f;
-        private const float FinalTurnStart = 0.7f;
+        private const float ExitDuration = 3f; // Seconds.
+        private const float InitialTurnDuration = 1.5f; // Seconds.
+        private const float FinalTurnDuration = 1f; // Seconds.
 
         private static Vector3 startPosition;
         private static Quaternion startRotation;
@@ -19,7 +18,6 @@ namespace Landoria.FreeFly
         private static Quaternion targetRotation;
         private static Vector3 exitLookTarget;
         private static float elapsed;
-        private static float approachStart;
         private static bool entering;
         private static bool exiting;
 
@@ -56,7 +54,6 @@ namespace Landoria.FreeFly
                 ? player.m_eye.position
                 : camera.transform.position + camera.transform.forward;
             elapsed = 0f;
-            approachStart = -1f;
             entering = false;
             exiting = true;
         }
@@ -82,7 +79,7 @@ namespace Landoria.FreeFly
             }
 
             elapsed += deltaTime;
-            ApplyExitTransform(camera, Mathf.Clamp01(elapsed / ExitDuration));
+            ApplyExitTransform(camera, Mathf.Min(elapsed, ExitDuration));
             exiting = elapsed < ExitDuration;
             if (!exiting)
             {
@@ -102,48 +99,21 @@ namespace Landoria.FreeFly
         }
 
         // Blends the three exit movements together.
-        private static void ApplyExitTransform(GameCamera camera, float progress)
+        private static void ApplyExitTransform(GameCamera camera, float time)
         {
-            float initialTurn = Ease(Mathf.Clamp01(progress / TurnEnd));
-            Quaternion facingStart = LookAt(startPosition, startRotation);
-            Quaternion playerFacing = Quaternion.Slerp(
-                startRotation, facingStart, initialTurn);
-            if (approachStart < 0f && IsPlayerInView(camera, playerFacing))
-            {
-                approachStart = progress;
-            }
-
-            float approach = GetApproachProgress(progress);
+            float progress = time / ExitDuration;
             Vector3 position = Vector3.Lerp(
-                startPosition, targetPosition, Ease(approach));
-            Quaternion facing = LookAt(position, playerFacing);
-            Quaternion approachFacing = Quaternion.Slerp(
-                playerFacing, facing, Ease(approach));
-            float finalTurn = Mathf.Clamp01(
-                (progress - FinalTurnStart) / (1f - FinalTurnStart));
+                startPosition, targetPosition, Ease(progress));
+            Quaternion facing = LookAt(position, startRotation);
+            float initialTurn = Ease(Mathf.Clamp01(time / InitialTurnDuration));
+            Quaternion playerFacing = Quaternion.Slerp(
+                startRotation, facing, initialTurn);
+            float finalTurnStart = ExitDuration - FinalTurnDuration;
+            float finalTurn = Ease(Mathf.Clamp01(
+                (time - finalTurnStart) / FinalTurnDuration));
             camera.transform.SetPositionAndRotation(
                 position,
-                Quaternion.Slerp(approachFacing, targetRotation, Ease(finalTurn)));
-        }
-
-        // Starts and advances the approach after the player becomes visible.
-        private static float GetApproachProgress(float progress)
-        {
-            if (approachStart < 0f)
-            {
-                return 0f;
-            }
-
-            float duration = Mathf.Max(0.01f, ApproachEnd - approachStart);
-            return Mathf.Clamp01((progress - approachStart) / duration);
-        }
-
-        // Checks whether the player is inside the camera view angle.
-        private static bool IsPlayerInView(GameCamera camera, Quaternion rotation)
-        {
-            Vector3 direction = (exitLookTarget - startPosition).normalized;
-            float angle = Vector3.Angle(rotation * Vector3.forward, direction);
-            return angle <= camera.m_fov * 0.5f;
+                Quaternion.Slerp(playerFacing, targetRotation, finalTurn));
         }
 
         // Returns a rotation facing the player.
