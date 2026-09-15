@@ -1,6 +1,6 @@
 {
   "name": "FreeFly",
-  "version_number": "1.0.0-draft",
+  "version_number": "1.0.0",
   "website_url": "https://github.com/landoria-gaming/LandoriaMods/tree/main/Landoria.FreeFly",
   "description": "Gives players a free camera for exploring, taking screenshots, and filming around their character.",
   "dependencies": [
