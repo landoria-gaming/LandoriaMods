@@ -18,7 +18,7 @@ Thunderstore. A mod may also include a changelog.
 | [GentleDeath](Landoria.GentleDeath/) | Client-only | Keeps equipable gear on the player after death and moves other items to the tombstone. |
 | [GetMyTrophyBack](Landoria.GetMyTrophyBack/) | Both | Returns a mounted boss trophy after selecting or reusing its guardian power. |
 | [HammerFreedom](Landoria.HammerFreedom/) | Both | Adds server-authorized creative freedoms to Hammer worlds. |
-| [FreeFlyCommand](Landoria.FreeFlyCommand/) | Both | Allows server-authorized native free-camera commands within 50 metres of the player. |
+| [FreeFly](Landoria.FreeFly/) | Client | Adds an F7 free-camera toggle within 20 metres of the player. |
 | [First Person](Landoria.FirstPerson/) | Client-only | Adds first-person view at the closest camera zoom level. |
 | [ModSentry](Landoria.ModSentry/) | Both | Validates the exact client mod inventory before a server accepts a connection. |
 | [Moderator](Landoria.Moderator/) | Both | Adds multiplayer moderation commands gated by server-validated administrator access. |

@@ -7,8 +7,8 @@
     <Platform Condition="'$(Platform)' == ''">AnyCPU</Platform>
     <ProjectGuid>{037059B7-0C09-4B60-A05B-62627829B3D8}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>Landoria.FreeFlyCommand</RootNamespace>
-    <AssemblyName>Landoria.FreeFlyCommand</AssemblyName>
+    <RootNamespace>Landoria.FreeFly</RootNamespace>
+    <AssemblyName>Landoria.FreeFly</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
@@ -30,9 +30,12 @@
     <Reference Include="UnityEngine.PhysicsModule"><HintPath>$(ValheimGamePath)\valheim_Data\Managed\UnityEngine.PhysicsModule.dll</HintPath><Private>false</Private></Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="FreeFlyAuthorization.cs" /><Compile Include="FreeFlyCommands.cs" />
+    <Compile Include="FreeFlyCommands.cs" />
     <Compile Include="FreeFlyController.cs" />
-    <Compile Include="FreeFlyPatches.cs" /><Compile Include="FreeFlyCommandPlugin.cs" />
+    <Compile Include="FreeFlyInterfaceController.cs" />
+    <Compile Include="FreeFlyPatches.cs" /><Compile Include="FreeFlyPlugin.cs" />
+    <Compile Include="FreeFlyPreference.cs" /><Compile Include="FreeFlyShortcut.cs" />
+    <Compile Include="FreeFlyTransitionController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

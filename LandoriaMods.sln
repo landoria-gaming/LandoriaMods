@@ -13,7 +13,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Landoria.ExpandedServer", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Landoria.HammerFreedom", "Landoria.HammerFreedom\Landoria.HammerFreedom.csproj", "{DDA10461-612F-42CD-A050-B2634758E942}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Landoria.FreeFlyCommand", "Landoria.FreeFlyCommand\Landoria.FreeFlyCommand.csproj", "{037059B7-0C09-4B60-A05B-62627829B3D8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Landoria.FreeFly", "Landoria.FreeFly\Landoria.FreeFly.csproj", "{037059B7-0C09-4B60-A05B-62627829B3D8}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Landoria.GentleDeath", "Landoria.GentleDeath\Landoria.GentleDeath.csproj", "{CAA46083-A0C5-4FFC-9180-99BE40D8CAA1}"
 EndProject
