@@ -36,6 +36,7 @@ namespace Landoria.FirstPerson
             if (!enabled)
             {
                 SetActive(false);
+                FirstPersonShortcut.CancelTransition();
             }
             Apply(GameCamera.instance);
             ApplyConfiguredFieldOfView(GameCamera.instance);
@@ -65,7 +66,17 @@ namespace Landoria.FirstPerson
             Player player, bool isFreeFly, float cameraDistance)
         {
             return Enabled && player && !player.IsDead() && !isFreeFly &&
-                   cameraDistance <= DistanceThreshold;
+                   IsFirstPersonDistance(cameraDistance);
+        }
+
+        internal static bool IsFirstPersonDistance(float cameraDistance)
+        {
+            return cameraDistance <= DistanceThreshold;
+        }
+
+        internal static float GetMinimumThirdPersonDistance()
+        {
+            return vanillaMinimumDistance;
         }
 
         // Applies a field of view to the active game camera.
@@ -99,6 +110,7 @@ namespace Landoria.FirstPerson
             FirstPersonHeadBobController.Reset();
             FirstPersonHelmetLightController.Restore();
             FirstPersonVisibilityController.Restore();
+            FirstPersonShortcut.Reset();
         }
 
         // Restores all camera and visual state when the plugin stops.

@@ -3,6 +3,21 @@
 ## Unreleased
 
 - Add continuous figure-eight first-person camera movement matched to vanilla movement paces.
+- Stop first-person camera rotation from accelerating while the game menu is open.
+- Add F6 to enable automatic first-person view and restore the saved third-person distance when disabled.
+- Show First Person or Third Person when F6 changes the camera mode.
+- Let any configured camera zoom choose the temporary third-person combat distance.
+- Temporarily switch to third person after any configured camera zoom.
+- Return to first person three seconds after the last configured camera zoom.
+- Prevent zoom-in controls from entering first person.
+- Limit temporary zoom-in to Valheim's native third-person minimum distance.
+- Apply temporary zoom limits before camera positioning to prevent a close-view flash.
+- Use a 0.09-metre near clip plane in first person.
+- Return to first person 0.5 seconds after the actual vanilla attack or block state ends.
+- Smooth transitions between first- and third-person camera distances.
+- Include the final backward first-person offset in camera transitions.
+- Make camera transition acceleration and deceleration more progressive.
+- Blend Valheim's native camera offsets to remove the final first-person transition stutter.
 
 ## 1.0.9
 
