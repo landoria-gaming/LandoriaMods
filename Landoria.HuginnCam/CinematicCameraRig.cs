@@ -6,14 +6,6 @@ using UnityEngine.PostProcessing;
 
 namespace Landoria.HuginnCam
 {
-    // Identifies one supported cinematic position around the player.
-    internal enum CinematicCameraAngle
-    {
-        Behind,
-        Front,
-        RightSide
-    }
-
     // Maintains a collision-aware cinematic camera behind the player.
     internal sealed class CinematicCameraRig : MonoBehaviour
     {
@@ -38,9 +30,6 @@ namespace Landoria.HuginnCam
         private AudioListener _listener;
         private AudioListener _originalListener;
         private RenderTexture _offscreenTarget;
-        private Camera _sourceCamera;
-        private bool _followPlayer;
-        private CinematicCameraAngle _angle;
         private readonly List<EffectMirror> _effectMirrors = new List<EffectMirror>();
         private static readonly Dictionary<Type, FieldInfo[]> SerializableFields =
             new Dictionary<Type, FieldInfo[]>();
@@ -51,15 +40,8 @@ namespace Landoria.HuginnCam
         internal RenderTexture PreparedTarget => _offscreenTarget;
 
         // Clones the gameplay camera and optionally transfers audio listening to it.
-        internal void Initialize(
-            Camera sourceCamera,
-            bool transferAudio = true,
-            bool followPlayer = true,
-            CinematicCameraAngle angle = CinematicCameraAngle.Behind)
+        internal void Initialize(Camera sourceCamera, bool transferAudio = true)
         {
-            _sourceCamera = sourceCamera;
-            _followPlayer = followPlayer;
-            _angle = angle;
             GameObject cameraObject = new GameObject("HuginnCamCinematicCamera");
             cameraObject.transform.SetParent(transform, false);
             _camera = cameraObject.AddComponent<Camera>();
@@ -67,11 +49,6 @@ namespace Landoria.HuginnCam
             _camera.depth = sourceCamera.depth + 1f;
             _camera.enabled = false;
             CopyVisualEffectStack(sourceCamera, cameraObject);
-            if (!followPlayer)
-            {
-                LogCameraComparison(sourceCamera, _camera);
-            }
-
             if (transferAudio)
             {
                 _originalListener = sourceCamera.GetComponent<AudioListener>();
@@ -83,21 +60,7 @@ namespace Landoria.HuginnCam
                 _listener = cameraObject.AddComponent<AudioListener>();
             }
 
-            UpdateCameraPose();
-        }
-
-        // Changes the cinematic position while retaining this camera's rendering history.
-        internal void SetAngle(CinematicCameraAngle angle)
-        {
-            _angle = angle;
-            UpdateCameraPose();
-        }
-
-        // Selects gameplay-camera mirroring or cinematic player following.
-        internal void SetFollowPlayer(bool followPlayer)
-        {
-            _followPlayer = followPlayer;
-            UpdateCameraPose();
+            UpdatePose();
         }
 
         // Recreates safe visual effects in their source order and mirrors their settings.
@@ -232,36 +195,11 @@ namespace Landoria.HuginnCam
             return cached;
         }
 
-        // Logs camera components and rendering settings used by the reference comparison.
-        private static void LogCameraComparison(Camera source, Camera target)
-        {
-            HuginnCamPlugin.Log.LogInfo(
-                $"Reference source camera: components=[{DescribeComponents(source.gameObject)}], " +
-                $"HDR={source.allowHDR}, MSAA={source.allowMSAA}, path={source.renderingPath}, " +
-                $"actualPath={source.actualRenderingPath}, colorSpace={QualitySettings.activeColorSpace}.");
-            HuginnCamPlugin.Log.LogInfo(
-                $"Reference target camera: components=[{DescribeComponents(target.gameObject)}], " +
-                $"HDR={target.allowHDR}, MSAA={target.allowMSAA}, path={target.renderingPath}, " +
-                $"actualPath={target.actualRenderingPath}, colorSpace={QualitySettings.activeColorSpace}.");
-        }
-
-        // Returns a readable ordered inventory of components attached to one camera object.
-        private static string DescribeComponents(GameObject cameraObject)
-        {
-            Component[] components = cameraObject.GetComponents<Component>();
-            string[] names = new string[components.Length];
-            for (int index = 0; index < components.Length; index++)
-            {
-                names[index] = components[index] == null
-                    ? "<missing>"
-                    : components[index].GetType().FullName;
-            }
-
-            return string.Join(", ", names);
-        }
-
         // Starts invisible rendering so this camera can establish its own automatic exposure.
-        internal void BeginWarmup(int requestedWidth = 0, int requestedHeight = 0)
+        internal void BeginWarmup(
+            int requestedWidth = 0,
+            int requestedHeight = 0,
+            int antiAliasingSamples = 1)
         {
             int width = requestedWidth > 0
                 ? Mathf.Max(2, requestedWidth & ~1)
@@ -276,38 +214,10 @@ namespace Landoria.HuginnCam
                 0,
                 RenderTextureFormat.ARGB32,
                 RenderTextureReadWrite.sRGB);
+            _offscreenTarget.antiAliasing = antiAliasingSamples;
             _offscreenTarget.Create();
             _camera.targetTexture = _offscreenTarget;
             _camera.enabled = true;
-        }
-
-        // Reads the completed post-processed camera frame and encodes it as PNG.
-        internal byte[] EncodeStillFrame()
-        {
-            if (_offscreenTarget == null)
-            {
-                throw new System.InvalidOperationException("The still-image target is not ready.");
-            }
-
-            RenderTexture previous = RenderTexture.active;
-            Texture2D image = new Texture2D(
-                _offscreenTarget.width,
-                _offscreenTarget.height,
-                TextureFormat.RGBA32,
-                false,
-                false);
-            try
-            {
-                RenderTexture.active = _offscreenTarget;
-                image.ReadPixels(new Rect(0f, 0f, _offscreenTarget.width, _offscreenTarget.height), 0, 0);
-                image.Apply(false, false);
-                return image.EncodeToPNG();
-            }
-            finally
-            {
-                RenderTexture.active = previous;
-                Destroy(image);
-            }
         }
 
         // Stops invisible warmup rendering while preserving the camera's exposure history.
@@ -350,7 +260,7 @@ namespace Landoria.HuginnCam
         private void LateUpdate()
         {
             SynchronizeVisualEffects();
-            UpdateCameraPose();
+            UpdatePose();
         }
 
         // Restores the gameplay listener and destroys the cinematic camera.
@@ -368,39 +278,8 @@ namespace Landoria.HuginnCam
                 Destroy(_camera.gameObject);
                 _camera = null;
                 _listener = null;
-                _sourceCamera = null;
                 _effectMirrors.Clear();
             }
-        }
-
-        // Selects either the cinematic follow pose or the gameplay camera's exact pose.
-        private void UpdateCameraPose()
-        {
-            if (_followPlayer)
-            {
-                UpdatePose();
-                return;
-            }
-
-            MirrorSourceCamera();
-        }
-
-        // Mirrors the gameplay camera transform and optical settings for reference captures.
-        private void MirrorSourceCamera()
-        {
-            if (_camera == null || _sourceCamera == null)
-            {
-                return;
-            }
-
-            _camera.transform.SetPositionAndRotation(
-                _sourceCamera.transform.position,
-                _sourceCamera.transform.rotation);
-            _camera.fieldOfView = _sourceCamera.fieldOfView;
-            _camera.orthographic = _sourceCamera.orthographic;
-            _camera.orthographicSize = _sourceCamera.orthographicSize;
-            _camera.nearClipPlane = _sourceCamera.nearClipPlane;
-            _camera.farClipPlane = _sourceCamera.farClipPlane;
         }
 
         // Places the camera behind the player and keeps a clear line of sight.
@@ -419,21 +298,7 @@ namespace Landoria.HuginnCam
                 forward = Vector3.forward;
             }
 
-            Vector3 offset;
-            switch (_angle)
-            {
-                case CinematicCameraAngle.Front:
-                    offset = forward * DistanceBehind;
-                    break;
-                case CinematicCameraAngle.RightSide:
-                    offset = Vector3.Cross(Vector3.up, forward).normalized * DistanceBehind;
-                    break;
-                default:
-                    offset = -forward * DistanceBehind;
-                    break;
-            }
-
-            Vector3 desired = head + Vector3.up * HeightAboveHead + offset;
+            Vector3 desired = head + Vector3.up * HeightAboveHead - forward * DistanceBehind;
             _camera.transform.position = ResolveCollision(head, desired);
             _camera.transform.rotation = CreateLevelRotation(head - _camera.transform.position);
         }

@@ -12,26 +12,19 @@ namespace Landoria.HuginnCam
     {
         private const int FrameRate = 60;
         private const float CameraWarmupSeconds = 3f;
-        private const float ScreenshotWarmupSeconds = 3f;
         private readonly RecordingStatusDisplay _statusDisplay = new RecordingStatusDisplay();
         private CinematicCameraRig _cameraRig;
         private MediaRecorder _recorder;
-        private CinematicCameraRig _screenshotRig;
-        private Coroutine _screenshotRoutine;
         private string _archivePath;
+        private string _gameplayPreviewPath;
         private string _outputPath;
+        private string _previewPath;
         private string _temporaryContainerPath;
         private Coroutine _warmupRoutine;
 
         // Handles the recording hotkey without knowing the media pipeline internals.
         private void Update()
         {
-            if (Input.GetKeyDown(KeyCode.F10))
-            {
-                StartScreenshot();
-                return;
-            }
-
             if (!Input.GetKeyDown(KeyCode.F8))
             {
                 return;
@@ -67,176 +60,7 @@ namespace Landoria.HuginnCam
             }
 
             ReleaseCameraRig();
-            ReleaseScreenshotRig();
             _statusDisplay.Dispose();
-        }
-
-        // Creates and warms an independent camera for one full-resolution PNG frame.
-        private void StartScreenshot()
-        {
-            if (_screenshotRoutine != null)
-            {
-                Notify("HuginnCam is already preparing a screenshot");
-                return;
-            }
-
-            try
-            {
-                Camera gameplayCamera = Camera.main;
-                if (gameplayCamera == null)
-                {
-                    throw new InvalidOperationException("Valheim's gameplay camera was not found.");
-                }
-
-                _screenshotRig = gameObject.AddComponent<CinematicCameraRig>();
-                _screenshotRig.Initialize(gameplayCamera, false, true, CinematicCameraAngle.Behind);
-                int width = Math.Max(2, Screen.width & ~1);
-                int height = Math.Max(2, Screen.height & ~1);
-                _screenshotRig.BeginWarmup(width, height);
-                _screenshotRoutine = StartCoroutine(CaptureScreenshotSet());
-                Notify("HuginnCam is preparing comparison and cinematic screenshots");
-            }
-            catch (Exception exception)
-            {
-                HandleScreenshotFailed(exception);
-            }
-        }
-
-        // Captures a matched comparison pair followed by three cinematic viewpoints.
-        private IEnumerator CaptureScreenshotSet()
-        {
-            CinematicCameraAngle[] angles =
-            {
-                CinematicCameraAngle.Behind,
-                CinematicCameraAngle.Front,
-                CinematicCameraAngle.RightSide
-            };
-
-            int width = Math.Max(2, Screen.width & ~1);
-            int height = Math.Max(2, Screen.height & ~1);
-            string identifier = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss-fff");
-            _screenshotRig.SetFollowPlayer(false);
-            float referenceDeadline = Time.realtimeSinceStartup + ScreenshotWarmupSeconds;
-            while (Time.realtimeSinceStartup < referenceDeadline)
-            {
-                yield return null;
-            }
-
-            yield return new WaitForEndOfFrame();
-            if (!TrySaveScreenshot("Reference", identifier) || !TrySaveGameplayReference(identifier))
-            {
-                _screenshotRoutine = null;
-                ReleaseScreenshotRig();
-                yield break;
-            }
-
-            _screenshotRig.SetFollowPlayer(true);
-            foreach (CinematicCameraAngle angle in angles)
-            {
-                _screenshotRig.SetAngle(angle);
-                float deadline = Time.realtimeSinceStartup + ScreenshotWarmupSeconds;
-                while (Time.realtimeSinceStartup < deadline)
-                {
-                    yield return null;
-                }
-
-                yield return new WaitForEndOfFrame();
-                if (!TrySaveScreenshot(angle.ToString(), identifier))
-                {
-                    _screenshotRoutine = null;
-                    ReleaseScreenshotRig();
-                    yield break;
-                }
-            }
-
-            _screenshotRoutine = null;
-            ReleaseScreenshotRig();
-            Notify($"HuginnCam saved five {width}x{height} screenshots to Videos");
-        }
-
-        // Writes one rendered cinematic angle to the configured screenshot directory.
-        private bool TrySaveScreenshot(string label, string identifier)
-        {
-            try
-            {
-                string screenshotDirectory = Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.MyVideos),
-                    "NVIDIA",
-                    "Valheim");
-                Directory.CreateDirectory(screenshotDirectory);
-                string path = Path.Combine(
-                    screenshotDirectory,
-                    $"HuginnCam_{identifier}_{label}.png");
-                File.WriteAllBytes(path, _screenshotRig.EncodeStillFrame());
-                HuginnCamPlugin.Log.LogInfo($"Cinematic screenshot saved: {path}");
-                return true;
-            }
-            catch (Exception exception)
-            {
-                HuginnCamPlugin.Log.LogError(exception);
-                Notify($"HuginnCam screenshot failed: {exception.Message}");
-                return false;
-            }
-        }
-
-        // Saves the gameplay screen from the same frame as the aligned HuginnCam reference.
-        private static bool TrySaveGameplayReference(string identifier)
-        {
-            Texture2D gameplayImage = null;
-            try
-            {
-                string screenshotDirectory = Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.MyVideos),
-                    "NVIDIA",
-                    "Valheim");
-                string path = Path.Combine(
-                    screenshotDirectory,
-                    $"GameplayReference_{identifier}.png");
-                gameplayImage = ScreenCapture.CaptureScreenshotAsTexture();
-                File.WriteAllBytes(path, gameplayImage.EncodeToPNG());
-                HuginnCamPlugin.Log.LogInfo($"Gameplay reference saved: {path}");
-                return true;
-            }
-            catch (Exception exception)
-            {
-                HuginnCamPlugin.Log.LogError(exception);
-                Notify($"HuginnCam gameplay reference failed: {exception.Message}");
-                return false;
-            }
-            finally
-            {
-                if (gameplayImage != null)
-                {
-                    Destroy(gameplayImage);
-                }
-            }
-        }
-
-        // Reports a screenshot failure and releases its camera resources.
-        private void HandleScreenshotFailed(Exception exception)
-        {
-            HuginnCamPlugin.Log.LogError(exception);
-            Notify($"HuginnCam screenshot failed: {exception.Message}");
-            ReleaseScreenshotRig();
-        }
-
-        // Stops pending screenshot work and destroys its independent camera.
-        private void ReleaseScreenshotRig()
-        {
-            if (_screenshotRoutine != null)
-            {
-                StopCoroutine(_screenshotRoutine);
-                _screenshotRoutine = null;
-            }
-
-            if (_screenshotRig == null)
-            {
-                return;
-            }
-
-            _screenshotRig.Dispose();
-            Destroy(_screenshotRig);
-            _screenshotRig = null;
         }
 
         // Creates the cinematic camera and starts the reusable Unity recorder.
@@ -255,7 +79,7 @@ namespace Landoria.HuginnCam
                 _cameraRig.Initialize(gameplayCamera);
                 int width = Math.Max(2, Screen.width & ~1);
                 int height = Math.Max(2, Screen.height & ~1);
-                _cameraRig.BeginWarmup(width, height);
+                _cameraRig.BeginWarmup(width, height, HuginnCamPreference.AntiAliasingSamples);
                 _statusDisplay.Show("Preparing camera...");
                 _warmupRoutine = StartCoroutine(StartRecorderAfterWarmup());
             }
@@ -316,10 +140,14 @@ namespace Landoria.HuginnCam
                 FfmpegPath = HuginnCamPreference.FfmpegPath,
                 TemporaryContainerPath = _temporaryContainerPath,
                 ArchivePath = _archivePath,
+                KeepIntermediateFile = HuginnCamPreference.KeepIntermediateFile,
+                GeneratePreviewImage = HuginnCamPreference.GeneratePreviewImage,
+                PreviewImagePath = _previewPath,
                 OutputPath = _outputPath,
                 Width = Math.Max(2, Screen.width & ~1),
                 Height = Math.Max(2, Screen.height & ~1),
                 MaximumFrameRate = FrameRate,
+                AntiAliasingSamples = HuginnCamPreference.AntiAliasingSamples,
                 FlipVertically = true
             };
         }
@@ -331,12 +159,15 @@ namespace Landoria.HuginnCam
             string baseName = $"HuginnCam_{DateTime.Now:yyyy-MM-dd_HH-mm-ss-fff}";
             _temporaryContainerPath = Path.Combine(desktop, $"{baseName}.mkv.tmp");
             _archivePath = Path.Combine(desktop, $"{baseName}.mkv");
+            _gameplayPreviewPath = Path.Combine(desktop, $"{baseName}_Gameplay.png");
             _outputPath = Path.Combine(desktop, $"{baseName}.mp4");
+            _previewPath = Path.Combine(desktop, $"{baseName}.png");
         }
 
         // Connects recorder lifecycle events to HuginnCam presentation behavior.
         private void SubscribeRecorder()
         {
+            _recorder.CaptureStarting += HandleCaptureStarting;
             _recorder.CaptureStarted += HandleCaptureStarted;
             _recorder.FinalizationStarted += HandleFinalizationStarted;
             _recorder.RecordingCompleted += HandleRecordingCompleted;
@@ -346,10 +177,35 @@ namespace Landoria.HuginnCam
         // Disconnects recorder lifecycle events before destroying the component.
         private void UnsubscribeRecorder()
         {
+            _recorder.CaptureStarting -= HandleCaptureStarting;
             _recorder.CaptureStarted -= HandleCaptureStarted;
             _recorder.FinalizationStarted -= HandleFinalizationStarted;
             _recorder.RecordingCompleted -= HandleRecordingCompleted;
             _recorder.RecordingFailed -= HandleRecordingFailed;
+        }
+
+        // Saves the cinematic frame and player screen immediately before video capture starts.
+        private void HandleCaptureStarting()
+        {
+            if (!HuginnCamPreference.GeneratePreviewImage)
+            {
+                return;
+            }
+
+            Texture2D gameplayImage = null;
+            try
+            {
+                gameplayImage = ScreenCapture.CaptureScreenshotAsTexture();
+                File.WriteAllBytes(_gameplayPreviewPath, gameplayImage.EncodeToPNG());
+                HuginnCamPlugin.Log.LogInfo($"Gameplay preview saved: {_gameplayPreviewPath}");
+            }
+            finally
+            {
+                if (gameplayImage != null)
+                {
+                    Destroy(gameplayImage);
+                }
+            }
         }
 
         // Displays the active recording state after the media pipes connect.
@@ -372,8 +228,13 @@ namespace Landoria.HuginnCam
         {
             _statusDisplay.Hide();
             HuginnCamPlugin.Log.LogInfo($"Recording saved: {_outputPath}");
-            HuginnCamPlugin.Log.LogInfo($"Archive recording saved: {_archivePath}");
-            Notify("HuginnCam saved the MP4 and archive recording to Desktop");
+            if (HuginnCamPreference.KeepIntermediateFile)
+            {
+                HuginnCamPlugin.Log.LogInfo($"Archive recording saved: {_archivePath}");
+            }
+            Notify(HuginnCamPreference.KeepIntermediateFile
+                ? "HuginnCam saved the MP4 and archive recording to Desktop"
+                : "HuginnCam saved the MP4 to Desktop");
             ReleaseRecorder();
         }
 

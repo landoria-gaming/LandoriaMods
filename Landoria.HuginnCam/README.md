@@ -5,7 +5,7 @@ HuginnCam records Valheim gameplay from an independent cinematic camera.
 ## Current features
 
 - Press F8 to start recording and press F8 again to stop.
-- Press F10 to save a same-frame gameplay comparison pair followed by full-resolution rear, front and right-side cinematic PNGs in the current user's `Videos\NVIDIA\Valheim` folder.
+- Save full-resolution PNGs of the prepared cinematic frame and the player's complete screen beside each recording immediately before capture begins.
 - Show `Recording...` in white below the minimap while recording is active.
 - Capture a secondary camera at the active game resolution without changing the gameplay view.
 - Follow five metres behind and two metres above the player's head while always looking at the player.
@@ -22,7 +22,11 @@ FFmpeg must be installed separately. Set its full path in `Landoria.HuginnCam.cf
 
 Reusable Unity capture is provided by `Landoria.UnityMediaRecorder.dll`. Generic FFmpeg transport and output creation are provided by `Landoria.FFmpegMediaWriter.dll`. GPU video encoding is provided by `Landoria.D3D11NvencEncoder.dll`, which has no dependency on Valheim, Unity, BepInEx, or FFmpeg.
 
-HuginnCam records directly to very-high-quality H.265 4:4:4 at CQ 8 through NVENC on NVIDIA systems. A three-surface GPU pool lets Unity render new frames while the previous frames are encoded. FFmpeg combines that stream with lossless 32-bit float PCM audio in a crash-resistant `*.mkv.tmp` container. After recording stops, FFmpeg copies the already-compressed video without re-encoding it and encodes the final MP4 audio once as 320-kbit/s AAC. The MKV is then renamed to `*.mkv`; both the high-quality archive and MP4 remain on the Desktop. Other GPUs use a lossless intermediate followed by hardware H.265 compression.
+HuginnCam records directly to very-high-quality H.265 4:4:4 at CQ 8 through NVENC on NVIDIA systems. A three-surface GPU pool lets Unity render new frames while the previous frames are encoded. FFmpeg combines that stream with lossless 32-bit float PCM audio in a crash-resistant `*.mkv.tmp` container. After recording stops, FFmpeg copies the already-compressed video without re-encoding it and encodes the final MP4 audio once as 320-kbit/s AAC. The temporary MKV is deleted after successful MP4 creation unless `KeepIntermediateFile` is enabled in the BepInEx configuration. Other GPUs use a lossless intermediate followed by hardware H.265 compression.
+
+`GeneratePreviewImage` controls whether the cinematic-camera PNG and gameplay-screen PNG are saved next to the video. It is enabled by default.
+
+`AntiAliasingSamples` controls cinematic-camera MSAA and accepts `1`, `2`, `4` or `8`. It defaults to `4`; the multisampled image is resolved on the GPU before NVENC encoding.
 
 Audio is captured directly from Valheim's Unity audio mix as 32-bit float samples before FFmpeg encodes it to AAC. Unity supports one active audio listener, so the player hears the cinematic camera's audio perspective while recording.
 
@@ -43,7 +47,6 @@ FfmpegPath = C:\ffmpeg\bin\ffmpeg.exe
 | Control | Action |
 |---|---|
 | `F8` | Start or stop recording |
-| `F10` | Save a comparison pair and three cinematic screenshots |
 
 ## BepInEx configuration
 
