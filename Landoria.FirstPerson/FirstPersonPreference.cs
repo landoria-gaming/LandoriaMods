@@ -45,8 +45,7 @@ namespace Landoria.FirstPerson
                 "\nExamples: Mouse2 for the middle mouse button.\n" +
                 "\nMouse3/Mouse4 for the Forward/Back side button.\n" +
                 "\nSpace + LeftControl for Left Ctrl + Space.\n" +
-                "\n[https://docs.unity3d.com/ScriptReference/KeyCode.html]" +
-                "(https://docs.unity3d.com/ScriptReference/KeyCode.html)");
+                "\nhttps://docs.unity3d.com/ScriptReference/KeyCode.html");
             combatReturnDelay = config.Bind(
                 "Transitions", "CombatReturnDelay", DefaultCombatReturnDelay,
                 "Seconds to remain in third person after an attack or block ends. " +
