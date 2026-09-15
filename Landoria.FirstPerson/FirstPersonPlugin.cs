@@ -11,7 +11,7 @@ namespace Landoria.FirstPerson
         private const string PluginName = "Landoria.FirstPerson";
         private const string PluginVersion = "1.0.9";
 
-        internal const float FirstPersonNearClipPlane = 0.01f; // Meters.
+        internal const float FirstPersonNearClipPlane = 0.09f; // Meters.
         internal const float FirstPersonBackwardOffset = 0.4f; // Meters.
 
         internal const float HeadBobMultiplier = 2.0f; // Unitless: 0 disables, 1 normal, 2 doubled.

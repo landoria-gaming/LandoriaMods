@@ -4,7 +4,6 @@ namespace Landoria.FirstPerson
     internal static class FirstPersonMode
     {
         private const float DistanceThreshold = 0.001f; // Meters.
-        private const float FieldOfViewOffset = 15f; // Degrees.
 
         private static float vanillaMinimumDistance;
         private static bool distanceCaptured;
@@ -78,11 +77,10 @@ namespace Landoria.FirstPerson
             }
         }
 
-        // Applies the saved field of view with the first-person adjustment.
+        // Applies the saved field of view to every camera mode.
         internal static void ApplyConfiguredFieldOfView(GameCamera camera)
         {
-            float offset = Active ? FieldOfViewOffset : 0f;
-            SetFieldOfView(camera, FirstPersonPreference.FieldOfView + offset);
+            SetFieldOfView(camera, FirstPersonPreference.FieldOfView);
         }
 
         // Reduces nearby geometry clipping while first person is active.

@@ -6,7 +6,7 @@ Zoom all the way in to enter first person, then scroll back to return to third
 person. Your body is hidden only from your own first-person view, while items
 held in either hand remain visible without changing how other players see you.
 
-First Person is not enabled by default, run command `/firstperson` in the chat to enable it.
+Run `/firstperson` in chat to enable the mod. It is disabled by default.
 
 ## Video demo
 
@@ -14,12 +14,9 @@ First Person is not enabled by default, run command `/firstperson` in the chat t
 
 ## Highlights
 
-- Stable camera movement while walking in every direction.
-- Camera positioned 40 centimeters behind the vanilla first-person eye point.
-- Camera keeps the vanilla first-person eye height.
-- Nearby vegetation remains visible in first person.
-- Continuous figure-eight camera movement matched to each vanilla movement pace.
-- Stable helmet lighting while moving in any direction.
+- Smooth first-person movement in every direction.
+- Nearby vegetation and helmet lighting remain stable.
+- Adjustable FOV up to 120 degrees.
 - Client-side only: no server installation or configuration required.
 
 ## Commands
@@ -27,15 +24,13 @@ First Person is not enabled by default, run command `/firstperson` in the chat t
 | Command | Action |
 |---|---|
 | `firstperson` | Enable or disable first person (disabled by default) |
-| `fov <degrees>` | Set the saved FOV, up to 85 |
+| `fov <degrees>` | Set the saved FOV, up to 120 |
 | `fov` | Show the current FOV |
 | `fov reset` | Restore the default FOV of 65 |
-
 
 ## Valheim compatibility
 
 Current release: 1.0.x
-
 
 ## Contact
 

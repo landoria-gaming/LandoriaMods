@@ -6,7 +6,7 @@ namespace Landoria.FirstPerson
     internal static class FirstPersonPreference
     {
         internal const float DefaultFieldOfView = 65f; // Degrees.
-        internal const float MaximumFieldOfView = 85f; // Degrees.
+        internal const float MaximumFieldOfView = 120f; // Degrees.
 
         private static ConfigEntry<bool> enabled;
         private static ConfigEntry<float> fieldOfView;
